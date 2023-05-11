@@ -5,14 +5,24 @@ import argparse
 parser = argparse.ArgumentParser(description='comAna: a tool for comparing annotations')
 parser.add_argument('-i', '--input', help='gtf-file to be imported into the database', required=True)
 
-
 arguments = parser.parse_args()
 
 
 db_path = os.path.dirname(arguments.input)
 db_name = os.path.basename(arguments.input)[:-4] + '-ca.db'
-print(db_name)
-print(db_path)
+
+gffutils_db = gffutils.create_db(
+    arguments.input, 
+    dbfn=f'{db_path}/{db_name}', 
+    force=True, 
+    keep_order=True, 
+    merge_strategy='merge', 
+    sort_attribute_values=True,
+    disable_infer_genes=True,
+    disable_infer_transcripts=True
+    )
+
+
 
 
 # Sample file path
