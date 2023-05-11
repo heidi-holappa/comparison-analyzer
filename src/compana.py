@@ -2,10 +2,13 @@ import os
 import gffutils
 import argparse
 
-parser = argparse.ArgumentParser(description='compAna: a tool for comparing annotations')
-parser.add_argument('-i', '--input', help='gtf-file to be imported into the database', required=True)
-parser.add_argument('-s', '--stats', help='output statistics of class codes', action='store_true')
+parser = argparse.ArgumentParser(
+    description='compAna: a tool for comparing annotations',
+    usage='python3 compAna.py -i <input.gtf> [-f] [-s]'
+    )
+parser.add_argument('-i', '--input', help='gtf-file to be imported into the database', required=True, metavar='')
 parser.add_argument('-f', '--force', help='force overwrite of existing database', action='store_true')
+parser.add_argument('-s', '--stats', help='output statistics of class codes', action='store_true')
 
 arguments = parser.parse_args()
 
