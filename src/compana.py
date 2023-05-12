@@ -10,6 +10,7 @@ parser.add_argument('-i', '--input', help='gtf-file to be imported into the data
 parser.add_argument('-r', '--reference', help='reference gtf-file to be compared against', required=True, metavar='')
 parser.add_argument('-f', '--force', help='force overwrite of existing database', action='store_true')
 parser.add_argument('-s', '--stats', help='output statistics of class codes', action='store_true')
+parser.add_argument('-c', '--class-code', help='specify gffcompare class code to analyze.', action='store_true')
 
 arguments = parser.parse_args()
 
@@ -70,6 +71,15 @@ if arguments.stats:
         print(f"{key:<18}| {value:<10}")
 
 print("\n=========================================")
+
+if arguments.class_code:
+    print("==========ANNOTATION COMPARISON==========")
+    class_code = input("Enter class code to analyze: ")
+    print(f"Analyzing class code: {class_code}")
+    print("=========================================")
+
+
+
 print("================= END ===================")
 
 # Sample file path
