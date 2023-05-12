@@ -20,5 +20,6 @@ The application provides the following arguments
 | Short | Long | Description |
 | --- | --- | --- |
 | i | input | provide full path for `gtf` file produced by `gffcompare` |
+| r | reference | provide full path for reference `gtf` file used to create the `gffcompare` `gtf`-file |
 | f | force | force re-creation of sqlite3 database. By default a new database is not created if one already exists to improve efficiency. |
 | s | stats | output statistics on class codes | 
