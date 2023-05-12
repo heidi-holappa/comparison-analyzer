@@ -7,6 +7,7 @@ parser = argparse.ArgumentParser(
     usage='python3 compAna.py -i <input.gtf> [-f] [-s]'
     )
 parser.add_argument('-i', '--input', help='gtf-file to be imported into the database', required=True, metavar='')
+parser.add_argument('-r', '--reference', help='reference gtf-file to be compared against', metavar='')
 parser.add_argument('-f', '--force', help='force overwrite of existing database', action='store_true')
 parser.add_argument('-s', '--stats', help='output statistics of class codes', action='store_true')
 
