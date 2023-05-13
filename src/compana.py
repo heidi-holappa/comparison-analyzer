@@ -76,6 +76,16 @@ if arguments.class_code:
     print("==========ANNOTATION COMPARISON==========")
     class_code = input("Enter class code to analyze: ")
     print(f"Analyzing class code: {class_code}")
+    offset_analysis = {}
+    for feature in gffcompare_db.features_of_type('transcript'):
+        if 'class_code' in feature.attributes and class_code in feature.attributes['class_code']:
+            for exon in gffcompare_db.children(feature, featuretype='exon', order_by='start'):
+                if feature.id not in offset_analysis:
+                    offset_analysis[feature.id] = []
+                offset_analysis[feature.id].append((exon.start, exon.end))
+    for key, value in offset_analysis.items():
+        print(key, value)
+                
     print("=========================================")
 
 
