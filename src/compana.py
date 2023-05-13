@@ -58,7 +58,7 @@ if arguments.stats:
     print("==========CLASS CODE STATISTICS==========")
     class_codes = {}
     print('\nComputing statistics for class codes...\n')
-    for feature in gffcompare_db.all_features():
+    for feature in gffcompare_db.features_of_type('transcript'):
         if 'class_code' in feature.attributes:
             class_code = feature.attributes['class_code'][0]
             if not class_code in class_codes:
@@ -80,7 +80,5 @@ if arguments.class_code:
 
 
 
-print("================= END ===================")
 
-# Sample file path
-# /home/holaphei/koulutyot/lv-2022-2023/BI-summer-trainee/isoquant-summer-trainee/ca-task-2/comparison-analyzer/sample-data/nanopore-compare-2.annotated.gtf
+print("================= END ===================")
