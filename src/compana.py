@@ -85,8 +85,8 @@ if arguments.class_code:
                 if transcript.id not in offset_analysis:
                     offset_analysis[transcript.id] = []
                 for reference_exon in reference_db.children(ref_gene_id, featuretype='exon', order_by='start'):
-                    if reference_exon['exon_number'] == exon['exon_number'] and transcript['ref_gene_id'][0] == reference_exon['gene_id'][0]:
-                        offset_analysis[transcript.id].append((exon['exon_number'], exon.start - reference_exon.start, exon.end - reference_exon.end))
+                    if reference_exon['exon_number'][0] == exon['exon_number'][0] and transcript['ref_gene_id'][0] == reference_exon['gene_id'][0]:
+                        offset_analysis[transcript.id].append((int(exon['exon_number'][0]), exon.start - reference_exon.start, exon.end - reference_exon.end))
     for key, value in offset_analysis.items():
         print(key, sorted(value))
                 
