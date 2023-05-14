@@ -73,6 +73,7 @@ if arguments.stats:
 print("\n=========================================")
 
 if arguments.class_code:
+    # TODO: Consider requesting class code as input
     print("==========ANNOTATION COMPARISON==========")
     class_code = input("Enter class code to analyze: ")
     print(f"Analyzing class code: {class_code}")
