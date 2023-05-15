@@ -82,13 +82,20 @@ if arguments.class_code:
         if 'class_code' in transcript.attributes and class_code in transcript.attributes['class_code']:
             ref_gene_id = transcript['ref_gene_id'][0]
             for exon in gffcompare_db.children(transcript, featuretype='exon', order_by='start'):
-                if transcript.id not in offset_analysis:
-                    offset_analysis[transcript.id] = []
                 for reference_exon in reference_db.children(ref_gene_id, featuretype='exon', order_by='start'):
-                    if reference_exon['exon_number'][0] == exon['exon_number'][0] and transcript['ref_gene_id'][0] == reference_exon['gene_id'][0]:
-                        offset_analysis[transcript.id].append((int(exon['exon_number'][0]), exon.start - reference_exon.start, exon.end - reference_exon.end))
+                    if transcript['cmp_ref'] != reference_exon['transcript_id']:
+                        continue
+                    dict_key = (transcript.id, reference_exon['transcript_id'][0])
+                    if dict_key not in offset_analysis:
+                        offset_analysis[dict_key] = {}
+                    offset = (exon.start - reference_exon.start, exon.end - reference_exon.end)
+                    exon_number = int(exon['exon_number'][0])
+                    if exon_number not in offset_analysis[dict_key]:
+                        offset_analysis[dict_key][exon_number] = offset
+                    elif abs(offset[1]) + abs(offset[0]) < abs(offset_analysis[dict_key][exon_number][0]) + (offset_analysis[dict_key][exon_number][1]):
+                        offset_analysis[dict_key][exon_number] = offset
     for key, value in offset_analysis.items():
-        print(key, sorted(value))
+        print(key, value)
                 
     print("=========================================")
 
