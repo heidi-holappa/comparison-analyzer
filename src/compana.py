@@ -10,7 +10,7 @@ parser.add_argument('-i', '--input', help='gtf-file to be imported into the data
 parser.add_argument('-r', '--reference', help='reference gtf-file to be compared against', required=True, metavar='')
 parser.add_argument('-f', '--force', help='force overwrite of existing database', action='store_true')
 parser.add_argument('-s', '--stats', help='output statistics of class codes', action='store_true')
-parser.add_argument('-c', '--class-code', help='specify gffcompare class code to analyze.', action='store_true')
+parser.add_argument('-c', '--class-code', nargs='+', help='specify gffcompare class code to analyze.')
 
 arguments = parser.parse_args()
 
@@ -28,6 +28,11 @@ print("=========================================")
 print("compAna: a tool for comparing annotations")
 print("=========================================")
 print("===========DATABASE MANAGEMENT===========\n")
+
+print("============ FILE INFORMATION ===========\n")
+print(f"Gffcompare GTF-file: {os.path.basename(arguments.input)}")
+print(f"Reference GTF-file: {os.path.basename(arguments.reference)}\n")
+
 
 for key, value in db_paths.items():
     db_exists = os.path.exists(f'{value}')
@@ -73,31 +78,31 @@ if arguments.stats:
 print("\n=========================================")
 
 if arguments.class_code:
-    # TODO: Consider requesting class code as input
-    print("==========ANNOTATION COMPARISON==========")
-    class_code = input("Enter class code to analyze: ")
-    print(f"Analyzing class code: {class_code}")
-    offset_analysis = {}
-    for transcript in gffcompare_db.features_of_type('transcript'):
-        if 'class_code' in transcript.attributes and class_code in transcript.attributes['class_code']:
-            ref_gene_id = transcript['ref_gene_id'][0]
-            for exon in gffcompare_db.children(transcript, featuretype='exon', order_by='start'):
-                for reference_exon in reference_db.children(ref_gene_id, featuretype='exon', order_by='start'):
-                    if transcript['cmp_ref'] != reference_exon['transcript_id']:
-                        continue
-                    dict_key = (transcript.id, reference_exon['transcript_id'][0])
-                    if dict_key not in offset_analysis:
-                        offset_analysis[dict_key] = {}
-                    offset = (exon.start - reference_exon.start, exon.end - reference_exon.end)
-                    exon_number = int(exon['exon_number'][0])
-                    if exon_number not in offset_analysis[dict_key]:
-                        offset_analysis[dict_key][exon_number] = offset
-                    elif abs(offset[1]) + abs(offset[0]) < abs(offset_analysis[dict_key][exon_number][0]) + (offset_analysis[dict_key][exon_number][1]):
-                        offset_analysis[dict_key][exon_number] = offset
-    for key, value in offset_analysis.items():
-        print(key, value)
-                
-    print("=========================================")
+    
+    for class_code in arguments.class_code:
+        print("==========ANNOTATION COMPARISON==========")
+        print(f"Analyzing class code: {class_code}")
+        offset_analysis = {}
+        for transcript in gffcompare_db.features_of_type('transcript'):
+            if 'class_code' in transcript.attributes and class_code in transcript.attributes['class_code']:
+                ref_transcript_id = transcript['cmp_ref'][0]
+                for exon in gffcompare_db.children(transcript, featuretype='exon', order_by='start'):
+                    for reference_exon in reference_db.children(ref_transcript_id, featuretype='exon', order_by='start'):
+                        if transcript['cmp_ref'] != reference_exon['transcript_id']:
+                            continue
+                        dict_key = (transcript.id, reference_exon['transcript_id'][0])
+                        if dict_key not in offset_analysis:
+                            offset_analysis[dict_key] = {}
+                        offset = (exon.start - reference_exon.start, exon.end - reference_exon.end)
+                        exon_number = int(exon['exon_number'][0])
+                        if exon_number not in offset_analysis[dict_key]:
+                            offset_analysis[dict_key][exon_number] = offset
+                        elif abs(offset[1]) + abs(offset[0]) < abs(offset_analysis[dict_key][exon_number][0]) + (offset_analysis[dict_key][exon_number][1]):
+                            offset_analysis[dict_key][exon_number] = offset
+        for key, value in offset_analysis.items():
+            print(key, value)
+                    
+        print("=========================================\n")
 
 
 
