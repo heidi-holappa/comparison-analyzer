@@ -23,3 +23,4 @@ The application provides the following arguments
 | r | reference | provide full path for reference `gtf` file used to create the `gffcompare` `gtf`-file |
 | f | force | force re-creation of sqlite3 database. By default a new database is not created if one already exists to improve efficiency. |
 | s | stats | output statistics on class codes | 
+| c | class-code | specify a class code for which to generate offset data | 
