@@ -97,7 +97,7 @@ if arguments.class_code:
                         exon_number = int(exon['exon_number'][0])
                         if exon_number not in offset_analysis[dict_key]:
                             offset_analysis[dict_key][exon_number] = offset
-                        elif abs(offset[1]) + abs(offset[0]) < abs(offset_analysis[dict_key][exon_number][0]) + (offset_analysis[dict_key][exon_number][1]):
+                        elif abs(offset[1]) + abs(offset[0]) < abs(offset_analysis[dict_key][exon_number][0]) + abs(offset_analysis[dict_key][exon_number][1]):
                             offset_analysis[dict_key][exon_number] = offset
         for key, value in offset_analysis.items():
             print(key, value)
