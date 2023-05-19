@@ -32,12 +32,8 @@ $$ t_{ij} =  \mid a_{e_i} - a_{x_j} \mid + \mid b_{e_i} - b_{x_j} \mid $$
 
 **Definition 2.** For any $e_i$ we call the optimal match in $X$ to be the exon $x_j$ that satisfies the following conditions: 
 
-1. The offset for $e_i$ compared to $x_j$ is the smallest possible. That is for $e_i$ and $X=[x_1, \ldots x_m]$ $\min \{t_{i1}, t_{i2}, \ldots, t_{im} \} = t_{ij}$. 
-2. No other exon in $E$ has a smaller offset compared to $x_j$. That is $\not\exists e_k$ for which 
-
-$$\min \{ t_{i1}, t_{i2}, \ldots, t_{im} \} = t_{kj}$$ 
-
-and $t_{kj} < t_{ij}$
+1. The offset for $e_i$ compared to $x_j$ is the smallest possible. That is for $e_i$ and $X=[x_1, \ldots x_m]$ $\min \\{t_{i1}, t_{i2}, \ldots, t_{im} \\} = t_{ij}$. 
+2. No other exon in $E$ has a smaller offset compared to $x_j$. That is $\not\exists e_k$ for which $\min \\{ t_{i1}, t_{i2}, \ldots, t_{im} \\} = t_{kj}$ and $t_{kj} < t_{ij}$
 
 
 ### Computing offset
