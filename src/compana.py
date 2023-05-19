@@ -90,7 +90,7 @@ if arguments.class_code:
                     for reference_exon in reference_db.children(ref_transcript_id, featuretype='exon', order_by='start'):
                         if transcript['cmp_ref'] != reference_exon['transcript_id']:
                             continue
-                        dict_key = (transcript.id, reference_exon['transcript_id'][0])
+                        dict_key = (transcript.id, reference_exon['transcript_id'][0], transcript.strand)
                         if dict_key not in offset_analysis:
                             offset_analysis[dict_key] = {}
                         offset = (exon.start - reference_exon.start, exon.end - reference_exon.end)
