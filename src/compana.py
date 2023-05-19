@@ -77,33 +77,66 @@ if arguments.stats:
 
 print("\n=========================================")
 
+def fetch_exons(transcript, class_code):
+    analyzed_exons = []
+    reference_exons = []
+    if not 'class_code' in transcript.attributes or not class_code in transcript.attributes['class_code']:
+        return analyzed_exons, reference_exons
+    for exon in gffcompare_db.children(transcript, featuretype='exon', order_by='start'):
+        analyzed_exons.append((exon.start, exon.end))
+    ref_transcript_id = transcript['cmp_ref'][0]
+    for exon in reference_db.children(ref_transcript_id, featuretype='exon', order_by='start'):
+        if transcript['cmp_ref'] != exon['transcript_id']:
+            continue
+        reference_exons.append((exon.start, exon.end))
+    return analyzed_exons, reference_exons
+
+def calculate_total_offset(exon_1, exon_2):
+    start_offset = exon_1[0] - exon_2[0]
+    end_offset = exon_1[1] - exon_2[1]
+    total_offset = abs(start_offset) + abs(end_offset)
+    return total_offset
+
+def compute_offset(analyzed_exons, reference_exons):
+    r_start_index = 0
+    offset_list = []
+    for e_index in range(0, len(analyzed_exons)):
+        result = (float('inf'), float('inf'))
+        for r_index in range(r_start_index, len(reference_exons)):
+            total_offset_current_analysis_exon_to_current_reference_exon = calculate_total_offset(analyzed_exons[e_index], reference_exons[r_index])
+            if e_index < len(analyzed_exons) - 1:
+                total_offset_current_reference_exon_to_next_analysis_exon = calculate_total_offset(analyzed_exons[e_index+1], reference_exons[r_index])
+                if r_index < len(reference_exons) - 1 and total_offset_current_reference_exon_to_next_analysis_exon < total_offset_current_analysis_exon_to_current_reference_exon:
+                    total_offset_from_next_analysis_exon_to_next_reference_exon = calculate_total_offset(analyzed_exons[e_index+1], reference_exons[r_index+1])
+                    if total_offset_current_reference_exon_to_next_analysis_exon < total_offset_from_next_analysis_exon_to_next_reference_exon:
+                        r_start_index = r_index
+                        break
+            if total_offset_current_analysis_exon_to_current_reference_exon < abs(result[0]) + abs(result[1]):
+                if result != (float('inf'), float('inf')):
+                    offset_list.append( (float('-inf'), float('-inf')))
+                result = (analyzed_exons[e_index][0] - reference_exons[r_index][0], analyzed_exons[e_index][1] - reference_exons[r_index][1])
+                r_start_index = r_index + 1
+            else:
+                break
+        offset_list.append(result)
+    return offset_list
+
 if arguments.class_code:
-    
+        
     for class_code in arguments.class_code:
         print("==========ANNOTATION COMPARISON==========")
         print(f"Analyzing class code: {class_code}")
-        offset_analysis = {}
+        offset_results = {}
         for transcript in gffcompare_db.features_of_type('transcript'):
-            if 'class_code' in transcript.attributes and class_code in transcript.attributes['class_code']:
-                ref_transcript_id = transcript['cmp_ref'][0]
-                for exon in gffcompare_db.children(transcript, featuretype='exon', order_by='start'):
-                    for reference_exon in reference_db.children(ref_transcript_id, featuretype='exon', order_by='start'):
-                        if transcript['cmp_ref'] != reference_exon['transcript_id']:
-                            continue
-                        dict_key = (transcript.id, reference_exon['transcript_id'][0])
-                        if dict_key not in offset_analysis:
-                            offset_analysis[dict_key] = {}
-                        offset = (exon.start - reference_exon.start, exon.end - reference_exon.end)
-                        exon_number = int(exon['exon_number'][0])
-                        if exon_number not in offset_analysis[dict_key]:
-                            offset_analysis[dict_key][exon_number] = offset
-                        elif abs(offset[1]) + abs(offset[0]) < abs(offset_analysis[dict_key][exon_number][0]) + abs(offset_analysis[dict_key][exon_number][1]):
-                            offset_analysis[dict_key][exon_number] = offset
-        for key, value in offset_analysis.items():
-            print(key, value)
+            analyzed_exons, reference_exons = fetch_exons(transcript, class_code)
+            if analyzed_exons:
+                offsets = compute_offset(analyzed_exons, reference_exons)
+                dict_key = (transcript.id, transcript['cmp_ref'][0], transcript.strand)
+                offset_results[dict_key] = offsets
+        for key, value in offset_results.items():
+            print(f"{key}: {value}")
                     
         print("=========================================\n")
-
 
 
 
