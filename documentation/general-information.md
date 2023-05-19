@@ -26,9 +26,9 @@ We assume that for a selected transcript the exon children do not overlap. That 
 
 **Definition 1.** The distance $i_e - i_x$ is the offset at the start index and the distance $j_e - j_x$ is the offset at the end index. Notice that if the offset is 'to the left', the output value is negative and similarily if the offset is 'to the right', the output value is positive.   
 
-The total offset is the sum off the absolute value of these two offsets
+The total offset $t_{ij}$ for $e_i$ and $x_j$ is the sum off the absolute value of these two offsets
 
-$$ \mid i_e - i_x \mid + \mid j_e - j_x \mid $$
+$$ t_{ij} =  \mid i_{e_i} - i_{x_j} \mid + \mid j_{e_i} - j_{x_j} \mid $$
 
 **Definition 2.** For any $e_i$ we call the optimal match in $X$ to be the exon $x_j$ that satisfies the following conditions: 
 
