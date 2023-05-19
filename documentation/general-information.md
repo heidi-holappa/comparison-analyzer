@@ -18,9 +18,9 @@ TBA
 
 `gffcompare` classifies comparison results with class codes providing detailed information on the comparison results. One interesting aspect in the case of misalignments is the nature of the offset in the misalignment. Here we provide a definition for offset and a detail how offset is computed. 
 
-Let $S$ be  a transcript from an analyzed read and assume that $S$ has one or more exons as children. Let the set of these exons be $E = \{e_1, \ldots , e_n\},\,n\in\N,\,\mid E\mid \ge 1$. Let $R$ be a reference transcript to which $S$ has been compared to. Let exons children in $R$ be $X = \{x_1, \ldots, x_m\}$. 
+Let $S$ be  a transcript from an analyzed read and assume that $S$ has one or more exons as children. Let the set of these exons be $E = \{e_1, \ldots , e_n\},\,n\in\mathbb{N},\,\mid E\mid \ge 1$. Let $R$ be a reference transcript to which $S$ has been compared to. Let exons children in $R$ be $X = \{x_1, \ldots, x_m\}$. 
 
-Each exon is given as a tuple with a start index and end index $(i, j)\, i,j\in\N,\,i < j$. Let $e_i\in E$ and $x_j\in X$ be an arbitrary exons and let $e_i = (i_e, j_e)$ and $x_j = (i_x, j_x)$.  
+Each exon is given as a tuple with a start index and end index $(i, j)\, i,j\in\mathbb{N},\,i < j$. Let $e_i\in E$ and $x_j\in X$ be an arbitrary exons and let $e_i = (i_e, j_e)$ and $x_j = (i_x, j_x)$.  
 
 We assume that for a selected transcript the exon children do not overlap. That is, for arbitary two exons $e_i = (a, b) $ and $e_k = (c, d)$ it always holds that either $b < c$ or $d < a$
 
