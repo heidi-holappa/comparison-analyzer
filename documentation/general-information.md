@@ -47,17 +47,22 @@ function compute_offset(list E, list X)
     result  = (inf, inf)
     for x_index in X from x_start_index to len(X):
       total_offset = compute total offset for E[e_index] and X[x_index] 
-      if e_index < len(E) - 1:
-        total_offset_next = compute total offset for E[e_index + 1] and X[x_index]
-        if total_offset_next < total_offset:
+      total_offset_next = compute total offset for E[e_index + 1] and X[x_index]
+      if e_index < len(E) - 1 and total_offset_next < total_offset:
           x_start_index = x_index
           continue
-        if total_offset < total offset of result:
-          result = (start_offset, end_offset) for E[e_index] and X[x_index]
-        else:
-          x_start_index = x_index
-          continue
-          
-              
-
+      if total_offset < total offset of result:
+        result = (start_offset, end_offset) for E[e_index] and X[x_index]
+        x_start_index = x_index + 1
+      else:
+        continue
 ```
+
+The algorithm is quite simple and perhaps self-explanatory. Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of reference exons $X=[x_1, \ldots , x_m]$. The algorithm starts from $e_1$ and iterates through the exons. Let us assume that the algorithm is now at an arbitary index $e_p$ and the next index would be $e_q$. The following steps happen:
+
+1. set result to $(\inf, \inf)$
+2. iterate through reference exons starting from the current x_start_index to the end of the reference exons. 
+3. if the total offset between $e_p$ and arbitary $x_i$ is smaller than the total offset of the result
+    - If $e_p$ is not the last exon, check whether the total offset between $e_q$ and $x_i$ is smaller that the total offset between $e_p$ and $x_i$. If it is, update the x_start_index to be the current index and continue to iterate over $e_q$
+    - If the new total offset is smaller than the offset in result, update the result and set the x_start_index to be one index after the current index
+    - if not, continue to iterate over $e_q$
