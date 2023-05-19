@@ -16,7 +16,7 @@ TBA
 
 ### Defining offset
 
-`gffcompare` classifies comparison results with class codes providing detailed information on the comparison results. One interesting aspect in the case of misalignments is the nature of the offset in the misalignment. Here we provide a definition for offset and a detail how offset is computed. 
+`gffcompare` output contains class codes for transcripts which provide information on the quality of the alignment. One interesting aspect in the case of misalignments is the amount of the offset in the misalignment. Here we provide a definition for offset and detail how offset is calculated in this application. 
 
 Let $S$ be  a transcript from an analyzed read and assume that $S$ has one or more exons as children. Let the set of these exons be $E = \{e_1, \ldots , e_n\},\,n\in\mathbb{N},\,\mid E\mid \ge 1$. Let $R$ be a reference transcript to which $S$ has been compared to. Let exons children in $R$ be $X = \{x_1, \ldots, x_m\}$. 
 
@@ -75,18 +75,18 @@ function compute_offset(list E, list X)
   add result to list_of_results
 ```
 
-Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of reference exons $X=[x_1, \ldots , x_m]$. The algorithm starts from $e_1$ and iterates through the exons. Let us assume that the algorithm is now at an arbitary index $e_p$ and index $e_p + 1 = e_q$. Additionally assume that we are inspecting arbitary index $x_i\in X$ and index $x_i + 1 = x_j$ The following steps happen:
+Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of reference exons $X=[x_1, \ldots , x_m]$. The algorithm starts from $e_1$ and iterates through the exons. Let us assume that the algorithm is now at an arbitary index $e_i$. Additionally assume that we are inspecting arbitary index $x_j\in X$. The following steps happen:
 
 1. set result to $(\inf, \inf)$
 2. iterate through reference exons starting from the current x_start_index to the end of the reference exons. 
-3. if the total offset between $e_p$ and arbitary $x_i$ is smaller than the total offset of the value stored in result
-    - If $e_p$ is not the last exon, check whether the total offset between $e_q$ and $x_i$ is smaller that the total offset between $e_p$ and $x_i$. If it is, check further if the offset between $e_q$ and $x_j$ is smaller that the offset between $e_q$ and $x_j$. If it is, update the x_start_index to be the current index and break the inner loop
+3. if the total offset between $e_i$ and arbitary $x_j$ is smaller than the total offset of the value stored in result
+    - If $e_p$ is not the last exon, check whether the total offset between $e_{p+1}$ and $x_i$ is smaller that the total offset between $e_i$ and $x_j$. If it is, check further if the offset between $e_{i+1}$ and $x_{j+1}$ is smaller that the offset between $e_{i+1}$ and $x_j$. If it is, update the x_start_index to be the current index and break the inner loop
     - If the new total offset is smaller than the offset in result, check whether the values in result are less than $(\inf, \inf)$. In that case, append $(-\inf, -\inf)$ to the list of results. Update result to the new offset values. Set the x_start_index = x_index + 1. Incase the new offset is not smaller than the offset stored in result, break the inner loop. 
 4. at the end append result to the list of results. 
 
 
 ### Offset output
 
-1. In case of a match the offset is expressed from the point of view of the analyzed transcript in the form of a tuple of two integers $(i, j),\,i,j\in\mathbb{Z}$. A negative integer indicates that the exon $e_i$ from the analyzed data has a smaller value than the matching reference exon $x_i$ and similarily a positive value indicates that the exon $e_i$ has a higher value
+1. In case of a match the offset is expressed from the point of view of the analyzed transcript in the form of a tuple of two integers $(a, b),\,a,b\in\mathbb{Z}$. A negative integer indicates that the exon $e_i$ from the analyzed data has a smaller value than the matching reference exon $x_j$ and similarily a positive value indicates that the exon $e_i$ has a higher value
 2. A tuple $(\inf, \inf)$ indicates that no optimal match for an exon in analyzed data was found (i.e. there's possibly an exon in the analyzed data that is not present in the reference data)
 3. A tuple $(-\inf, -\inf)$ that no optimal match for an exon in the reference data was found (i.e. there's possibly an exon is missing from the analyzed data)
