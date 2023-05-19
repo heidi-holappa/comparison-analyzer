@@ -54,7 +54,10 @@ function compute_offset(list E, list X)
           continue
         if total_offset < total offset of result:
           result = (start_offset, end_offset) for E[e_index] and X[x_index]
-        
+        else:
+          x_start_index = x_index
+          continue
+          
               
 
 ```
