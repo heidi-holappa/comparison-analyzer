@@ -20,20 +20,20 @@ TBA
 
 Let $S$ be  a transcript from an analyzed read and assume that $S$ has one or more exons as children. Let the set of these exons be $E = \{e_1, \ldots , e_n\},\,n\in\mathbb{N},\,\mid E\mid \ge 1$. Let $R$ be a reference transcript to which $S$ has been compared to. Let exons children in $R$ be $X = \{x_1, \ldots, x_m\}$. 
 
-Each exon is given as a tuple with a start index and end index $(i, j)\, i,j\in\mathbb{N},\,i < j$. Let $e_i\in E$ and $x_j\in X$ be an arbitrary exons and let $e_i = (i_e, j_e)$ and $x_j = (i_x, j_x)$.  
+Each exon is given as a tuple with a start index and end index $(a, b)\, a,b\in\mathbb{N},\,a < b$. Let $e_i\in E$ and $x_j\in X$ be an arbitrary exons and let $e_i = (a_e, b_e)$ and $x_j = (a_x, b_x)$.  
 
-We assume that for a selected transcript the exon children do not overlap. That is, for arbitary two exons $e_i = (a, b) $ and $e_k = (c, d)$ it always holds that either $b < c$ or $d < a$
+We assume that for a selected transcript the exon children do not overlap. That is, for arbitary two exons $e_i = (a_{e_i}, b_{e_i}) $ and $e_k = (a_{e_k}, b_{e_k})$ it always holds that either $b_{e_i} < a_{e_k}$ or $b_{e_k} < a_{e_i}$
 
-**Definition 1.** The distance $i_e - i_x$ is the offset at the start index and the distance $j_e - j_x$ is the offset at the end index. Notice that if the offset is 'to the left', the output value is negative and similarily if the offset is 'to the right', the output value is positive.   
+**Definition 1.** For arbitary $e_i$ and $x_j$ The distance $a_{e_i} - a_{x_j}$ is the offset at the start index and the distance $b_{e_i} - b_{x_j}$ is the offset at the end index. Notice that if the offset is 'to the left', the output value is negative and similarily if the offset is 'to the right', the output value is positive.   
 
 The total offset $t_{ij}$ for $e_i$ and $x_j$ is the sum off the absolute value of these two offsets
 
-$$ t_{ij} =  \mid i_{e_i} - i_{x_j} \mid + \mid j_{e_i} - j_{x_j} \mid $$
+$$ t_{ij} =  \mid a_{e_i} - a_{x_j} \mid + \mid b_{e_i} - b_{x_j} \mid $$
 
 **Definition 2.** For any $e_i$ we call the optimal match in $X$ to be the exon $x_j$ that satisfies the following conditions: 
 
-1. The offset for $e_i$ compared to $x_j$ is the smallest possible
-2. No other exon in $E$ has a smaller offset compared to $x_j$
+1. The offset for $e_i$ compared to $x_j$ is the smallest possible. That is for $e_i$ and $X=[x_1, \ldots x_m]$ $\min\{t_{i1}, t_{i2}, \ldots, t_{im}\} = t_{ij}$. 
+2. No other exon in $E$ has a smaller offset compared to $x_j$. That is $\not\exists e_k$ for which $\min\{t_{i1}, t_{i2}, \ldots, t_{im}\} = t_{kj}$ and $t_{kj}<t_{ij}$
 
 
 ### Computing offset
