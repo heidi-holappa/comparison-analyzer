@@ -107,7 +107,7 @@ def compute_offset(aligned_exons, reference_exons):
             if e_index < len(aligned_exons) - 1:
                 offset_between_reference_exon_and_next_aligned_exon = calculate_total_offset(aligned_exons[e_index+1], reference_exons[r_index])
                 if offset_between_aligned_and_reference_exon > offset_between_reference_exon_and_next_aligned_exon:
-                    result = (float('-inf'), float('-inf'))
+                    result = (float('inf'), float('inf'))
                     break
             if r_index < len(reference_exons) - 1:
                 total_offset_from_analysis_exon_to_next_reference_exon = calculate_total_offset(aligned_exons[e_index], reference_exons[r_index+1])
@@ -115,7 +115,7 @@ def compute_offset(aligned_exons, reference_exons):
                     if e_index < len(aligned_exons) - 1:
                         offset_between_next_reference_exon_and_next_aligned_exon = calculate_total_offset(aligned_exons[e_index+1], reference_exons[r_index+1])
                         if not offset_between_next_reference_exon_and_next_aligned_exon < total_offset_from_analysis_exon_to_next_reference_exon:
-                            offset_list.append((float('inf'), float('inf')))
+                            offset_list.append((float('-inf'), float('-inf')))
                             r_start_index = r_index + 1
                             continue
             result = (aligned_exons[e_index][0] - reference_exons[r_index][0], aligned_exons[e_index][1] - reference_exons[r_index][1])
