@@ -55,33 +55,43 @@ function compute_offset(list E, list X)
   for e_index in list E:
     result  = (inf, inf)
     for x_index in X from x_start_index to len(X):
-      total_offset = compute total offset for E[e_index] and X[x_index] 
+      offset_between_aligned_and_reference_exon = compute total offset for E[e_index] and X[x_index] 
       if e_index < len(E) - 1:
-        total_offset_next = compute total offset for E[e_index + 1] and X[x_index]
+        offset_between_reference_exon_and_next_aligned_exon = compute total offset for E[e_index + 1] and X[x_index]
         if total_offset_next < total_offset:
           if x_index < len(X) - 1:
             total_offset_next_ref = compute total offset for E[e_index + 1] and X[x_index + 1]
-            if total_offset_next < total_offset_next_ref:
-              x_start_index = x_index
+            if offset_between_aligned_and_reference_exon > offset_between_reference_exon_and_next_aligned_exon:
+              result = (inf, inf)
               break inner loop
-      if total_offset < total offset of result:
-        if total offset of result != (inf, inf):
-          add (-inf, -inf) to list_of_results
-        result = (start_offset, end_offset) for E[e_index] and X[x_index]
-        x_start_index = x_index + 1
-      else:
-        break inner for loop
-  add result to list_of_results
+      if x_index < len(X) - 1:
+        offset_between_aligned_exon_and_next_reference_exon = compute offset E[e_index] + X[x_index + 1]
+        if offset_between_aligned_and_reference_exon > offset_between_aligned_exon_and_next_reference_exon:
+          if e_index < len(E) - 1:
+            offset_between_next_reference_exon_and_next_aligned_exon = calculate_total_offset(aligned_exons[e_index+1], reference_exons[r_index+1])
+            if not offset_between_next_reference_exon_and_next_aligned_exon < offset_between_aligned_exon_and_next_reference_exon:
+              append (-inf, -inf) to list_of_results
+              x_start_index = x_index + 1
+              continue
+          else:
+            append (-inf, -inf) to list_of_results
+            x_start_index = x_index + 1
+            continue
+      result = (aligned_exons[e_index][0] - reference_exons[r_index][0], aligned_exons[e_index][1] - reference_exons[r_index][1])
+      r_start_index = r_index + 1
+      break
+      offset_list.append(result)
+    add result to list_of_results
+  return list_of_results
 ```
 
 Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of reference exons $X=[x_1, \ldots , x_m]$. The algorithm starts from $e_1$ and iterates through the exons. Let us assume that the algorithm is now at an arbitrary index $i$ and processing exon $e_i$. The following steps happen:
 
 1. set result to $(\inf, \inf)$
 2. iterate through reference exons starting from the current x_start_index to the end of the reference exons. 
-3. if the total offset between $e_i$ and arbitrary $x_j$ is smaller than the total offset of the value stored in result
-    - If $e_p$ is not the last exon, check whether the total offset between $e_{p+1}$ and $x_i$ is smaller that the total offset between $e_i$ and $x_j$. If it is, check further if the offset between $e_{i+1}$ and $x_{j+1}$ is smaller that the offset between $e_{i+1}$ and $x_j$. If it is, update the x_start_index to be the current index and break the inner loop
-    - If the new total offset is smaller than the offset in result, check whether the values in result are less than $(\inf, \inf)$. In that case, append $(-\inf, -\inf)$ to the list of results. Update result to the new offset values. Set the x_start_index = x_index + 1. Incase the new offset is not smaller than the offset stored in result, break the inner loop. 
-4. at the end append result to the list of results. 
+3. Let us remind ourselves that $t_{e_i, x_j}$ is the total total offset between $e_i$ and arbitrary $x_j$. If $t_{e_{i}, x_{j}} > t_{e_{i+1}, x_{j}}$, $e_i$ must be $(\inf, \inf)$. Append list and break the inner loop
+4. if instead $t_{e_{i}, x_{j+1}}  < t_{e_{i}, x_{j}}$, then if $t_{e_{i+1}, x_{j+1}} < t_{e_{i}, x_{j+1}}$, $t_{e_{i}, x_{j}}$ must be $(-\inf, -\inf)$. In that case append $(-\inf, -\inf)$ to the list and continue iterating through the inner loop. If the latter condition does not apply, append the offset $t_{e_{i}, x_{j}}$ to the list and break the inner loop. 
+4. once all reference exons are iterated over or the inner loop breaks, append result to the list of results. 
 
 
 ### Offset output
