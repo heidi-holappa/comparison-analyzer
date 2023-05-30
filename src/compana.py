@@ -118,6 +118,10 @@ def compute_offset(aligned_exons, reference_exons):
                             offset_list.append((float('-inf'), float('-inf')))
                             r_start_index = r_index + 1
                             continue
+                    else:
+                        offset_list.append((float('-inf'), float('-inf')))
+                        r_start_index = r_index + 1
+                        continue
             result = (aligned_exons[e_index][0] - reference_exons[r_index][0], aligned_exons[e_index][1] - reference_exons[r_index][1])
             r_start_index = r_index + 1
             break
