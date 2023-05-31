@@ -23,5 +23,5 @@ jobs:
           source venv/bin/activate
       - name: Run tests
         run: |
-          . .venv/bin/activate
+          source venv/bin/activate
           pytest
