@@ -6,6 +6,7 @@ The purpose of comparison analyzer compAna is to provide further tools for analy
 
 ## Documentation
 - [Instruction manual](documentation/instruction-manual.md)
+- [General information](documentation/general-information.md)
 - [Definition of Done](documentation/definition-of-done.md)
 
 ## Project state
