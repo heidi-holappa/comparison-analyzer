@@ -108,7 +108,7 @@ Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of refer
 1. set result to $(\inf, \inf)$
 2. iterate through reference exons starting from the current x_start_index to the end of the reference exons. 
 3. Let us remind ourselves that $t_{e_i, x_j}$ is the total total offset between $e_i$ and arbitrary $x_j$. If $t_{e_{i}, x_{j}} > t_{e_{i+1}, x_{j}}$, $e_i$ must be $(\inf, \inf)$. Append list and break the inner loop
-4. if instead $t_{e_{i}, x_{j+1}}  < t_{e_{i}, x_{j}}$, then if $t_{e_{i+1}, x_{j+1}} < t_{e_{i}, x_{j+1}}$, $t_{e_{i}, x_{j}}$ must be $(-\inf, -\inf)$. In that case append $(-\inf, -\inf)$ to the list and continue iterating through the inner loop. If the latter condition does not apply, append the offset $t_{e_{i}, x_{j}}$ to the list and break the inner loop. 
+4. if instead $t_{e_{i}, x_{j+1}}  < t_{e_{i}, x_{j}}$, then if $t_{e_{i+1}, x_{j+1}} > t_{e_{i}, x_{j+1}}$, $t_{e_{i}, x_{j}}$ must be $(-\inf, -\inf)$. In that case append $(-\inf, -\inf)$ to the list and continue iterating through the inner loop. If the latter condition does not apply, append the offset $t_{e_{i}, x_{j}}$ to the list and break the inner loop. 
 5. Finally once aligned exons are iterated through if there are reference exons left, append (-inf, -inf) for each remaining reference exon to the list of results
 6. once all reference exons are iterated over or the inner loop breaks, append result to the list of results. 
 
