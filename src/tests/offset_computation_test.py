@@ -55,4 +55,10 @@ class TestOffsetComputation(unittest.TestCase):
         result = compute_offsets(aligned, ref)
         self.assertEqual(result, [(5, 3), (float('inf'), float('inf')), (5, 0), (-5, -7), (float('-inf'), float('-inf')), (float('-inf'), float('-inf'))])
 
+    def test_with_a_longer_chain_optimal_matches_are_made(self):
+        ref = [(40, 50), (60, 62)]
+        aligned = [(10, 20), (50, 60), (61, 63)]
+        result = compute_offsets(aligned, ref)
+        self.assertEqual(result, [(float('inf'), float('inf')), (10, 10), (1, 1)])
+
 
