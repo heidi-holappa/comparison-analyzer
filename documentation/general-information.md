@@ -37,14 +37,29 @@ $$ t_{e_i,x_j} =  \mid a_{e_i} - a_{x_j} \mid + \mid b_{e_i} - b_{x_j} \mid $$
 
 ### Computing offset
 
-The basic idea in computing the offset is to have the lists of tuples $E$ and $X$ in ascending order. The list $E$ is then iterated over to find the optimal matches from list $X$ for the exons. At each index, if possible, the items in the next index are also considered for an optimal match. Let $e_i\in E$ and $x_j\in X$ be arbitrary items. Now four possible scenarios can happen
+The basic idea in computing the offset is to have the lists of tuples $E$ and $X$ in ascending order. The list $E$ is then iterated over to find the optimal matches from list $X$ for the exons. At each index, if possible, the items in the next index are also considered for an optimal match.  
+
+Let $e_i\in E$ and $x_j\in X$ be arbitrary elements and assume $j< \text{len}(X) - 1$ and $i< \text{len}(E) - 1$. Additionally assume that $e_i$ and $x_j$ are the first exons, for which offset is not yet computed. Four possible scenarios can happen when iterating the offset pairs in set $E$:  
 
 1. for exons $e_1,\ldots, e_i$ and exons $x_1,\ldots x_{j}$ it holds that $e_i$ and $x_j$ are an optimal match
 2. for exons $e_1,\ldots, e_i$ and exons $x_1,\ldots x_{j+1}$ exons $e_{i}$ and $x_{j+1}$ are an optimal match
 3. for exons $e_1,\ldots, e_{i+1}$ and exons $x_1,\ldots, x_{j+1}$ exon $e_{i+1}$ and $x_{j}$ are an  optimal match
 4. for exons $e_1,\ldots, e_{i+1}$ and exons $x_1,\ldots, x_{j+1}$ exons $e_{i+1}$ and $x_{j+1}$ are  an optimal match
 
-Each of these cases needs to be considered and in case of $e_{i+1}$ being an item in the optimal match, $e_{i+2}$ needs to be considered on the next iteration. 
+
+![offset: case 1](img/offset-case-1.png)
+
+![offset: case 2](img/offset-case-2.png)
+
+![offset: case 3](img/offset-case-3.png)
+
+![offset: case 4](img/offset-case-4.png)
+
+Each of these cases needs to be considered. In case of $e_{i+1}$ being an element in the optimal match, $e_{i+2}$ needs to be considered on the next iteration as for it the match could be even more optimal.  
+
+In cases 2 and 3 we notice that an exon from either the reference data or the aligned data is left without a pair. These instances will need to be noted in the data. In case 4 $e_i$ is paired with $x_j$ even though for $e_{i+1}$ $x_j$ the offset $t_{e_{i+1}, x_j}$ was smaller, as $x_{j+1}$ was a more suitable pair for $e_{i+1}$
+
+### Pseudocode
 
 The following pseudocode computes the offsets following the rules given in definition two:
 
