@@ -79,7 +79,11 @@ def create_output_filename_dict_cli(bam_file: str, transcript_list: str, suffix:
 
 def create_output_filename_dict(bam_file: str, transcript_set: set):
     filename_dict = {}
-    temporary_path = os.makedir(os.getcwd() + "/temporary_files")
+    temporary_dir = "temporary_files"
+    current_dir = os.getcwd()
+    temporary_path = os.path.join(current_dir, temporary_dir)
+    if not os.path.exists(temporary_path):
+        os.makedirs(temporary_path)
     for transcript in transcript_set:
         filename_dict[transcript] = os.path.dirname(os.path.abspath(temporary_path)) + "/" + Path(bam_file).stem + "." + Path(transcript).stem + ".bam"
     return filename_dict
