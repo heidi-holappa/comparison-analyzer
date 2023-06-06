@@ -162,12 +162,12 @@ def extract_candidates_matching_selected_offset(offset_results: dict, offset: in
         for i in range(1, len(value)-1):
             if abs(value[i][0]) == offset:
                 for exon in reference_db.children(key[1], featuretype='exon', order_by='start'):
-                    if int(exon['exon_number'][0]) == i + 1 and key[2] == '+':
+                    if int(exon['exon_number'][0]) == i + 1:
                         extracted_candidates[(key[0], key[1], key[2], i + 1, 'start')] = exon.start
                         break
             elif abs(value[i][1]) == offset: 
                 for exon in reference_db.children(key[1], featuretype='exon', order_by='start'):
-                    if int(exon['exon_number'][0]) == i + 1 and key[2] == '+':  
+                    if int(exon['exon_number'][0]) == i + 1:  
                         extracted_candidates[(key[0], key[1], key[2], i + 1, 'end')] = exon.end
                         break
     return extracted_candidates
@@ -198,19 +198,46 @@ if arguments.reference_fasta:
                 coordinates = (chromosome, value - 3, value - 1)
             chars = fasta_extractor.extract_characters_at_given_coordinates(coordinates)
             results[key] = chars
-        n_count = {
-            "start": {},
-            "end": {}
+        json_overview = {
+            "strand": {
+                "+": {
+                    "start": {},
+                    "end": {}
+                },
+                "-": {
+                    "start": {},
+                    "end": {}
+                }
+            },
+            
         }
         for key, value in results.items():
-            if str(value) not in n_count[key[4]]:
-                n_count[key[4]][str(value)] = 0
-            n_count[key[4]][str(value)] += 1
-            print(f"{key}: {value}")
-        for title, sub_dict in n_count.items():
-            print(f"\n{title}:")
-            for key, value in sub_dict.items():
-                print(f"{key}: {value}")
+            if str(value) not in json_overview['strand'][key[2]][key[4]]:
+                json_overview['strand'][key[2]][key[4]][str(value)] = 0
+            json_overview['strand'][key[2]][key[4]][str(value)] += 1
+        
+        for strand in json_overview['strand']:
+            for position in json_overview['strand'][strand]:
+                json_overview['strand'][strand][position] = dict(sorted(json_overview['strand'][strand][position].items(), key=lambda item: item[1], reverse=True))
+
+
+        with open("overview.md", "w") as file:
+            file.write("# Overview\n")
+            file.write("## Offset characters\n")
+            file.write("This section contains the characters in the reference FASTA-file at the offset specified by the user.  \n\n")
+            file.write("**Arguments provided by the user:**\n")
+            file.write("```\n")
+            file.write("gffcompare GTF-file:\n" + arguments.gffcompare_gtf + "\n\n")
+            file.write("Reference GTF-file:\n" + arguments.reference_gtf + "\n\n")
+            file.write("Reference FASTA-file:\n" + arguments.reference_fasta + "\n\n")
+            file.write("Specified offset: " + str(arguments.offset) + "\n")
+            file.write("Class codes: " + str(arguments.class_code) + "\n")
+            file.write("```\n")
+            file.write("**Results in JSON-format:**  \n")
+            file.write("```json\n")
+            file.write(json.dumps(json_overview, indent=4))
+            file.write("\n```\n")
+            
 
         
     
