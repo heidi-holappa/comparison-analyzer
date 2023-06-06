@@ -85,8 +85,9 @@ def create_output_filename_dict(bam_file: str, transcript_set: set):
     if not os.path.exists(temporary_path):
         os.makedirs(temporary_path)
     for transcript in transcript_set:
-        filename_dict[transcript] = os.path.dirname(os.path.abspath(temporary_path)) + "/" + Path(bam_file).stem + "." + Path(transcript).stem + ".bam"
-    return filename_dict
+        filename = Path(bam_file).stem + "." + Path(transcript).stem + ".bam"
+        filename_dict[transcript] = os.path.join(temporary_path, filename)
+    return filename_dict, 
 
 
 def filter_reads(in_file_name: str, out_file_dict: dict, read_dict: dict):
