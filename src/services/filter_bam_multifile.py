@@ -57,7 +57,7 @@ def create_read_dict(output_filename_dict: dict, original_read_list: str):
     return read_dict
 
 
-def create_output_filename_dict(bam_file: str, transcript_list: str, suffix: str):
+def create_output_filename_dict_cli(bam_file: str, transcript_list: str, suffix: str):
     """
     Creates a dictionary of transcript ids as keys and output filenames as values
 
@@ -76,6 +76,14 @@ def create_output_filename_dict(bam_file: str, transcript_list: str, suffix: str
     for transcript in transcripts:
        filenames_dict[transcript] = os.path.dirname(os.path.abspath(transcript_list)) + "/" + Path(bam_file).stem + "." + Path(transcript).stem + suffix + ".bam"
     return filenames_dict
+
+def create_output_filename_dict(bam_file: str, transcript_set: set):
+    filename_dict = {}
+    temporary_path = os.makedir(os.getcwd() + "/temporary_files")
+    for transcript in transcript_set:
+        filename_dict[transcript] = os.path.dirname(os.path.abspath(temporary_path)) + "/" + Path(bam_file).stem + "." + Path(transcript).stem + ".bam"
+    return filename_dict
+
 
 def filter_reads(in_file_name: str, out_file_dict: dict, read_dict: dict):
     """
@@ -136,6 +144,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    out_file_dict = create_output_filename_dict(args.input, args.transcript_list, args.suffix)
+    out_file_dict = create_output_filename_dict_cli(args.input, args.transcript_list, args.suffix)
     read_dict = create_read_dict(out_file_dict, args.model_reads_tsv)
     filter_reads(args.input, out_file_dict, read_dict)
