@@ -4,7 +4,7 @@ import gffutils
 import argparse
 from services.offset_computation import compute_offsets
 from services.fasta_extractor import FastaExtractor
-
+from services.bam_manager import BamManager
 
 parser = argparse.ArgumentParser(
     description='compAna: a tool for comparing annotations',
@@ -183,11 +183,11 @@ if arguments.reference_fasta:
         print("No offset value given. Nothing to do here.")
     else:
         print(f"Extracting candidates matching offset {arguments.offset}...")
-        extracted_candidates = extract_candidates_matching_selected_offset(offset_results, arguments.offset)
+        matching_cases_dict = extract_candidates_matching_selected_offset(offset_results, arguments.offset)
         # for key, value in extracted_candidates.items():
         #     print(f"{key}: {value}")    
         results = {}
-        for key, value in extracted_candidates.items():
+        for key, value in matching_cases_dict.items():
             chromosome = key[0].split('.')[1]
             if key[4] == 'end':
                 coordinates = (chromosome, value, value + 2)
@@ -236,7 +236,15 @@ if arguments.reference_fasta:
             file.write("\n```\n")
             
 if arguments.reads_tsv and arguments.reads_bam:
-    print("Ready to fetch reads BAM-file...", end=' ')
+    print("Fetching reads from BAM-file. This might take some time.", end=' ')
+    transcripts = set()
+    for row in matching_cases_dict:
+        transcripts.add(row[0])
+    bam_manager = BamManager(arguments.reads_bam, arguments.reads_tsv, transcripts)
+    bam_manager.execute()
+
+    
+
         
 
 
