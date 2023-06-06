@@ -19,6 +19,7 @@ parser.add_argument('-s', '--stats', help='output statistics of class codes', ac
 parser.add_argument('-c', '--class-code', nargs='+', help='specify gffcompare class code to analyze.')
 parser.add_argument('-j', '--json', help='input arguments from json file', metavar='')
 parser.add_argument('-b', '--reads_bam', help='BAM-file from which reads are to be extracted from', metavar='')
+parser.add_argument('-t', '--reads_tsv', help='tsv-file for read mapping created by IsoQuant', metavar='')
 
 arguments = parser.parse_args()
 argparse_dict = vars(arguments)
@@ -28,7 +29,6 @@ if arguments.json:
         json_dict = json.load(json_file)
         argparse_dict.update(json_dict)
         print(argparse_dict)
-
 
 gtf_paths = {
     'gffcompare': arguments.gffcompare_gtf,
@@ -235,11 +235,9 @@ if arguments.reference_fasta:
             file.write(json.dumps(json_overview, indent=4))
             file.write("\n```\n")
             
-
+if arguments.reads_tsv and arguments.reads_bam:
+    print("Ready to fetch reads BAM-file...", end=' ')
         
-    
-
-
 
 
 print("================= END ===================")
