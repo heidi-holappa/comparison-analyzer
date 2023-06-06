@@ -1,28 +1,46 @@
 import os
+import json
 import gffutils
 import argparse
 from services.offset_computation import compute_offsets
+from services.fasta_extractor import FastaExtractor
+
 
 parser = argparse.ArgumentParser(
     description='compAna: a tool for comparing annotations',
     usage='python3 compAna.py -i <input.gtf> [-f] [-s]'
     )
-parser.add_argument('-i', '--input', help='gtf-file to be imported into the database', required=True, metavar='')
-parser.add_argument('-r', '--reference', help='reference gtf-file to be compared against', required=True, metavar='')
+parser.add_argument('-g', '--gffcompare_gtf', help='gtf-file to be imported into the database', required=False, metavar='')
+parser.add_argument('-r', '--reference_gtf', help='reference gtf-file to be compared against', required=False, metavar='')
+parser.add_argument('-a', '--reference_fasta', help='reference fasta-file to be compared against', required=False, metavar='')
+parser.add_argument('-o', '--offset', help='offset from which canonical splice point is to be searched', required=False, metavar='')
 parser.add_argument('-f', '--force', help='force overwrite of existing database', action='store_true')
 parser.add_argument('-s', '--stats', help='output statistics of class codes', action='store_true')
 parser.add_argument('-c', '--class-code', nargs='+', help='specify gffcompare class code to analyze.')
+parser.add_argument('-j', '--json', help='input arguments from json file', metavar='')
 
 arguments = parser.parse_args()
+argparse_dict = vars(arguments)
+
+
+if arguments.json:
+    with open(arguments.json) as json_file:
+        json_dict = json.load(json_file)
+        argparse_dict.update(json_dict)
+        print(argparse_dict)
+
+
+    
+
 
 gtf_paths = {
-    'gffcompare': arguments.input,
-    'reference': arguments.reference
+    'gffcompare': arguments.gffcompare_gtf,
+    'reference': arguments.reference_gtf
 }
 
 db_paths = {
-    'gffcompare': arguments.input[:-4] + '-ca.db',
-    'reference': arguments.reference[:-4] + '-ca.db'
+    'gffcompare': arguments.gffcompare_gtf[:-4] + '-ca.db',
+    'reference': arguments.reference_gtf[:-4] + '-ca.db'
 }
 
 print("=========================================")
@@ -31,11 +49,14 @@ print("=========================================")
 print("===========DATABASE MANAGEMENT===========\n")
 
 print("============ FILE INFORMATION ===========\n")
-print(f"Gffcompare GTF-file: {os.path.basename(arguments.input)}")
-print(f"Reference GTF-file: {os.path.basename(arguments.reference)}\n")
+print(f"Gffcompare GTF-file: {os.path.basename(arguments.gffcompare_gtf)}")
+print(f"Reference GTF-file: {os.path.basename(arguments.reference_gtf)}\n")
 
 
 for key, value in db_paths.items():
+    """
+        Check if database files exists. If they do, use existing files. If not, create db-file(s).
+    """
     db_exists = os.path.exists(f'{value}')
 
     if not arguments.force and db_exists:
@@ -61,6 +82,9 @@ reference_db = gffutils.FeatureDB(f'{db_paths["reference"]}')
 print("\n=========================================\n")
 
 if arguments.stats:
+    """
+        Compute simple n-count statistics for class codes.
+    """ 
     print("==========CLASS CODE STATISTICS==========")
     class_codes = {}
     print('\nComputing statistics for class codes...\n')
@@ -79,6 +103,16 @@ if arguments.stats:
 print("\n=========================================")
 
 def fetch_exons(transcript, class_code):
+    """
+        Fetch exons from gffcompare and reference databases.
+
+    Args:
+        transcript (gffutils.feature.Feature): a feature of type 'transcript'
+        class_code (str): a character representing the class code of the transcript
+
+    Returns:
+        _type_: _description_
+    """
     aligned_exons = []
     reference_exons = []
     if not 'class_code' in transcript.attributes or not class_code in transcript.attributes['class_code']:
@@ -95,21 +129,92 @@ def fetch_exons(transcript, class_code):
 
 
 if arguments.class_code:
-        
+    """
+        Compute offsets for specified class codes.
+    """
+    offset_results = {}
     for class_code in arguments.class_code:
         print("==========ANNOTATION COMPARISON==========")
         print(f"Analyzing class code: {class_code}")
-        offset_results = {}
+        class_code_results = {}
         for transcript in gffcompare_db.features_of_type('transcript'):
-            analyzed_exons, reference_exons = fetch_exons(transcript, class_code)
-            if analyzed_exons:
-                offsets = compute_offsets(analyzed_exons, reference_exons)
+            aligned_exons, reference_exons = fetch_exons(transcript, class_code)
+            if aligned_exons:
+                offsets = compute_offsets(aligned_exons, reference_exons)
                 dict_key = (transcript.id, transcript['cmp_ref'][0], transcript.strand)
+                class_code_results[dict_key] = offsets
                 offset_results[dict_key] = offsets
-        for key, value in offset_results.items():
+        for key, value in class_code_results.items():
             print(f"{key}: {value}")
                     
         print("=========================================\n")
+
+def extract_candidates_matching_selected_offset(offset_results: dict, offset: int):
+    """
+        Extract candidates matching the selected offset.
+
+    Args:
+        offset_results (dict): a dictionary containing the offset results for each transcript
+        offset (int): the offset to match
+    """
+    extracted_candidates = {}
+    for key, value in offset_results.items():
+        for i in range(1, len(value)-1):
+            if abs(value[i][0]) == offset:
+                for exon in reference_db.children(key[1], featuretype='exon', order_by='start'):
+                    if int(exon['exon_number'][0]) == i + 1 and key[2] == '+':
+                        extracted_candidates[(key[0], key[1], key[2], i + 1, 'start')] = exon.start
+                        break
+            elif abs(value[i][1]) == offset: 
+                for exon in reference_db.children(key[1], featuretype='exon', order_by='start'):
+                    if int(exon['exon_number'][0]) == i + 1 and key[2] == '+':  
+                        extracted_candidates[(key[0], key[1], key[2], i + 1, 'end')] = exon.end
+                        break
+    return extracted_candidates
+                
+
+
+print("==========CHARACTERS AT OFFSET===========\n")
+if arguments.reference_fasta:
+    print("Fetching reference fasta file...", end=' ')
+    try:
+        fasta_extractor = FastaExtractor(arguments.reference_fasta)
+        print("success!\n")
+    except:
+        print("fasta-file not found. Please check path and try again.")
+    if not arguments.offset:
+        print("No offset value given. Nothing to do here.")
+    else:
+        print(f"Extracting candidates matching offset {arguments.offset}...")
+        extracted_candidates = extract_candidates_matching_selected_offset(offset_results, arguments.offset)
+        # for key, value in extracted_candidates.items():
+        #     print(f"{key}: {value}")    
+        results = {}
+        for key, value in extracted_candidates.items():
+            chromosome = key[0].split('.')[1]
+            if key[4] == 'end':
+                coordinates = (chromosome, value, value + 2)
+            else:
+                coordinates = (chromosome, value - 3, value - 1)
+            chars = fasta_extractor.extract_characters_at_given_coordinates(coordinates)
+            results[key] = chars
+        n_count = {
+            "start": {},
+            "end": {}
+        }
+        for key, value in results.items():
+            if str(value) not in n_count[key[4]]:
+                n_count[key[4]][str(value)] = 0
+            n_count[key[4]][str(value)] += 1
+            print(f"{key}: {value}")
+        for title, sub_dict in n_count.items():
+            print(f"\n{title}:")
+            for key, value in sub_dict.items():
+                print(f"{key}: {value}")
+
+        
+    
+
 
 
 
