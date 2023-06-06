@@ -87,7 +87,7 @@ def create_output_filename_dict(bam_file: str, transcript_set: set):
     for transcript in transcript_set:
         filename = Path(bam_file).stem + "." + Path(transcript).stem + ".bam"
         filename_dict[transcript] = os.path.join(temporary_path, filename)
-    return filename_dict, 
+    return filename_dict
 
 
 def filter_reads(in_file_name: str, out_file_dict: dict, read_dict: dict):
