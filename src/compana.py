@@ -236,7 +236,7 @@ if arguments.reference_fasta:
             file.write("\n```\n")
             
 if arguments.reads_tsv and arguments.reads_bam:
-    print("Fetching reads from BAM-file. This might take some time.", end=' ')
+    print("Fetching reads from BAM-file. This might take some time.")
     transcripts = set()
     for row in matching_cases_dict:
         transcripts.add(row[0])
