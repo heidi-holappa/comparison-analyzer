@@ -46,7 +46,4 @@ def init_databases(parser):
     gffcompare_db = gffutils.FeatureDB(f'{db_paths["gffcompare"]}')
     reference_db = gffutils.FeatureDB(f'{db_paths["reference"]}')
 
-    output_manager.output_line("")
-    output_manager.output_line("DONE", is_title=True, additional_line_breaks=1)
-
     return gffcompare_db, reference_db

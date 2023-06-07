@@ -120,9 +120,6 @@ def execute_fasta_extraction(parser, offset_results, reference_db):
             file.write("```json\n")
             file.write(json.dumps(json_overview, indent=4))
             file.write("\n```\n")
-        output_manager.output_line("")
-        output_manager.output_line(
-            "DONE", is_title=True, additional_line_breaks=1)
         return matching_cases_dict
 
 

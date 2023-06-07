@@ -111,5 +111,4 @@ def execute_offset_computation(parser, gffcompare_db, reference_db):
                 offset_results[dict_key] = offsets
         write_to_output_file(class_code_results, class_code)
     output_manager.output_line("\n")
-    output_manager.output_line("DONE", is_title=True, additional_line_breaks=1)
     return offset_results
