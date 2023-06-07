@@ -14,6 +14,7 @@ class BamManager:
         self.temporary_path = self.create_temporary_path()
 
     def execute(self):
+        output_manager.output_line("PROCESSING BAM-FILE", is_title=True)
         output_manager.output_line(
             "Fetching reads from BAM-file. This might take some time.", is_info=True)
         output_filename_dict = create_output_filename_dict(
