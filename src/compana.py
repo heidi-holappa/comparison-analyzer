@@ -11,7 +11,6 @@ parser = init_argparser()
 print("=========================================")
 print("compAna: a tool for comparing annotations")
 print("=========================================")
-print("===========DATABASE MANAGEMENT===========\n")
 
 gffcompare_db, reference_db = init_databases(parser)
 
