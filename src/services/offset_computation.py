@@ -76,15 +76,15 @@ def fetch_exons(transcript, class_code, gffcompare_db, reference_db):
 
 
 def initialize_output_file():
-    with open('offsets.txt', 'w', encoding="utf-8") as f:
-        f.write("Offset results for most recent run:\n")
+    with open('offsets.txt', 'w', encoding="utf-8") as file:
+        file.write("Offset results for most recent run:\n")
 
 
 def write_to_output_file(class_code_results: dict, class_code: str):
-    with open('offsets.txt', 'a', encoding="utf-8") as f:
-        f.write(f"\nClass code: {class_code}\n")
+    with open('offsets.txt', 'a', encoding="utf-8") as file:
+        file.write(f"\nClass code: {class_code}\n")
         for key, value in class_code_results.items():
-            f.write(f"{key}: {value}\n")
+            file.write(f"{key}: {value}\n")
 
 
 def execute_offset_computation(parser, gffcompare_db, reference_db):

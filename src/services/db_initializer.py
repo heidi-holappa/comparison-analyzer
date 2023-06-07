@@ -26,7 +26,8 @@ def init_databases(parser):
 
         if not parser.force and db_exists:
             output_manager.output_line(
-                f"{key}: using existing db file. Use -f to force overwrite existing db-files.", is_info=True)
+                f"{key}: using existing db file. Use -f to force overwrite existing db-files.",
+                is_info=True)
         else:
             output_manager.output_line(
                 f'{key}: creating database... this might take a while.', is_info=True)
