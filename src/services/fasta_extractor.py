@@ -1,5 +1,6 @@
 import json
 from pyfaidx import Fasta
+from services.output_manager import default_output_manager as output_manager
 
 
 class FastaExtractor:
@@ -39,17 +40,22 @@ def extract_candidates_matching_selected_offset(offset_results: dict, offset: in
 
 
 def execute_fasta_extraction(parser, offset_results, reference_db):
-    print("==========CHARACTERS AT OFFSET===========\n")
-    print("Fetching reference fasta file...", end=' ')
+    output_manager.output_line(
+        "FASTA EXTRACTION", is_title=True, additional_line_breaks=1)
+    output_manager.output_line(
+        "Fetching reference fasta file...", end_line=' ')
     try:
         fasta_extractor = FastaExtractor(parser.reference_fasta)
-        print("success!\n")
+        output_manager.output_line("success!")
     except:
-        print("fasta-file not found. Please check path and try again.")
+        output_manager.output_line(
+            "fasta-file not found. Please check path and try again.")
     if not parser.offset:
-        print("No offset value given. Nothing to do here.")
+        output_manager.output_line(
+            "No offset value given. Nothing to do here.")
     else:
-        print(f"Extracting candidates matching offset {parser.offset}...")
+        output_manager.output_line(
+            f"Extracting candidates matching offset {parser.offset}...")
         matching_cases_dict = extract_candidates_matching_selected_offset(
             offset_results, parser.offset, reference_db)
         # for key, value in extracted_candidates.items():
@@ -114,6 +120,8 @@ def execute_fasta_extraction(parser, offset_results, reference_db):
             file.write("```json\n")
             file.write(json.dumps(json_overview, indent=4))
             file.write("\n```\n")
+        output_manager.output_line(
+            "DONE", is_title=True, additional_line_breaks=1)
         return matching_cases_dict
 
 

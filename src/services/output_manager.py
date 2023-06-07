@@ -16,7 +16,7 @@ class OutputManager:
         self.output_line("", is_title=True)
         self.output_line(
             "compAna: a tool for comparing annotations", fill=' ', is_title=True)
-        self.output_line("", is_title=True, additional_line_breaks=2)
+        self.output_line("", is_title=True, additional_line_breaks=1)
 
 
 default_output_manager = OutputManager()
