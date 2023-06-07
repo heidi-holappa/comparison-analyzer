@@ -4,6 +4,4 @@ venv/
 .coverage
 sample-data/
 sandbox/
-overview.md
-.vscode/
-pylint.log
+.coverage
