@@ -19,7 +19,7 @@ class OutputManager:
 
     def output_heading(self):
         self.output_line("", is_title=True)
-        self.output_line("compAna: a tool for comparing annotations", fill=' ')
+        self.output_line("compAna: a tool for comparing annotations", fill='_')
         self.output_line("", is_title=True)
         self.output_line("\n")
 
