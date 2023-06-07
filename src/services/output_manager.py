@@ -23,7 +23,9 @@ class OutputManager:
 
     def generate_title(self, title: str, fill: str):
         line_length = 50  # This arbitrary value can be changed. Move to ENV?
-        title_line = (" " + title + " ").center(line_length, fill)
+        if len(title):
+            title = " " + title + " "
+        title_line = (title).center(line_length, fill)
         return title_line
 
     def output_heading(self):
