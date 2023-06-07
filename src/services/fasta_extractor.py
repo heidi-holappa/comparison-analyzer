@@ -41,7 +41,7 @@ def extract_candidates_matching_selected_offset(offset_results: dict, offset: in
 
 def execute_fasta_extraction(parser, offset_results, reference_db):
     output_manager.output_line(
-        "FASTA EXTRACTION", is_title=True, additional_line_breaks=1)
+        "FASTA EXTRACTION", is_title=True)
     output_manager.output_line(
         "Fetching reference fasta file...", end_line=' ')
     try:

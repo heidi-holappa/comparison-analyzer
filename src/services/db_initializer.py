@@ -15,7 +15,7 @@ def init_databases(parser):
     }
 
     output_manager.output_line(
-        "FILE INFORMATION", is_title=True, additional_line_breaks=1)
+        "FILE INFORMATION", is_title=True)
     output_manager.output_line(
         f"Gffcompare GTF-file: {os.path.basename(parser.gffcompare_gtf)}")
     output_manager.output_line(
