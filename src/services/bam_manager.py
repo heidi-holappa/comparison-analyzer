@@ -38,6 +38,7 @@ class BamManager:
             read_dict
         )
         self.iterate_extracted_files()
+        os.rmdir(self.temporary_path)
         # TODO: open each file and extract the reads
         # TODO: compare coordinates of reads with coordinates of matching_cases_dict
         # TODO: if there is an indel at the given position, do something. Perhaps calculate percentage of reads with indel?
