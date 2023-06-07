@@ -10,12 +10,12 @@ def init_argparser():
     parser.add_argument(
         '-g', '--gffcompare_gtf',
         help='GTF-file to be imported into the database',
-        required=True,
+        required=False,
         metavar='')
     parser.add_argument(
         '-r', '--reference_gtf',
         help='reference GTF-file to be compared against',
-        required=True,
+        required=False,
         metavar='')
     parser.add_argument(
         '-a', '--reference_fasta',
