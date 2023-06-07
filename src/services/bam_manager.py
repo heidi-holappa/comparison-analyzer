@@ -1,5 +1,7 @@
 import os
-from services.filter_bam_multifile import create_output_filename_dict, create_read_dict, filter_reads
+from services.filter_bam_multifile import create_output_filename_dict
+from services.filter_bam_multifile import create_read_dict
+from services.filter_bam_multifile import filter_reads
 
 
 class BamManager:

@@ -1,5 +1,6 @@
 from pyfaidx import Fasta
 
+
 class FastaExtractor:
 
     def __init__(self, fasta_path: str):
@@ -9,11 +10,9 @@ class FastaExtractor:
         chromosome, start, end = coordinates
         return self.fasta[chromosome][start:end]
 
-    
 
-
-# genes = Fasta('/home/holaphei/koulutyot/lv-2022-2023/BI-summer-trainee/data/sprint-1-get-familiar-with-isoquant/reference/mouse/GRCm39.primary_assembly.genome.fa')
+# genes = Fasta('<filename>')
 # print(genes.keys())
 # s = genes['chr6'][87866109-4:87866109+4]
 # print(s)
-# ENSMUST00000068755.14 
+# ENSMUST00000068755.14

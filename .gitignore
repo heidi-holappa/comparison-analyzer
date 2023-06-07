@@ -6,3 +6,4 @@ sample-data/
 sandbox/
 overview.md
 .vscode/
+pylint.log
