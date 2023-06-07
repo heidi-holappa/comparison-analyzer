@@ -1,5 +1,6 @@
 import os
 import gffutils
+from services.output_manager import default_output_manager as output_manager
 
 
 def init_databases(parser):
@@ -13,19 +14,22 @@ def init_databases(parser):
         'reference': parser.reference_gtf[:-4] + '-ca.db'
     }
 
-    print("\n============ FILE INFORMATION ===========\n")
-    print(f"Gffcompare GTF-file: {os.path.basename(parser.gffcompare_gtf)}")
-    print(f"Reference GTF-file: {os.path.basename(parser.reference_gtf)}\n")
+    output_manager.output_line("FILE INFORMATION", is_title=True)
+    output_manager.output_line(
+        f"Gffcompare GTF-file: {os.path.basename(parser.gffcompare_gtf)}")
+    output_manager.output_line(
+        f"Reference GTF-file: {os.path.basename(parser.reference_gtf)}\n")
 
     for key, value in db_paths.items():
         db_exists = os.path.exists(f'{value}')
 
         if not parser.force and db_exists:
-            print(
+            output_manager.output_line(
                 f"{key}: using existing db file. Use -f to force overwrite existing db-files.")
             # gffutils_db = gffutils.FeatureDB(f'{db_path}/{db_name}')
         else:
-            print(f'{key}: creating database... this might take a while.')
+            output_manager.output_line(
+                f'{key}: creating database... this might take a while.')
             gffutils.create_db(
                 gtf_paths[key],
                 dbfn=f'{value}',
@@ -36,10 +40,12 @@ def init_databases(parser):
                 disable_infer_genes=True,
                 disable_infer_transcripts=True
             )
-            print(f"{key}: database created successfully!")
+            output_manager.output_line(
+                f"{key}: database created successfully!")
 
     gffcompare_db = gffutils.FeatureDB(f'{db_paths["gffcompare"]}')
     reference_db = gffutils.FeatureDB(f'{db_paths["reference"]}')
 
-    print("\n=========================================\n")
+    output_manager.output_line("DONE", is_title=True)
+
     return gffcompare_db, reference_db
