@@ -1,3 +1,6 @@
+from services.output_manager import default_output_manager as output_manager
+
+
 def calculate_total_offset(exon_1, exon_2):
     start_offset = exon_1[0] - exon_2[0]
     end_offset = exon_1[1] - exon_2[1]
@@ -72,11 +75,26 @@ def fetch_exons(transcript, class_code, gffcompare_db, reference_db):
     return aligned_exons, reference_exons
 
 
+def initialize_output_file():
+    with open('offsets.txt', 'w', encoding="utf-8") as file:
+        file.write("Offset results for most recent run:\n")
+
+
+def write_to_output_file(class_code_results: dict, class_code: str):
+    with open('offsets.txt', 'a', encoding="utf-8") as file:
+        file.write(f"\nClass code: {class_code}\n")
+        for key, value in class_code_results.items():
+            file.write(f"{key}: {value}\n")
+
+
 def execute_offset_computation(parser, gffcompare_db, reference_db):
+    output_manager.output_line("ANNOTATION COMPARISON", is_title=True)
+
+    output_manager.output_line(
+        "Counting class code instances for: " + parser.class_code, is_info=True)
+    initialize_output_file()
     offset_results = {}
-    for class_code in parser.class_code:
-        print("==========ANNOTATION COMPARISON==========")
-        print(f"Analyzing class code: {class_code}")
+    for class_code in parser.class_code.strip().split(" "):
         class_code_results = {}
         for tc_element in gffcompare_db.features_of_type('transcript'):
             aligned_exons, reference_exons = fetch_exons(
@@ -91,8 +109,7 @@ def execute_offset_computation(parser, gffcompare_db, reference_db):
                             tc_element['cmp_ref'][0], tc_element.strand)
                 class_code_results[dict_key] = offsets
                 offset_results[dict_key] = offsets
-        for key, value in class_code_results.items():
-            print(f"{key}: {value}")
-
-        print("=========================================\n")
+        write_to_output_file(class_code_results, class_code)
+    output_manager.output_line(
+        "Offset results written to a log file.", is_info=True)
     return offset_results

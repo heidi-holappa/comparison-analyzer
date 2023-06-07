@@ -1,5 +1,6 @@
-from pyfaidx import Fasta
 import json
+from pyfaidx import Fasta
+from services.output_manager import default_output_manager as output_manager
 
 
 class FastaExtractor:
@@ -38,17 +39,23 @@ def extract_candidates_matching_selected_offset(offset_results: dict, offset: in
     return extracted_candidates
 
 
-def execute_fasta_extraction(parser, offset_results, reference_db):
-    print("Fetching reference fasta file...", end=' ')
+def execute_fasta_extraction(parser, offset_results: dict, reference_db):
+    output_manager.output_line(
+        "FASTA EXTRACTION", is_title=True)
+    output_manager.output_line(
+        "Fetching reference fasta file...", end_line=' ', is_info=True)
     try:
         fasta_extractor = FastaExtractor(parser.reference_fasta)
-        print("success!\n")
+        output_manager.output_line("success!", is_info=True)
     except:
-        print("fasta-file not found. Please check path and try again.")
+        output_manager.output_line(
+            "fasta-file not found. Please check path and try again.", is_error=True)
     if not parser.offset:
-        print("No offset value given. Nothing to do here.")
+        output_manager.output_line(
+            "No offset value given. Nothing to do here.", is_error=True)
     else:
-        print(f"Extracting candidates matching offset {parser.offset}...")
+        output_manager.output_line(
+            f"Extracting candidates matching offset {parser.offset}...", is_info=True)
         matching_cases_dict = extract_candidates_matching_selected_offset(
             offset_results, parser.offset, reference_db)
         # for key, value in extracted_candidates.items():
@@ -91,7 +98,7 @@ def execute_fasta_extraction(parser, offset_results, reference_db):
                     )
                 )
 
-        with open("overview.md", "w") as file:
+        with open("overview.md", "w", encoding="utf-8") as file:
             file.write("# Overview\n")
             file.write("## Offset characters\n")
             file.write(

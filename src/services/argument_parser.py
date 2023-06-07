@@ -52,12 +52,11 @@ def init_argparser():
         help='tsv-file for read mapping created by IsoQuant',
         metavar='')
 
-    parser = parser.parse_args()
-    parser_dict = vars(parser)
+    parser_args = parser.parse_args()
+    parser_dict = vars(parser_args)
 
-    if parser.json:
-        with open(parser.json, encoding="UTF-8") as json_file:
+    if parser_args.json:
+        with open(parser_args.json, encoding="UTF-8") as json_file:
             json_dict = json.load(json_file)
             parser_dict.update(json_dict)
-            print(parser_dict)
-    return parser
+    return parser_args
