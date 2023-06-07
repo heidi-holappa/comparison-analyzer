@@ -14,7 +14,8 @@ def init_databases(parser):
         'reference': parser.reference_gtf[:-4] + '-ca.db'
     }
 
-    output_manager.output_line("FILE INFORMATION", is_title=True)
+    output_manager.output_line(
+        "FILE INFORMATION", is_title=True, additional_line_breaks=2)
     output_manager.output_line(
         f"Gffcompare GTF-file: {os.path.basename(parser.gffcompare_gtf)}")
     output_manager.output_line(
@@ -26,7 +27,6 @@ def init_databases(parser):
         if not parser.force and db_exists:
             output_manager.output_line(
                 f"{key}: using existing db file. Use -f to force overwrite existing db-files.")
-            # gffutils_db = gffutils.FeatureDB(f'{db_path}/{db_name}')
         else:
             output_manager.output_line(
                 f'{key}: creating database... this might take a while.')
@@ -46,6 +46,6 @@ def init_databases(parser):
     gffcompare_db = gffutils.FeatureDB(f'{db_paths["gffcompare"]}')
     reference_db = gffutils.FeatureDB(f'{db_paths["reference"]}')
 
-    output_manager.output_line("DONE", is_title=True)
+    output_manager.output_line("DONE", is_title=True, additional_line_breaks=2)
 
     return gffcompare_db, reference_db
