@@ -13,7 +13,7 @@ def init_databases(parser):
         'reference': parser.reference_gtf[:-4] + '-ca.db'
     }
 
-    print("============ FILE INFORMATION ===========\n")
+    print("\n============ FILE INFORMATION ===========\n")
     print(f"Gffcompare GTF-file: {os.path.basename(parser.gffcompare_gtf)}")
     print(f"Reference GTF-file: {os.path.basename(parser.reference_gtf)}\n")
 
