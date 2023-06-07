@@ -1,5 +1,5 @@
-from pyfaidx import Fasta
 import json
+from pyfaidx import Fasta
 
 
 class FastaExtractor:
@@ -39,6 +39,7 @@ def extract_candidates_matching_selected_offset(offset_results: dict, offset: in
 
 
 def execute_fasta_extraction(parser, offset_results, reference_db):
+    print("==========CHARACTERS AT OFFSET===========\n")
     print("Fetching reference fasta file...", end=' ')
     try:
         fasta_extractor = FastaExtractor(parser.reference_fasta)
@@ -91,7 +92,7 @@ def execute_fasta_extraction(parser, offset_results, reference_db):
                     )
                 )
 
-        with open("overview.md", "w") as file:
+        with open("overview.md", "w", encoding="utf-8") as file:
             file.write("# Overview\n")
             file.write("## Offset characters\n")
             file.write(
