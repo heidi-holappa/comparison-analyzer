@@ -91,10 +91,10 @@ def execute_offset_computation(parser, gffcompare_db, reference_db):
     output_manager.output_line("ANNOTATION COMPARISON", is_title=True)
 
     output_manager.output_line(
-        "Counting class code instances for:", end_line=" ", is_info=True)
+        "Counting class code instances for: " + parser.class_code, is_info=True)
     initialize_output_file()
     offset_results = {}
-    for class_code in parser.class_code:
+    for class_code in parser.class_code.strip().split(" "):
         output_manager.output_line(f"{class_code} ", end_line=" ")
         class_code_results = {}
         for tc_element in gffcompare_db.features_of_type('transcript'):
