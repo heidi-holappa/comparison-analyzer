@@ -2,6 +2,7 @@ import os
 from services.filter_bam_multifile import create_output_filename_dict
 from services.filter_bam_multifile import create_read_dict
 from services.filter_bam_multifile import filter_reads
+from services.output_manager import default_output_manager as output_manager
 
 
 class BamManager:

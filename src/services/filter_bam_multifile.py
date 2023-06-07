@@ -12,6 +12,7 @@ import argparse
 from pathlib import Path
 
 import pysam
+from services.output_manager import default_output_manager as output_manager
 
 
 def create_read_dict(output_filename_dict: dict, original_read_list: str):
@@ -99,18 +100,20 @@ def filter_reads(in_file_name: str, dict_of_output_filenames: dict, dict_of_read
 
         count += 1
         if count % 10000 == 0:
-            sys.stdout.write("Processed " + str(count) + " reads\r")
+            output_manager.output_line(
+                "Processed " + str(count) + " reads, written " + str(passed), end_line='\r', is_info=True)
 
         if read.query_name in dict_of_reads:
             for file in dict_of_reads[read.query_name]:
                 if file in out_files:
                     out_files[file].write(read)
                 else:
-                    print("Transcript " + file +
-                          " not found in output file dictionary")
+                    output_manager.output_line("Transcript " + file +
+                                               " not found in output file dictionary", is_error=True)
             passed += 1
 
-    print("Processed " + str(count) + " reads, written " + str(passed))
+    output_manager.output_line(
+        "Processed " + str(count) + " reads, written " + str(passed), is_info=True)
     inf.close()
     idx_count = 0
     for transcript, filename in out_files.items():
