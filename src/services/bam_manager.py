@@ -10,12 +10,13 @@ class BamManager:
         self.bam_path = bam_path
         self.tsv_path = tsv_path
         self.transcript_set = transcript_set
+        self.temporary_path = self.create_temporary_path()
 
     def execute(self):
         output_filename_dict = create_output_filename_dict(
             self.bam_path,
             self.transcript_set,
-            self.create_temporary_path()
+            self.temporary_path
         )
         read_dict = create_read_dict(
             output_filename_dict,
@@ -34,3 +35,8 @@ class BamManager:
         if not os.path.exists(temporary_path):
             os.makedirs(temporary_path)
         return temporary_path
+
+    def iterate_extracted_files(self):
+        for file in os.listdir(self.temporary_path):
+            if file.endswith(".bam"):
+                print(file)
