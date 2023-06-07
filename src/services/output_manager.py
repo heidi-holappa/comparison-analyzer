@@ -12,7 +12,7 @@ class OutputManager:
         title_padding = (line_length - len(title)) // 2
 
         # Pad the title line with spaces to make it centered
-        title_line = title.center(line_length, '#')
+        title_line = title.center(line_length, '=')
 
         # Print the title and content
         return title_line
