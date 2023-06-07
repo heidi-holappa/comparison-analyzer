@@ -59,5 +59,4 @@ def init_argparser():
         with open(parser.json, encoding="UTF-8") as json_file:
             json_dict = json.load(json_file)
             parser_dict.update(json_dict)
-            print(parser_dict)
     return parser
