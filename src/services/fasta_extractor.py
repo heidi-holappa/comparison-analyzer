@@ -1,4 +1,5 @@
 from pyfaidx import Fasta
+import json
 
 
 class FastaExtractor:
