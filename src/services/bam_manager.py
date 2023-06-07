@@ -60,3 +60,7 @@ class BamManager:
                 samfile = cigar_parser.initialize_file(filename)
                 cigar_results[filename] = cigar_parser.extract_cigar_symbol(
                     samfile, value)
+
+        with open("cigar_results.txt", "w") as file:
+            for key, value in cigar_results.items():
+                file.write(f"{key}: {value}\n")
