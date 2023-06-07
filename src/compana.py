@@ -1,5 +1,3 @@
-import json
-
 from services.bam_manager import BamManager
 
 from services.offset_computation import execute_offset_computation
@@ -8,13 +6,15 @@ from services.db_initializer import init_databases
 from services.class_code_stats import compute_class_code_stats
 from services.fasta_extractor import execute_fasta_extraction
 
+parser = init_argparser()
+
 print("=========================================")
 print("compAna: a tool for comparing annotations")
 print("=========================================")
 print("===========DATABASE MANAGEMENT===========\n")
 
-parser = init_argparser()
 gffcompare_db, reference_db = init_databases(parser)
+
 
 if parser.stats:
     compute_class_code_stats(gffcompare_db)
@@ -26,7 +26,6 @@ if parser.class_code:
 
 matching_cases_dict = {}
 
-print("==========CHARACTERS AT OFFSET===========\n")
 if parser.reference_fasta:
     matching_cases_dict = execute_fasta_extraction(
         parser, offset_results, reference_db)
