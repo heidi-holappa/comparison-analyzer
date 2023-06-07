@@ -14,9 +14,9 @@ class OutputManager:
         if is_title:
             line = self.generate_title(line, fill)
         if is_info:
-            line = f"[INFO: {datetime.now()}]: {line}"
+            line = f"[INFO: {datetime.now().strftime('%Y-%m-%d %H:%M')}]: {line}"
         if is_error:
-            line = f"[ERROR: {datetime.now()}]: {line}"
+            line = f"[ERROR: {datetime.now().strftime('%Y-%m-%d %H:%M')}]: {line}"
         print(line, end=end_line)
         if additional_line_breaks:
             print("\n" * additional_line_breaks)
