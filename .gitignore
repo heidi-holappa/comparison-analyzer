@@ -5,3 +5,4 @@ venv/
 sample-data/
 sandbox/
 overview.md
+.vscode/
