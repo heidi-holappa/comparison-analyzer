@@ -8,3 +8,4 @@ overview.md
 .vscode/
 .coverage
 pylint.log
+offsets.txt
