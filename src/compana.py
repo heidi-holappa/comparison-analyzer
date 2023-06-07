@@ -30,10 +30,8 @@ if parser.reference_fasta:
 
 if parser.reads_tsv and parser.reads_bam:
     transcripts = set()
-    for row in matching_cases_dict:
-        transcripts.add(row[0])
     bam_manager = BamManager(
-        parser.reads_bam, parser.reads_tsv, transcripts)
+        parser.reads_bam, parser.reads_tsv, matching_cases_dict)
     bam_manager.execute()
 
 print("================= END ===================")
