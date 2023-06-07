@@ -7,3 +7,4 @@ sandbox/
 overview.md
 .vscode/
 .coverage
+pylint.log
