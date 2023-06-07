@@ -118,7 +118,8 @@ def filter_reads(in_file_name: str, dict_of_output_filenames: dict, dict_of_read
     idx_count = 0
     for transcript, filename in out_files.items():
         idx_count += 1
-        sys.stdout.write("Indexing file: " + str(idx_count) + "\r")
+        output_manager.output_line(
+            "Indexing file: " + str(idx_count), end_line='\r', is_info=True)
         filename.close()
         pysam.index(dict_of_output_filenames[transcript])
 

@@ -29,7 +29,6 @@ if parser.reference_fasta:
         parser, offset_results, reference_db)
 
 if parser.reads_tsv and parser.reads_bam:
-    print("Fetching reads from BAM-file. This might take some time.")
     transcripts = set()
     for row in matching_cases_dict:
         transcripts.add(row[0])
