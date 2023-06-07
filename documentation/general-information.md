@@ -118,3 +118,20 @@ Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of refer
 1. In case of a match the offset is expressed from the point of view of the analyzed transcript in the form of a tuple of two integers $(a, b),\\,a,b\in\mathbb{Z}$. A negative integer indicates that the exon $e_i$ from the analyzed data has a smaller value than the matching reference exon $x_j$ and similarily a positive value indicates that the exon $e_i$ has a higher value
 2. A tuple $(\inf, \inf)$ indicates that no optimal match for an exon in analyzed data was found (i.e. there's possibly an exon in the analyzed data that is not present in the reference data)
 3. A tuple $(-\inf, -\inf)$ that no optimal match for an exon in the reference data was found (i.e. there's possibly an exon is missing from the analyzed data)
+
+
+## Offset character comparison output
+
+Data strcuture:
+```python
+{
+  gffcompare-gtf: '<filename>',
+  reference-gtf: '<filename>',
+  reference-FASTA: '<filename>',
+  condition: "eq_4",
+  transcripts: {
+    id_1: '<string_1>',
+    id_2: '<string_2>',
+  }
+} 
+```
