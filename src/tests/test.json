@@ -1,0 +1,11 @@
+{
+    "reads_bam": "file.bam",
+    "reads_tsv": "file.tsv",
+    "reference_gtf": "reference.gtf",
+    "reference_fasta": "reference.fa>",
+    "gffcompare_gtf": "gffcompare.gtf",
+    "offset": 10,
+    "class_code": "j c k",
+    "force": false,
+    "stats": true
+}
