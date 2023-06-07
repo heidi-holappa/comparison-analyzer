@@ -4,4 +4,6 @@ venv/
 .coverage
 sample-data/
 sandbox/
+overview.md
+.vscode/
 .coverage
