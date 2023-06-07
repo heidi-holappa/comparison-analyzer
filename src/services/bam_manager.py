@@ -27,6 +27,7 @@ class BamManager:
             output_filename_dict,
             read_dict
         )
+        self.iterate_extracted_files()
 
     def create_temporary_path(self):
         temporary_dir = "temporary_files"
