@@ -1,3 +1,6 @@
+from services.output_manager import default_output_manager as output_manager
+
+
 def calculate_total_offset(exon_1, exon_2):
     start_offset = exon_1[0] - exon_2[0]
     end_offset = exon_1[1] - exon_2[1]
@@ -85,12 +88,13 @@ def write_to_output_file(class_code_results: dict, class_code: str):
 
 
 def execute_offset_computation(parser, gffcompare_db, reference_db):
-    print("==========ANNOTATION COMPARISON==========")
-    print(f"Analyzing class code: ", end=" ")
+    output_manager.output_line("ANNOTATION COMPARISON", is_title=True)
+
+    output_manager.output_line("\nAnalyzing class code", end_line=" ")
     initialize_output_file()
     offset_results = {}
     for class_code in parser.class_code:
-        print(f"{class_code} ", end=" ")
+        output_manager.output_line(f"{class_code} ", end_line=" ")
         class_code_results = {}
         for tc_element in gffcompare_db.features_of_type('transcript'):
             aligned_exons, reference_exons = fetch_exons(
@@ -106,7 +110,6 @@ def execute_offset_computation(parser, gffcompare_db, reference_db):
                 class_code_results[dict_key] = offsets
                 offset_results[dict_key] = offsets
         write_to_output_file(class_code_results, class_code)
-    print("\n=========================================")
-    print("=====DONE WITH ANNOTATION COMPARISON=====")
-    print("=========================================\n")
+    output_manager.output_line("\n")
+    output_manager.output_line("DONE", is_title=True)
     return offset_results
