@@ -95,3 +95,4 @@ def execute_offset_computation(parser, gffcompare_db, reference_db):
             print(f"{key}: {value}")
 
         print("=========================================\n")
+    return offset_results
