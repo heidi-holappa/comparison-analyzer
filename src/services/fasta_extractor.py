@@ -39,7 +39,7 @@ def extract_candidates_matching_selected_offset(offset_results: dict, offset: in
     return extracted_candidates
 
 
-def execute_fasta_extraction(parser, offset_results, reference_db):
+def execute_fasta_extraction(parser, offset_results: dict, reference_db):
     output_manager.output_line(
         "FASTA EXTRACTION", is_title=True)
     output_manager.output_line(
