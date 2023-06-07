@@ -72,11 +72,25 @@ def fetch_exons(transcript, class_code, gffcompare_db, reference_db):
     return aligned_exons, reference_exons
 
 
+def initialize_output_file():
+    with open('offsets.txt', 'w', encoding="utf-8") as f:
+        f.write("Offset results for most recent run:\n")
+
+
+def write_to_output_file(class_code_results: dict, class_code: str):
+    with open('offsets.txt', 'a', encoding="utf-8") as f:
+        f.write(f"\nClass code: {class_code}\n")
+        for key, value in class_code_results.items():
+            f.write(f"{key}: {value}\n")
+
+
 def execute_offset_computation(parser, gffcompare_db, reference_db):
+    print("==========ANNOTATION COMPARISON==========")
+    print(f"Analyzing class code: ", end=" ")
+    initialize_output_file()
     offset_results = {}
     for class_code in parser.class_code:
-        print("==========ANNOTATION COMPARISON==========")
-        print(f"Analyzing class code: {class_code}")
+        print(f"{class_code} ", end=" ")
         class_code_results = {}
         for tc_element in gffcompare_db.features_of_type('transcript'):
             aligned_exons, reference_exons = fetch_exons(
@@ -91,8 +105,8 @@ def execute_offset_computation(parser, gffcompare_db, reference_db):
                             tc_element['cmp_ref'][0], tc_element.strand)
                 class_code_results[dict_key] = offsets
                 offset_results[dict_key] = offsets
-        for key, value in class_code_results.items():
-            print(f"{key}: {value}")
-
-        print("=========================================\n")
+        write_to_output_file(class_code_results, class_code)
+    print("\n=========================================")
+    print("=====DONE WITH ANNOTATION COMPARISON=====")
+    print("=========================================\n")
     return offset_results
