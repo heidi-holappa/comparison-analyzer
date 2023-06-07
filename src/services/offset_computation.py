@@ -95,7 +95,6 @@ def execute_offset_computation(parser, gffcompare_db, reference_db):
     initialize_output_file()
     offset_results = {}
     for class_code in parser.class_code.strip().split(" "):
-        output_manager.output_line(f"{class_code} ", end_line=" ")
         class_code_results = {}
         for tc_element in gffcompare_db.features_of_type('transcript'):
             aligned_exons, reference_exons = fetch_exons(
