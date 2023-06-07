@@ -23,6 +23,8 @@ def read_reads(inf):
     return read_set
 
 # TODO: Remove this function after verifying that the new function works
+
+
 def read_called_barcodes(inf):
     read_set = set()
     read_dict = {}
@@ -34,6 +36,7 @@ def read_called_barcodes(inf):
         read_dict[v[0]] = v[6]
     print("Loaded %d read ids" % len(read_dict))
     return read_dict
+
 
 def create_read_dict(output_filename_dict: dict, original_read_list: str):
     """
@@ -53,13 +56,14 @@ def create_read_dict(output_filename_dict: dict, original_read_list: str):
             if line.rstrip("\n").split("\t")[1] in output_filename_dict:
                 if line.rstrip("\n").split("\t")[0] not in read_dict:
                     read_dict[line.rstrip("\n").split("\t")[0]] = set()
-                read_dict[line.rstrip("\n").split("\t")[0]].add(line.rstrip("\n").split("\t")[1])
+                read_dict[line.rstrip("\n").split("\t")[0]].add(
+                    line.rstrip("\n").split("\t")[1])
     return read_dict
 
 
 def create_output_filename_dict_cli(bam_file: str, transcript_list: str, suffix: str):
     """
-    Creates a dictionary of transcript ids as keys and output filenames as values
+    Creates a dictionary of transcript ids as keys and output filenames as values. This method is used when the script is run from the command line.
 
     Args:
         bam_file (str): filename of the input bam file
@@ -74,16 +78,17 @@ def create_output_filename_dict_cli(bam_file: str, transcript_list: str, suffix:
     with open(transcript_list) as file:
         transcripts = [line.rstrip("\n") for line in file]
     for transcript in transcripts:
-       filenames_dict[transcript] = os.path.dirname(os.path.abspath(transcript_list)) + "/" + Path(bam_file).stem + "." + Path(transcript).stem + suffix + ".bam"
+        filenames_dict[transcript] = os.path.dirname(os.path.abspath(
+            transcript_list)) + "/" + Path(bam_file).stem + "." + Path(transcript).stem + suffix + ".bam"
     return filenames_dict
 
-def create_output_filename_dict(bam_file: str, transcript_set: set):
+
+def create_output_filename_dict(bam_file: str, transcript_set: set, temporary_path: str):
+    """
+        Creates a dictionary of transcript ids as keys and output filenames as values. 
+        This method is used when the script is run as a part of a script.
+    """
     filename_dict = {}
-    temporary_dir = "temporary_files"
-    current_dir = os.getcwd()
-    temporary_path = os.path.join(current_dir, temporary_dir)
-    if not os.path.exists(temporary_path):
-        os.makedirs(temporary_path)
     for transcript in transcript_set:
         filename = Path(bam_file).stem + "." + Path(transcript).stem + ".bam"
         filename_dict[transcript] = os.path.join(temporary_path, filename)
@@ -102,7 +107,8 @@ def filter_reads(in_file_name: str, out_file_dict: dict, read_dict: dict):
     inf = pysam.AlignmentFile(in_file_name, "rb")
     out_files = {}
     for transcript, filename in out_file_dict.items():
-        out_files[transcript] = pysam.AlignmentFile(filename, "wb", template=inf)
+        out_files[transcript] = pysam.AlignmentFile(
+            filename, "wb", template=inf)
 
     count = 0
     passed = 0
@@ -120,7 +126,8 @@ def filter_reads(in_file_name: str, out_file_dict: dict, read_dict: dict):
                 if file in out_files:
                     out_files[file].write(read)
                 else:
-                    print("Transcript " + file + " not found in output file dictionary")
+                    print("Transcript " + file +
+                          " not found in output file dictionary")
             passed += 1
 
     print("Processed " + str(count) + " reads, written " + str(passed))
@@ -139,16 +146,21 @@ def init_parser():
         usage='python3 read-reader.py <input.bam> <read list> [suffix]'
     )
     parser.add_argument('-i', '--input', help='input BAM file')
-    parser.add_argument('-m', '--model_reads_tsv', help='tsv-file with read ids and transcript ids')
-    parser.add_argument('-t', '--transcript_list', help='transcript list. One transcript id per line')
-    parser.add_argument('-s', '--suffix', nargs='?', help='optional suffix for the output filenames')
+    parser.add_argument('-m', '--model_reads_tsv',
+                        help='tsv-file with read ids and transcript ids')
+    parser.add_argument('-t', '--transcript_list',
+                        help='transcript list. One transcript id per line')
+    parser.add_argument('-s', '--suffix', nargs='?',
+                        help='optional suffix for the output filenames')
     return parser
+
 
 if __name__ == "__main__":
     parser = init_parser()
 
     args = parser.parse_args()
 
-    out_file_dict = create_output_filename_dict_cli(args.input, args.transcript_list, args.suffix)
+    out_file_dict = create_output_filename_dict_cli(
+        args.input, args.transcript_list, args.suffix)
     read_dict = create_read_dict(out_file_dict, args.model_reads_tsv)
     filter_reads(args.input, out_file_dict, read_dict)
