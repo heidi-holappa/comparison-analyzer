@@ -17,19 +17,19 @@ def init_databases(parser):
     output_manager.output_line(
         "FILE INFORMATION", is_title=True)
     output_manager.output_line(
-        f"Gffcompare GTF-file: {os.path.basename(parser.gffcompare_gtf)}")
+        f"Gffcompare GTF-file: {os.path.basename(parser.gffcompare_gtf)}", is_info=True)
     output_manager.output_line(
-        f"Reference GTF-file: {os.path.basename(parser.reference_gtf)}\n")
+        f"Reference GTF-file: {os.path.basename(parser.reference_gtf)}", is_info=True)
 
     for key, value in db_paths.items():
         db_exists = os.path.exists(f'{value}')
 
         if not parser.force and db_exists:
             output_manager.output_line(
-                f"{key}: using existing db file. Use -f to force overwrite existing db-files.")
+                f"{key}: using existing db file. Use -f to force overwrite existing db-files.", is_info=True)
         else:
             output_manager.output_line(
-                f'{key}: creating database... this might take a while.')
+                f'{key}: creating database... this might take a while.', is_info=True)
             gffutils.create_db(
                 gtf_paths[key],
                 dbfn=f'{value}',
@@ -41,7 +41,7 @@ def init_databases(parser):
                 disable_infer_transcripts=True
             )
             output_manager.output_line(
-                f"{key}: database created successfully!")
+                f"{key}: database created successfully!", is_info=True)
 
     gffcompare_db = gffutils.FeatureDB(f'{db_paths["gffcompare"]}')
     reference_db = gffutils.FeatureDB(f'{db_paths["reference"]}')

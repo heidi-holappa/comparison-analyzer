@@ -90,7 +90,8 @@ def write_to_output_file(class_code_results: dict, class_code: str):
 def execute_offset_computation(parser, gffcompare_db, reference_db):
     output_manager.output_line("ANNOTATION COMPARISON", is_title=True)
 
-    output_manager.output_line("Analyzing class code(s):", end_line=" ")
+    output_manager.output_line(
+        "Analyzing class code(s):", end_line=" ", is_info=True)
     initialize_output_file()
     offset_results = {}
     for class_code in parser.class_code:

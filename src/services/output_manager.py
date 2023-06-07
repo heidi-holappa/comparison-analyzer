@@ -1,8 +1,22 @@
+from datetime import datetime
+
+
 class OutputManager:
 
-    def output_line(self, line: str, is_title: bool = False, end_line="\n", fill='=', additional_line_breaks=0):
+    def output_line(self,
+                    line: str,
+                    is_title: bool = False,
+                    end_line: str = "\n",
+                    fill: str = '=',
+                    additional_line_breaks: int = 0,
+                    is_info: bool = False,
+                    is_error: bool = False):
         if is_title:
             line = self.generate_title(line, fill)
+        if is_info:
+            line = f"[INFO: {datetime.now()}]: {line}"
+        if is_error:
+            line = f"[ERROR: {datetime.now()}]: {line}"
         print(line, end=end_line)
         if additional_line_breaks:
             print("\n" * additional_line_breaks)
