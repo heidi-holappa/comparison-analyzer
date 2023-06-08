@@ -1,0 +1,14 @@
+# 00_Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.model_reads.offset-case-1 IsoQuant generated GTF
+# Command line: ./isoquant.py --reference /home/holaphei/koulutyot/lv-2022-2023/BI-summer-trainee/data/sprint-1-get-familiar-with-isoquant/reference/mouse/GRCm39.primary_assembly.genome.fa --bam /home/holaphei/koulutyot/lv-2022-2023/BI-summer-trainee/isoquant-summer-trainee/ca-task-2/comparison-analyzer/src/tests/test-files/Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.model_reads.offset-case-1.bam --data_type nanopore -o /home/holaphei/koulutyot/lv-2022-2023/BI-summer-trainee/isoquant-summer-trainee/ca-task-2/comparison-analyzer/src/tests/test-files
+# IsoQuant version: 3.2.0
+chr1	IsoQuant	gene	36753618	36797035	.	+	.	gene_id "novel_gene_chr1_2"; transcripts "1"; 
+chr1	IsoQuant	transcript	36753618	36797035	.	+	.	gene_id "novel_gene_chr1_2"; transcript_id "transcript1.chr1.nnic"; exons "9";
+chr1	IsoQuant	exon	36753618	36753778	.	+	.	gene_id "novel_gene_chr1_2"; transcript_id "transcript1.chr1.nnic"; exon "1"; exon_id "chr1.1";
+chr1	IsoQuant	exon	36757903	36757965	.	+	.	gene_id "novel_gene_chr1_2"; transcript_id "transcript1.chr1.nnic"; exon "2"; exon_id "chr1.2";
+chr1	IsoQuant	exon	36762446	36762536	.	+	.	gene_id "novel_gene_chr1_2"; transcript_id "transcript1.chr1.nnic"; exon "3"; exon_id "chr1.3";
+chr1	IsoQuant	exon	36764296	36764379	.	+	.	gene_id "novel_gene_chr1_2"; transcript_id "transcript1.chr1.nnic"; exon "4"; exon_id "chr1.4";
+chr1	IsoQuant	exon	36772929	36773034	.	+	.	gene_id "novel_gene_chr1_2"; transcript_id "transcript1.chr1.nnic"; exon "5"; exon_id "chr1.5";
+chr1	IsoQuant	exon	36781359	36781457	.	+	.	gene_id "novel_gene_chr1_2"; transcript_id "transcript1.chr1.nnic"; exon "6"; exon_id "chr1.6";
+chr1	IsoQuant	exon	36783592	36783742	.	+	.	gene_id "novel_gene_chr1_2"; transcript_id "transcript1.chr1.nnic"; exon "7"; exon_id "chr1.7";
+chr1	IsoQuant	exon	36785443	36785652	.	+	.	gene_id "novel_gene_chr1_2"; transcript_id "transcript1.chr1.nnic"; exon "8"; exon_id "chr1.8";
+chr1	IsoQuant	exon	36796871	36797035	.	+	.	gene_id "novel_gene_chr1_2"; transcript_id "transcript1.chr1.nnic"; exon "9"; exon_id "chr1.9";
