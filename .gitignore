@@ -9,3 +9,4 @@ overview.md
 .coverage
 pylint.log
 offsets.txt
+htmlcov/
