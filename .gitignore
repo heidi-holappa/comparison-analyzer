@@ -1,6 +1,7 @@
 venv/
 *cache*
 .env
+.env.test
 .coverage
 sample-data/
 sandbox/
