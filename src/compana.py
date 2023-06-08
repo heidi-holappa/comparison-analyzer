@@ -28,7 +28,6 @@ def run_pipeline(parser):
             parser, offset_results, reference_db)
 
     if parser.reads_tsv and parser.reads_bam:
-        transcripts = set()
         bam_manager = BamManager(
             parser.reads_bam,
             parser.reads_tsv,

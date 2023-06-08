@@ -42,7 +42,6 @@ class BamManager:
         # TODO: open each file and extract the reads
         # TODO: compare coordinates of reads with coordinates of matching_cases_dict
         # TODO: if there is an indel at the given position, do something. Perhaps calculate percentage of reads with indel?
-        # TODO: delete temporary files
 
     def create_temporary_path(self):
         temporary_dir = "temporary_files"
