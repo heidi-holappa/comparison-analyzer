@@ -1,5 +1,7 @@
 from services.output_manager import default_output_manager as output_manager
 
+from config import OFFSET_LOG
+
 
 def calculate_total_offset(exon_1, exon_2):
     start_offset = exon_1[0] - exon_2[0]
@@ -76,12 +78,12 @@ def fetch_exons(transcript, class_code, gffcompare_db, reference_db):
 
 
 def initialize_output_file():
-    with open('offsets.txt', 'w', encoding="utf-8") as file:
+    with open(OFFSET_LOG, 'w', encoding="utf-8") as file:
         file.write("Offset results for most recent run:\n")
 
 
 def write_to_output_file(class_code_results: dict, class_code: str):
-    with open('offsets.txt', 'a', encoding="utf-8") as file:
+    with open(OFFSET_LOG, 'a', encoding="utf-8") as file:
         file.write(f"\nClass code: {class_code}\n")
         for key, value in class_code_results.items():
             file.write(f"{key}: {value}\n")
