@@ -5,9 +5,7 @@ class CigarParser:
 
     def initialize_file(self, filename: str):
         # pylint: disable=no-member
-        samfile = pysam.AlignmentFile(
-            "sandbox/Mouse.ONT.R9.4.sim.RE.no_gtf.transcript3975.chr6.offset-case-1.bam",
-            "rb")
+        samfile = pysam.AlignmentFile(filename, "rb")
 
         return samfile
 
