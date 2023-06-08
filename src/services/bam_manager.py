@@ -19,7 +19,6 @@ class BamManager:
         self.transcript_set = set()
         for row in matching_cases_dict:
             self.transcript_set.add(row[0])
-        self.temporary_path = TEMPORARY_DIR
 
     def execute(self):
         output_manager.output_line("PROCESSING BAM-FILE", is_title=True)
@@ -28,7 +27,7 @@ class BamManager:
         output_filename_dict = create_output_filename_dict(
             self.bam_path,
             self.transcript_set,
-            self.temporary_path
+            TEMPORARY_DIR
         )
         read_dict = create_read_dict(
             output_filename_dict,
@@ -46,21 +45,21 @@ class BamManager:
         # TODO: if there is an indel at the given position, do something. Perhaps calculate percentage of reads with indel?
 
     def create_temporary_path(self):
-        if not os.path.exists(self.temporary_path):
-            os.mkdir(self.temporary_path)
+        if not os.path.exists(TEMPORARY_DIR):
+            os.mkdir(TEMPORARY_DIR)
 
     def remove_temporary_path(self):
-        if os.path.exists(self.temporary_path):
-            for file in os.listdir(self.temporary_path):
-                os.remove(os.path.join(self.temporary_path, file))
-            os.rmdir(self.temporary_path)
+        if os.path.exists(TEMPORARY_DIR):
+            for file in os.listdir(TEMPORARY_DIR):
+                os.remove(os.path.join(TEMPORARY_DIR, file))
+            os.rmdir(TEMPORARY_DIR)
 
     def iterate_extracted_files(self):
         cigar_parser = CigarParser()
         cigar_results = {}
         for key, value in self.matching_cases_dict.items():
             filename = Path(self.bam_path).stem + key[0] + ".bam"
-            if filename in os.listdir(self.temporary_path):
+            if filename in os.listdir(TEMPORARY_DIR):
                 samfile = cigar_parser.initialize_file(filename)
                 cigar_results[filename] = cigar_parser.extract_cigar_symbol(
                     samfile, value)
