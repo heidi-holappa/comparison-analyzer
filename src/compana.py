@@ -11,7 +11,8 @@ from services.output_manager import default_output_manager as output_manager
 def run_pipeline(parser):
     output_manager.output_heading()
 
-    gffcompare_db, reference_db = init_databases(parser)
+    gffcompare_db, reference_db = init_databases(
+        parser.gffcompare_gtf, parser.reference_gtf, parser.force)
 
     if parser.stats:
         compute_class_code_stats(gffcompare_db)
