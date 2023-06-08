@@ -57,3 +57,8 @@ class TestOutputManager(unittest.TestCase):
         output_manager.output_heading()
         captured = self.capsys.readouterr()
         assert "compAna" in captured.out
+
+    def test_generating_footer_creaters_lines_of_string(self):
+        output_manager.output_footer()
+        captured = self.capsys.readouterr()
+        assert "END" in captured.out
