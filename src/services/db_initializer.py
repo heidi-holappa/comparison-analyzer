@@ -3,28 +3,28 @@ import gffutils
 from services.output_manager import default_output_manager as output_manager
 
 
-def init_databases(parser):
+def init_databases(gffcompare_gtf: str, reference_gtf: str, force=False) -> tuple:
     gtf_paths = {
-        'gffcompare': parser.gffcompare_gtf,
-        'reference': parser.reference_gtf
+        'gffcompare': gffcompare_gtf,
+        'reference': reference_gtf
     }
 
     db_paths = {
-        'gffcompare': parser.gffcompare_gtf[:-4] + '-ca.db',
-        'reference': parser.reference_gtf[:-4] + '-ca.db'
+        'gffcompare': gffcompare_gtf[:-4] + '-ca.db',
+        'reference': reference_gtf[:-4] + '-ca.db'
     }
 
     output_manager.output_line(
         "FILE INFORMATION", is_title=True)
     output_manager.output_line(
-        f"Gffcompare GTF-file: {os.path.basename(parser.gffcompare_gtf)}", is_info=True)
+        f"Gffcompare GTF-file: {os.path.basename(gffcompare_gtf)}", is_info=True)
     output_manager.output_line(
-        f"Reference GTF-file: {os.path.basename(parser.reference_gtf)}", is_info=True)
+        f"Reference GTF-file: {os.path.basename(reference_gtf)}", is_info=True)
 
     for key, value in db_paths.items():
         db_exists = os.path.exists(f'{value}')
 
-        if not parser.force and db_exists:
+        if not force and db_exists:
             output_manager.output_line(
                 f"{key}: using existing db file. Use -f to force overwrite existing db-files.",
                 is_info=True)
