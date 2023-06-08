@@ -24,7 +24,7 @@ def create_read_dict(output_filename_dict: dict, original_read_list: str):
         original_read_list (str): a filename of the original read list
 
     Returns:
-        _type_: _description_
+        dict: outputs a dictionary of read ids as keys and the transcripts they are mapped to
     """
     new_read_dict = {}
     with open(original_read_list, encoding="UTF-8") as file:
