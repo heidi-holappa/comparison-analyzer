@@ -34,5 +34,9 @@ class OutputManager:
             "compAna: a tool for comparing annotations", fill=' ', is_title=True)
         self.output_line("", is_title=True)
 
+    def output_footer(self):
+        self.output_line("Pipeline finished.", is_info=True)
+        self.output_line("END", is_title=True)
+
 
 default_output_manager = OutputManager()
