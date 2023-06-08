@@ -7,6 +7,8 @@ from services.filter_bam_multifile import filter_reads
 from services.output_manager import default_output_manager as output_manager
 from services.cigar_parser import CigarParser
 
+from config import TEMPORARY_DIR
+
 
 class BamManager:
 
@@ -17,7 +19,7 @@ class BamManager:
         self.transcript_set = set()
         for row in matching_cases_dict:
             self.transcript_set.add(row[0])
-        self.temporary_path = self.create_temporary_path()
+        self.temporary_path = TEMPORARY_DIR
 
     def execute(self):
         output_manager.output_line("PROCESSING BAM-FILE", is_title=True)
@@ -38,18 +40,20 @@ class BamManager:
             read_dict
         )
         self.iterate_extracted_files()
-        os.rmdir(self.temporary_path)
+        self.remove_temporary_path()
         # TODO: open each file and extract the reads
         # TODO: compare coordinates of reads with coordinates of matching_cases_dict
         # TODO: if there is an indel at the given position, do something. Perhaps calculate percentage of reads with indel?
 
     def create_temporary_path(self):
-        temporary_dir = "temporary_files"
-        current_dir = os.getcwd()
-        temporary_path = os.path.join(current_dir, temporary_dir)
-        if not os.path.exists(temporary_path):
-            os.makedirs(temporary_path)
-        return temporary_path
+        if not os.path.exists(self.temporary_path):
+            os.mkdir(self.temporary_path)
+
+    def remove_temporary_path(self):
+        if os.path.exists(self.temporary_path):
+            for file in os.listdir(self.temporary_path):
+                os.remove(os.path.join(self.temporary_path, file))
+            os.rmdir(self.temporary_path)
 
     def iterate_extracted_files(self):
         cigar_parser = CigarParser()
