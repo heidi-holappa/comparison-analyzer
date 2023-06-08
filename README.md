@@ -1,7 +1,5 @@
 # compAna
-[![CI](https://github.com/heidi-holappa/comparison-analyzer/actions/workflows/main.yml/badge.svg)](https://github.com/heidi-holappa/comparison-analyzer/actions/workflows/main.yml)
-
-[![codecov](https://codecov.io/gh/heidi-holappa/comparison-analyzer/branch/development/graph/badge.svg?token=3DGJPG3M6G)](https://codecov.io/gh/heidi-holappa/comparison-analyzer)
+[![CI](https://github.com/heidi-holappa/comparison-analyzer/actions/workflows/main.yml/badge.svg)](https://github.com/heidi-holappa/comparison-analyzer/actions/workflows/main.yml) [![codecov](https://codecov.io/gh/heidi-holappa/comparison-analyzer/branch/development/graph/badge.svg?token=3DGJPG3M6G)](https://codecov.io/gh/heidi-holappa/comparison-analyzer)
 
 The purpose of comparison analyzer compAna is to provide further tools for analyzing data produced by the application `gffcompare`. For further details see the documentation. 
 
