@@ -3,15 +3,20 @@ from datetime import datetime
 
 class OutputManager:
 
-    def output_line(self,
-                    line: str,
-                    is_title: bool = False,
-                    end_line: str = "\n",
-                    fill: str = '=',
-                    additional_line_breaks: int = 0,
-                    is_info: bool = False,
-                    is_error: bool = False,
-                    title_line_length: int = 50):
+    def output_line(self, config):
+        """Outputs given line to console. Can be used to output titles, info, errors and more. A simple custom logger.
+
+        Args:
+            config (dict): Configuration options for the output line.
+        """
+        line = config.get('line', '')
+        is_title = config.get('is_title', False)
+        end_line = config.get('end_line', '\n')
+        fill = config.get('fill', '=')
+        additional_line_breaks = config.get('additional_line_breaks', 0)
+        is_info = config.get('is_info', False)
+        is_error = config.get('is_error', False)
+        title_line_length = config.get('title_line_length', 50)
         if is_title:
             line = self.generate_title(line, fill, title_line_length)
         if is_info:
@@ -29,14 +34,33 @@ class OutputManager:
         return title_line
 
     def output_heading(self):
-        self.output_line("", is_title=True)
+        self.output_line({
+            "line": "",
+            "is_title": True
+        })
         self.output_line(
-            "compAna: a tool for comparing annotations", fill=' ', is_title=True)
-        self.output_line("", is_title=True)
+            {
+                'line': "compAna: a tool for comparing annotations",
+                'fill': ' ',
+                'is_title': True
+            }
+        )
+        self.output_line(
+            {
+                "line": "",
+                "is_title": True
+            }
+        )
 
     def output_footer(self):
-        self.output_line("Pipeline finished.", is_info=True)
-        self.output_line("END", is_title=True)
+        self.output_line({
+            "line": "Pipeline finished.",
+            "is_info": True
+        })
+        self.output_line({
+            "line": "Thank you for using compAna",
+            "is_info": True
+        })
 
 
 default_output_manager = OutputManager()

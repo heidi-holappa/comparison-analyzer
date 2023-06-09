@@ -59,4 +59,9 @@ def init_argparser():
         with open(parser_args.json, encoding="UTF-8") as json_file:
             json_dict = json.load(json_file)
             parser_dict.update(json_dict)
+
+    if not parser_args.gffcompare_gtf or not parser_args.reference_gtf:
+        parser.print_help()
+        exit(1)
+
     return parser_args

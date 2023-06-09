@@ -99,28 +99,36 @@ def filter_reads(bam_file: str, dict_of_output_filenames: dict, dict_of_reads: d
 
         count += 1
         if count % 10000 == 0:
-            output_manager.output_line(
-                "Processed " + str(count) + " reads, written " +
-                str(passed), end_line='\r', is_info=True)
+            output_manager.output_line({
+                "line": "Processed " + str(count) + " reads, written " + str(passed),
+                "end_line": "\r",
+                "is_info": True
+            })
 
         if read.query_name in dict_of_reads:
             for file in dict_of_reads[read.query_name]:
                 if file in out_files:
                     out_files[file].write(read)
                 else:
-                    output_manager.output_line(
-                        "Transcript " + file + " not found in output file dictionary",
-                        is_error=True)
+                    output_manager.output_line({
+                        "line": "Transcript " + file + " not found in output file dictionary",
+                        "is_error": True
+                    })
             passed += 1
 
-    output_manager.output_line(
-        "Processed " + str(count) + " reads, written " + str(passed), is_info=True)
+    output_manager.output_line({
+        "line": "Processed " + str(count) + " reads, written " + str(passed),
+        "is_info": True
+    })
     inf.close()
     idx_count = 0
     for transcript, filename in out_files.items():
         idx_count += 1
-        output_manager.output_line(
-            "Indexing file: " + str(idx_count), end_line='\r', is_info=True)
+        output_manager.output_line({
+            "line": "Indexing file: " + str(idx_count),
+            "end_line": "\r",
+            "is_info": True
+        })
         filename.close()
         pysam.index(dict_of_output_filenames[transcript])
 

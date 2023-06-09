@@ -39,7 +39,7 @@ class TestCompana(TestCase):
                        self.test_file_manager.reference_gtf,
                        False)
         captured = self.capsys.readouterr()
-        assert "using existing db" in captured.out
+        assert "exists" in captured.out
 
     def tearDown(self):
         self.test_file_manager.remove_test_files()
