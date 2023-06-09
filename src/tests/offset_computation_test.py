@@ -2,7 +2,9 @@ import os
 from unittest import TestCase
 from services.offset_computation import compute_offsets
 from services.offset_computation import initialize_output_file, write_to_output_file
-from config import OFFSET_LOG
+from services.offset_computation import execute_offset_computation
+from config import OFFSET_LOG, TEST_FILE_DIR
+from tests.sample_file_management import default_test_file_manager
 
 
 class TestOffsetComputation(TestCase):
@@ -102,3 +104,22 @@ class TestOffsetComputationFileManagement(TestCase):
     def tearDown(self) -> None:
         if os.path.exists(OFFSET_LOG):
             os.remove(OFFSET_LOG)
+
+
+class TestOffsetComputationExecution(TestCase):
+
+    def setUp(self):
+        self.test_file_manager = default_test_file_manager
+        self.test_file_manager.initialize_test_files()
+
+    def test_execute_offset_computation_returns_a_dictionary_of_results(self):
+        class_code = "j"
+        results = execute_offset_computation(
+            class_code,
+            self.test_file_manager.gffcompare_db,
+            self.test_file_manager.reference_db
+        )
+        self.assertEqual(len(results), 1)
+
+    def tearDown(self):
+        self.test_file_manager.remove_test_files()
