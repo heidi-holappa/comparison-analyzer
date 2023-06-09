@@ -58,4 +58,4 @@ class TestFastaExtractor(TestCase):
         extractor = FastaExtractor(self.fasta_config)
         result = extractor.execute_fasta_extraction()
         print(result)
-        self.assertIsInstance(result, list)
+        self.assertIsInstance(result, dict)
