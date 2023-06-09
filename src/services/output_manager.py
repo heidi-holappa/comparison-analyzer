@@ -3,7 +3,7 @@ from datetime import datetime
 
 class OutputManager:
 
-    def output_line(self, config):
+    def output_line(self, config: dict):
         """Outputs given line to console. Can be used to output titles, info, errors and more. A simple custom logger.
 
         Args:
@@ -53,6 +53,10 @@ class OutputManager:
         )
 
     def output_footer(self):
+        self.output_line({
+            "line": "",
+            "is_title": True
+        })
         self.output_line({
             "line": "Pipeline finished.",
             "is_info": True
