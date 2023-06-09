@@ -71,6 +71,19 @@ class TestOffsetComputation(TestCase):
         self.assertEqual(
             result, [(float('inf'), float('inf')), (10, 10), (1, 1)])
 
+    def test_if_no_more_aligned_exons_rest_of_reference_is_mapped_to_minus_infinity(self):
+        ref = [(10, 20), (30, 40)]
+        aligned = [(15, 23)]
+        result = compute_offsets(aligned, ref)
+        self.assertEqual(result, [(5, 3), (float('-inf'), float('-inf'))])
+
+    def test_an_alignment_exon_with_no_pair_is_mapped_to_minus_infinity(self):
+        aligned = [(10, 20), (30, 40), (50, 60)]
+        ref = [(15, 23), (25, 33), (31, 41)]
+        result = compute_offsets(aligned, ref)
+        self.assertEqual(
+            result, [(-5, -3), (float('-inf'), float('-inf')), (-1, -1), (float('inf'), float('inf'))])
+
 
 class TestOffsetComputationFileManagement(TestCase):
 
