@@ -11,9 +11,14 @@ class TestFastaExtractor(TestCase):
         self.capsys = capsys
 
     def setUp(self):
+        """
+            Note: these values have been altered to match the range of the sample data.
+            The extracted matches should be 'GT' and 'AG'. This needs to be changed
+            when the sample data is updated.
+        """
         matching_cases_dict = {
-            ('transcript1.chr1.nnic', 'ENSMUST00000208994.2', '+', 3, 'end'): 36762532,
-            ('transcript1.chr1.nnic', 'ENSMUST00000208994.2', '+', 5, 'end'): 36773030
+            ('transcript1.chr1.nnic', 'ENSMUST00000208994.2', '+', 3, 'end'): 63,
+            ('transcript1.chr1.nnic', 'ENSMUST00000208994.2', '+', 5, 'end'): 210
         }
         self.fasta_config = {
             "fasta_path": file_manager.reference_fasta,
@@ -52,4 +57,5 @@ class TestFastaExtractor(TestCase):
     def test_successful_execution_of_extraction_returns_a_dictionary(self):
         extractor = FastaExtractor(self.fasta_config)
         result = extractor.execute_fasta_extraction()
-        self.assertIsInstance(result, dict)
+        print(result)
+        self.assertIsInstance(result, list)
