@@ -117,7 +117,7 @@ def execute_offset_computation(class_code, gffcompare_db, reference_db):
                 offset_results[dict_key] = offsets
         write_to_output_file(class_code_results, class_code)
     output_manager.output_line({
-        "line": "Offset results written to a log file.",
+        "line": f"Offset results written to: {OFFSET_LOG}",
         "is_info": True
     })
     return offset_results
