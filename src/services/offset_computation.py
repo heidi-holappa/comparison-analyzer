@@ -89,14 +89,14 @@ def write_to_output_file(class_code_results: dict, class_code: str):
             file.write(f"{key}: {value}\n")
 
 
-def execute_offset_computation(parser, gffcompare_db, reference_db):
+def execute_offset_computation(class_code, gffcompare_db, reference_db):
     output_manager.output_line("ANNOTATION COMPARISON", is_title=True)
 
     output_manager.output_line(
-        "Counting class code instances for: " + parser.class_code, is_info=True)
+        "Counting class code instances for: " + class_code, is_info=True)
     initialize_output_file()
     offset_results = {}
-    for class_code in parser.class_code.strip().split(" "):
+    for class_code in class_code.strip().split(" "):
         class_code_results = {}
         for tc_element in gffcompare_db.features_of_type('transcript'):
             aligned_exons, reference_exons = fetch_exons(
