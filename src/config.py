@@ -16,3 +16,4 @@ test_file_directory = os.getenv(
 TEMPORARY_DIR = os.path.join(dirname, "..", temporary_dir_path)
 OFFSET_LOG = os.path.join(dirname, "..", offset_log_path)
 TEST_FILE_DIR = os.path.join(dirname, "..", test_file_directory)
+TITLE_FILE_LENGTH = os.getenv("TITLE_FILE_LENGTH") or 50
