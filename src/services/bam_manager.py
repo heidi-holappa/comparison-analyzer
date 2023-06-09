@@ -7,7 +7,7 @@ from services.filter_bam_multifile import filter_reads
 from services.output_manager import default_output_manager as output_manager
 from services.cigar_parser import CigarParser
 
-from config import TEMPORARY_DIR
+from config import TEMPORARY_DIR, CIGAR_RESULTS_LOG
 
 
 class BamManager:
@@ -70,6 +70,6 @@ class BamManager:
                 cigar_results[filename] = cigar_parser.extract_cigar_symbol(
                     samfile, value)
 
-        with open("cigar_results.txt", "w") as file:
+        with open(CIGAR_RESULTS_LOG, "w") as file:
             for key, value in cigar_results.items():
                 file.write(f"{key}: {value}\n")

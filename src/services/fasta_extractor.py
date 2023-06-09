@@ -1,6 +1,7 @@
 import json
 from pyfaidx import Fasta
 from services.output_manager import default_output_manager as output_manager
+from config import FASTA_OVERVIEW_FILE
 
 
 class FastaExtractor:
@@ -85,7 +86,7 @@ class FastaExtractor:
                     )
                 )
 
-        with open("overview.md", "w", encoding="utf-8") as file:
+        with open(FASTA_OVERVIEW_FILE, "w", encoding="utf-8") as file:
             file.write("# Overview\n")
             file.write("## Offset characters\n")
             file.write(
@@ -107,6 +108,29 @@ class FastaExtractor:
             file.write("```json\n")
             file.write(json.dumps(json_overview, indent=4))
             file.write("\n```\n")
+            file.write("\n\n## Results in table-format \n")
+            file.write("This section contains the results in table-format.  \n")
+            current_chromosome = "chr1"
+            file.write(f'\n### {current_chromosome}\n')
+            file.write(
+                "| transcript | read_id | strand | exon | nucleotides |\n")
+            file.write("| --- | --- | --- | --- | --- |\n")
+            for key, value in results.items():
+                chromosome = key[0].split('.')[1]
+                if current_chromosome != chromosome:
+                    file.write(f'\n### {chromosome}\n')
+                    file.write(
+                        "| transcript | read_id | strand | exon | nucleotides |\n")
+                    file.write("| --- | --- | --- | --- | --- |\n")
+                    current_chromosome = chromosome
+                file.write("| " + str(key[0]) + " | " + str(key[1]) +
+                           " | " + str(key[2]) + " | " + str(key[3]) +
+                           " | " + str(value) + " |\n")
+            file.close()
+            output_manager.output_line({
+                "line": "Results written to file: " + FASTA_OVERVIEW_FILE,
+                "is_info": True
+            })
 
     def execute_fasta_extraction(self):
         self.output_section_header()
@@ -128,7 +152,7 @@ class FastaExtractor:
                 coordinates = (chromosome, value - 3, value - 1)
             chars = self.extract_characters_at_given_coordinates(
                 coordinates)
-            results[key] = chars
+            results[key] = str(chars)
 
         self.write_results_to_file(results)
         return results

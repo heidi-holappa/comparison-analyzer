@@ -42,7 +42,7 @@ def run_pipeline(parser_args):
             "matching_cases_dict": matching_cases_dict
         }
         reference_fasta_extractor = FastaExtractor(fasta_config)
-        reference_fasta_extractor.execute_fasta_extraction()
+        result = reference_fasta_extractor.execute_fasta_extraction()
 
     if matching_cases_dict and parser_args.reads_tsv and parser_args.reads_bam:
         bam_manager = BamManager(
