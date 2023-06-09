@@ -4,6 +4,7 @@ from services.offset_computation import execute_offset_computation
 from services.argument_parser import init_argparser
 from services.db_initializer import init_databases
 from services.class_code_stats import ClassCodeStats
+from services.extract_matching_cases import MatchingCasesExtractor
 from services.fasta_extractor import execute_fasta_extraction
 from services.output_manager import default_output_manager as output_manager
 
@@ -24,11 +25,18 @@ def run_pipeline(parser_args):
             parser_args.class_code, gffcompare_db, reference_db)
 
     matching_cases_dict = {}
+    if parser_args.offset:
+        extractor = MatchingCasesExtractor(
+            offset_results,
+            parser_args.offset,
+            reference_db)
+        matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
+
     if parser_args.reference_fasta:
         matching_cases_dict = execute_fasta_extraction(
             parser_args, offset_results, reference_db)
 
-    if parser_args.reads_tsv and parser_args.reads_bam:
+    if matching_cases_dict and parser_args.reads_tsv and parser_args.reads_bam:
         bam_manager = BamManager(
             parser_args.reads_bam,
             parser_args.reads_tsv,
