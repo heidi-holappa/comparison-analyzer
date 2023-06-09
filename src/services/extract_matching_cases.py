@@ -1,18 +1,19 @@
 class MatchingCasesExtractor:
 
     def __init__(self, offset_results: dict, offset: int, reference_db):
-        self.offset_results = offset_results
-        self.offset = offset
-        self.reference_db = reference_db
-
-    def extract_candidates_matching_selected_offset(self):
         """
             Extract candidates matching the selected offset.
 
         Args:
             offset_results (dict): a dictionary containing the offset results for each transcript
             offset (int): the offset to match
+            reference_db: a gffutils database with the reference annotation
         """
+        self.offset_results = offset_results
+        self.offset = offset
+        self.reference_db = reference_db
+
+    def extract_candidates_matching_selected_offset(self):
         extracted_candidates = {}
         for key, value in self.offset_results.items():
             for i in range(1, len(value)-1):
