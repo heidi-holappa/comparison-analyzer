@@ -73,7 +73,7 @@ def create_output_filename_dict(bam_file: str, transcript_set: set, temporary_pa
     return filename_dict
 
 
-def filter_reads(in_file_name: str, dict_of_output_filenames: dict, dict_of_reads: dict):
+def filter_reads(bam_file: str, dict_of_output_filenames: dict, dict_of_reads: dict):
     # pylint: disable=no-member
     """
     Filters reads from a BAM file to multiple BAM files 
@@ -84,7 +84,7 @@ def filter_reads(in_file_name: str, dict_of_output_filenames: dict, dict_of_read
         out_file_dict (dict): a dict with transcript ids as keys and output filenames as values
         read_set (dict): a dictionary with read ids as keys and sets of transcript ids as values
     """
-    inf = pysam.AlignmentFile(in_file_name, "rb")
+    inf = pysam.AlignmentFile(bam_file, "rb")
     out_files = {}
     for transcript, filename in dict_of_output_filenames.items():
         out_files[transcript] = pysam.AlignmentFile(

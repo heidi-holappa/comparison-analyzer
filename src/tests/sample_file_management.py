@@ -15,6 +15,8 @@ class SampleFileManagement:
             TEST_FILE_DIR, "gffcompare.annotated-ca.db")
         self.reference_db_filename = os.path.join(
             TEST_FILE_DIR, "gencode.vM26.basic.annotation.extract-ca.db")
+        self.bam_file = os.path.join(
+            TEST_FILE_DIR, "Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.bam")
         self.gffcompare_db = None
         self.reference_db = None
 
