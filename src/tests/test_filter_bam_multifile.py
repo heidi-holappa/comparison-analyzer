@@ -1,12 +1,15 @@
 import os
+import sys
 import shutil
 from unittest import TestCase
+import pytest
+
 from services.filter_bam_multifile import create_read_dict
 from services.filter_bam_multifile import create_output_filename_dict_cli
 from services.filter_bam_multifile import create_output_filename_dict
 from services.filter_bam_multifile import filter_reads
+from services.filter_bam_multifile import init_parser
 from tests.sample_file_management import default_test_file_manager as file_manager
-
 
 from config import TEMPORARY_DIR
 
@@ -95,3 +98,26 @@ class TestFilterBamFile(TestCase):
     def tearDown(self) -> None:
         if os.path.exists(TEMPORARY_DIR):
             shutil.rmtree(TEMPORARY_DIR)
+
+
+class TestFilterBamParser(TestCase):
+
+    @pytest.fixture(autouse=True)
+    def capsys(self, capsys):
+        self.capsys = capsys
+
+    def test_parser_reads_short_arguments_correctly(self):
+        sys.argv = [
+            'filter_bam_multifile.py',
+            '-i', 'input.bam',
+            '-m', 'model.tsv',
+            '-t', 'transcript_list.txt',
+            '-s', 'suffix',
+
+        ]
+        parser = init_parser()
+        parser = parser.parse_args()
+        assert parser.input == 'input.bam'
+        assert parser.model_reads_tsv == 'model.tsv'
+        assert parser.transcript_list == 'transcript_list.txt'
+        assert parser.suffix == 'suffix'
