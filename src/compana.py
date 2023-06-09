@@ -5,7 +5,7 @@ from services.argument_parser import init_argparser
 from services.db_initializer import init_databases
 from services.class_code_stats import ClassCodeStats
 from services.extract_matching_cases import MatchingCasesExtractor
-from services.fasta_extractor import execute_fasta_extraction
+from services.fasta_extractor import FastaExtractor
 from services.output_manager import default_output_manager as output_manager
 
 
@@ -32,9 +32,17 @@ def run_pipeline(parser_args):
             reference_db)
         matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
 
-    if parser_args.reference_fasta:
-        matching_cases_dict = execute_fasta_extraction(
-            parser_args, offset_results, reference_db)
+    if matching_cases_dict and parser_args.reference_fasta:
+        fasta_config = {
+            "fasta_path": parser_args.reference_fasta,
+            "offset": parser_args.offset,
+            "gffcompare_gtf": parser_args.gffcompare_gtf,
+            "reference_gtf": parser_args.reference_gtf,
+            "class_codes": parser_args.class_code,
+            "matching_cases_dict": matching_cases_dict
+        }
+        reference_fasta_extractor = FastaExtractor(fasta_config)
+        reference_fasta_extractor.execute_fasta_extraction()
 
     if matching_cases_dict and parser_args.reads_tsv and parser_args.reads_bam:
         bam_manager = BamManager(
