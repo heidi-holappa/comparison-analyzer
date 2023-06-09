@@ -110,10 +110,19 @@ class FastaExtractor:
             file.write("\n```\n")
             file.write("\n\n## Results in table-format \n")
             file.write("This section contains the results in table-format.  \n")
+            current_chromosome = "chr1"
+            file.write(f'\n### {current_chromosome}\n')
             file.write(
                 "| transcript | read_id | strand | exon | nucleotides |\n")
             file.write("| --- | --- | --- | --- | --- |\n")
             for key, value in results.items():
+                chromosome = key[0].split('.')[1]
+                if current_chromosome != chromosome:
+                    file.write(f'\n### {chromosome}\n')
+                    file.write(
+                        "| transcript | read_id | strand | exon | nucleotides |\n")
+                    file.write("| --- | --- | --- | --- | --- |\n")
+                    current_chromosome = chromosome
                 file.write("| " + str(key[0]) + " | " + str(key[1]) +
                            " | " + str(key[2]) + " | " + str(key[3]) +
                            " | " + str(value) + " |\n")
