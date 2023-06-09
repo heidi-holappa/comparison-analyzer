@@ -2,7 +2,6 @@ from datetime import datetime
 
 
 class OutputManager:
-
     def output_line(self,
                     line: str,
                     is_title: bool = False,
@@ -12,6 +11,18 @@ class OutputManager:
                     is_info: bool = False,
                     is_error: bool = False,
                     title_line_length: int = 50):
+        """_summary_
+
+        Args:
+            line (str): string to output
+            is_title (bool, optional): True if title. Defaults to False.
+            end_line (str, optional): Optional end line char. Defaults to "\n".
+            fill (str, optional): Fill for titles. Defaults to '='.
+            additional_line_breaks (int, optional): Add line breaks. Defaults to 0.
+            is_info (bool, optional): Outputs info-tag. Defaults to False.
+            is_error (bool, optional): Outputs error-tag. Defaults to False.
+            title_line_length (int, optional): Gives the option to tailor title-line-length. Defaults to configured amount.
+        """
         if is_title:
             line = self.generate_title(line, fill, title_line_length)
         if is_info:
