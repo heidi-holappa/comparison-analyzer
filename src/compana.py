@@ -20,7 +20,7 @@ def run_pipeline(parser):
     offset_results = {}
     if parser.class_code:
         offset_results = execute_offset_computation(
-            parser, gffcompare_db, reference_db)
+            parser.class_code, gffcompare_db, reference_db)
 
     matching_cases_dict = {}
 
