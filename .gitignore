@@ -11,3 +11,4 @@ overview.md
 pylint.log
 offsets.txt
 htmlcov/
+logs/
