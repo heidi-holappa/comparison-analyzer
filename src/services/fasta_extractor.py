@@ -5,87 +5,58 @@ from services.output_manager import default_output_manager as output_manager
 
 class FastaExtractor:
 
-    def __init__(self, fasta_path: str):
-        self.fasta = Fasta(fasta_path)
+    def __init__(self, fasta_config: dict):
+        self.fasta = None
+        self.fasta_path = fasta_config.get('fasta_path', '')
+        self.offset = fasta_config.get('offset', -1)
+        self.gffcompare_gtf = fasta_config.get('gffcompare_gtf', '')
+        self.reference_gtf = fasta_config.get('reference_gtf', '')
+        self.class_codes = fasta_config.get('class_codes', '')
+        self.matching_cases_dict = fasta_config.get(
+            'matching_cases_dict', {})
+
+    def initialize_fasta(self):
+        if self.fasta_path:
+            self.fasta = Fasta(self.fasta_path)
 
     def extract_characters_at_given_coordinates(self, coordinates: tuple):
-        chromosome, start, end = coordinates
-        return self.fasta[chromosome][start:end]
+        if self.fasta:
+            chromosome, start, end = coordinates
+            return self.fasta[chromosome][start:end]
 
-
-def extract_candidates_matching_selected_offset(offset_results: dict, offset: int, reference_db):
-    """
-        Extract candidates matching the selected offset.
-
-    Args:
-        offset_results (dict): a dictionary containing the offset results for each transcript
-        offset (int): the offset to match
-    """
-    extracted_candidates = {}
-    for key, value in offset_results.items():
-        for i in range(1, len(value)-1):
-            if abs(value[i][0]) == offset:
-                for exon in reference_db.children(key[1], featuretype='exon', order_by='start'):
-                    if int(exon['exon_number'][0]) == i + 1:
-                        extracted_candidates[(
-                            key[0], key[1], key[2], i + 1, 'start')] = exon.start
-                        break
-            elif abs(value[i][1]) == offset:
-                for exon in reference_db.children(key[1], featuretype='exon', order_by='start'):
-                    if int(exon['exon_number'][0]) == i + 1:
-                        extracted_candidates[(
-                            key[0], key[1], key[2], i + 1, 'end')] = exon.end
-                        break
-    return extracted_candidates
-
-
-def execute_fasta_extraction(parser, offset_results: dict, reference_db):
-    output_manager.output_line({
-        "line": "FASTA EXTRACTION",
-        "is_title": True
-    })
-    output_manager.output_line({
-        "line": "Fethching reference fasta file...",
-        'end_line': ' ',
-        "is_info": True
-    })
-
-    try:
-        fasta_extractor = FastaExtractor(parser.reference_fasta)
+    def output_section_header(self):
         output_manager.output_line({
-            "line": "success!",
+            "line": "FASTA EXTRACTION",
+            "is_title": True
+        })
+        output_manager.output_line({
+            "line": "Fethching reference fasta file...",
             "is_info": True
         })
 
-    except:
-        output_manager.output_line({
-            "line": "fasta-file not found. Please check path and try again.",
-            "is_error": True
-        })
-    if not parser.offset:
-        output_manager.output_line({
-            "line": "No offset value given. Nothing to do here.",
-            "is_error": True
-        })
-    else:
-        output_manager.output_line({
-            "line": f"Offset value: {parser.offset}",
-            "is_info": True
-        })
-        matching_cases_dict = extract_candidates_matching_selected_offset(
-            offset_results, parser.offset, reference_db)
-        # for key, value in extracted_candidates.items():
-        #     print(f"{key}: {value}")
-        results = {}
-        for key, value in matching_cases_dict.items():
-            chromosome = key[0].split('.')[1]
-            if key[4] == 'end':
-                coordinates = (chromosome, value, value + 2)
-            else:
-                coordinates = (chromosome, value - 3, value - 1)
-            chars = fasta_extractor.extract_characters_at_given_coordinates(
-                coordinates)
-            results[key] = chars
+    def check_errors(self) -> bool:
+        errors = False
+        if not self.fasta:
+            output_manager.output_line({
+                "line": "fasta-file not found. Please check path and try again. Moving to next section.",
+                "is_error": True
+            })
+            errors = True
+
+        if self.offset == -1:
+            output_manager.output_line({
+                "line": "No offset value given. Nothing to do here.",
+                "is_error": True
+            })
+            errors = True
+        if not self.matching_cases_dict:
+            output_manager.output_line({
+                "line": "No matching cases found. Nothing to do here.",
+                "is_error": True
+            })
+        return errors
+
+    def write_results_to_file(self, results: dict):
         json_overview = {
             "strand": {
                 "+": {
@@ -124,23 +95,40 @@ def execute_fasta_extraction(parser, offset_results: dict, reference_db):
             file.write("**Arguments provided by the user:**\n")
             file.write("```\n")
             file.write("gffcompare GTF-file:\n" +
-                       parser.gffcompare_gtf + "\n\n")
+                       self.gffcompare_gtf + "\n\n")
             file.write("Reference GTF-file:\n" +
-                       parser.reference_gtf + "\n\n")
+                       self.reference_gtf + "\n\n")
             file.write("Reference FASTA-file:\n" +
-                       parser.reference_fasta + "\n\n")
-            file.write("Specified offset: " + str(parser.offset) + "\n")
-            file.write("Class codes: " + str(parser.class_code) + "\n")
+                       self.fasta_path + "\n\n")
+            file.write("Specified offset: " + str(self.offset) + "\n")
+            file.write("Class codes: " + str(self.class_codes) + "\n")
             file.write("```\n")
             file.write("**Results in JSON-format:**  \n")
             file.write("```json\n")
             file.write(json.dumps(json_overview, indent=4))
             file.write("\n```\n")
-        return matching_cases_dict
 
+    def execute_fasta_extraction(self):
+        self.output_section_header()
+        self.initialize_fasta()
+        if self.check_errors():
+            return
 
-# genes = Fasta('<filename>')
-# print(genes.keys())
-# s = genes['chr6'][87866109-4:87866109+4]
-# print(s)
-# ENSMUST00000068755.14
+        output_manager.output_line({
+            "line": f"Offset value: {self.offset}",
+            "is_info": True
+        })
+
+        results = {}
+        for key, value in self.matching_cases_dict.items():
+            chromosome = key[0].split('.')[1]
+            if key[4] == 'end':
+                coordinates = (chromosome, value, value + 2)
+            else:
+                coordinates = (chromosome, value - 3, value - 1)
+            chars = self.extract_characters_at_given_coordinates(
+                coordinates)
+            results[key] = chars
+
+        self.write_results_to_file(results)
+        return results
