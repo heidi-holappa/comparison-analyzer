@@ -14,23 +14,33 @@ def init_databases(gffcompare_gtf: str, reference_gtf: str, force=False) -> tupl
         'reference': reference_gtf[:-4] + '-ca.db'
     }
 
-    output_manager.output_line(
-        "FILE INFORMATION", is_title=True)
-    output_manager.output_line(
-        f"Gffcompare GTF-file: {os.path.basename(gffcompare_gtf)}", is_info=True)
-    output_manager.output_line(
-        f"Reference GTF-file: {os.path.basename(reference_gtf)}", is_info=True)
+    output_manager.output_line({
+        "line": "FILE INFORMATION",
+        "is_title": True
+    })
+    output_manager.output_line({
+        "line": "Gffcompare GTF-file: " + os.path.basename(gffcompare_gtf),
+        "is_info": True
+    })
+    output_manager.output_line({
+        "line": "Reference GTF-file: " + os.path.basename(reference_gtf),
+        "is_info": True
+    })
 
     for key, value in db_paths.items():
         db_exists = os.path.exists(f'{value}')
 
         if not force and db_exists:
-            output_manager.output_line(
-                f"{key}: using existing db file. Use -f to force overwrite existing db-files.",
-                is_info=True)
+            output_manager.output_line({
+                "line": f"{key}: database file already exists. Use -f to force overwrite existing db-files.",
+                "is_info": True
+            })
+
         else:
-            output_manager.output_line(
-                f'{key}: creating database... this might take a while.', is_info=True)
+            output_manager.output_line({
+                "line": f"{key}: database file does not exist.",
+                "is_info": True
+            })
             gffutils.create_db(
                 gtf_paths[key],
                 dbfn=f'{value}',
@@ -41,8 +51,10 @@ def init_databases(gffcompare_gtf: str, reference_gtf: str, force=False) -> tupl
                 disable_infer_genes=True,
                 disable_infer_transcripts=True
             )
-            output_manager.output_line(
-                f"{key}: database created successfully!", is_info=True)
+            output_manager.output_line({
+                "line": f"{key}: database created successfully!",
+                "is_info": True
+            })
 
     gffcompare_db = gffutils.FeatureDB(f'{db_paths["gffcompare"]}')
     reference_db = gffutils.FeatureDB(f'{db_paths["reference"]}')

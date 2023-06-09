@@ -40,22 +40,38 @@ def extract_candidates_matching_selected_offset(offset_results: dict, offset: in
 
 
 def execute_fasta_extraction(parser, offset_results: dict, reference_db):
-    output_manager.output_line(
-        "FASTA EXTRACTION", is_title=True)
-    output_manager.output_line(
-        "Fetching reference fasta file...", end_line=' ', is_info=True)
+    output_manager.output_line({
+        "line": "FASTA EXTRACTION",
+        "is_title": True
+    })
+    output_manager.output_line({
+        "line": "Fethching reference fasta file...",
+        'end_line': ' ',
+        "is_info": True
+    })
+
     try:
         fasta_extractor = FastaExtractor(parser.reference_fasta)
-        output_manager.output_line("success!", is_info=True)
+        output_manager.output_line({
+            "line": "success!",
+            "is_info": True
+        })
+
     except:
-        output_manager.output_line(
-            "fasta-file not found. Please check path and try again.", is_error=True)
+        output_manager.output_line({
+            "line": "fasta-file not found. Please check path and try again.",
+            "is_error": True
+        })
     if not parser.offset:
-        output_manager.output_line(
-            "No offset value given. Nothing to do here.", is_error=True)
+        output_manager.output_line({
+            "line": "No offset value given. Nothing to do here.",
+            "is_error": True
+        })
     else:
-        output_manager.output_line(
-            f"Extracting candidates matching offset {parser.offset}...", is_info=True)
+        output_manager.output_line({
+            "line": f"Offset value: {parser.offset}",
+            "is_info": True
+        })
         matching_cases_dict = extract_candidates_matching_selected_offset(
             offset_results, parser.offset, reference_db)
         # for key, value in extracted_candidates.items():

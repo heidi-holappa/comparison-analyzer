@@ -21,9 +21,15 @@ class BamManager:
             self.transcript_set.add(row[0])
 
     def execute(self):
-        output_manager.output_line("PROCESSING BAM-FILE", is_title=True)
-        output_manager.output_line(
-            "Fetching reads from BAM-file. This might take some time.", is_info=True)
+        output_manager.output_line({
+            "line": "PROCESSING BAM-FILE",
+            "is_title": True
+        })
+        output_manager.output_line({
+            "line": f"Input BAM-file: {self.bam_path}",
+            "is_info": True
+        })
+
         output_filename_dict = create_output_filename_dict(
             self.bam_path,
             self.transcript_set,

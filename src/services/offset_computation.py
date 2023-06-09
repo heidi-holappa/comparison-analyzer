@@ -90,10 +90,14 @@ def write_to_output_file(class_code_results: dict, class_code: str):
 
 
 def execute_offset_computation(class_code, gffcompare_db, reference_db):
-    output_manager.output_line("ANNOTATION COMPARISON", is_title=True)
-
-    output_manager.output_line(
-        "Counting class code instances for: " + class_code, is_info=True)
+    output_manager.output_line({
+        "line": "ANNOTATION COMPARISON",
+        "is_info": True
+    })
+    output_manager.output_line({
+        "line": "Counting class code instances for: " + class_code,
+        "is_info": True
+    })
     initialize_output_file()
     offset_results = {}
     for class_code in class_code.strip().split(" "):
@@ -112,6 +116,8 @@ def execute_offset_computation(class_code, gffcompare_db, reference_db):
                 class_code_results[dict_key] = offsets
                 offset_results[dict_key] = offsets
         write_to_output_file(class_code_results, class_code)
-    output_manager.output_line(
-        "Offset results written to a log file.", is_info=True)
+    output_manager.output_line({
+        "line": "Offset results written to a log file.",
+        "is_info": True
+    })
     return offset_results
