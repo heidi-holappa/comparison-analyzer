@@ -29,7 +29,6 @@ def create_dict_of_reads(transcript_set: set, original_read_list: str):
     new_read_dict = {}
     with open(original_read_list, encoding="UTF-8") as file:
         for line in file:
-            print(line.rstrip("\n").split("\t")[1])
             if line.rstrip("\n").split("\t")[1] in transcript_set:
                 if line.rstrip("\n").split("\t")[0] not in new_read_dict:
                     new_read_dict[line.rstrip("\n").split("\t")[0]] = set()
