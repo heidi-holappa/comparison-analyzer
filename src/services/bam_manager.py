@@ -47,6 +47,10 @@ class BamManager:
         # )
 
         # self.iterate_extracted_files()
+        output_manager.output_line({
+            "line": "Extracting reads from tsv-file",
+            "is_info": True
+        })
         dict_of_transcripts_and_reads = create_dict_of_transcripts_and_reads(
             self.transcript_set, self.tsv_path)
         reads_and_locations = {}

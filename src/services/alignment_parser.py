@@ -34,15 +34,8 @@ class AlignmentParser:
         Args:
             location (int): given location
         """
-        count = 0
+
         for read in self.samfile.fetch():
-            count += 1
-            if count % 10000 == 0:
-                output_manager.output_line({
-                    "line": "Processed " + str(count) + " reads",
-                    "end_line": "\r",
-                    "is_info": True
-                })
             pairs = read.get_aligned_pairs()
             aligned = False
             deletion_found = False
@@ -65,7 +58,15 @@ class AlignmentParser:
                     break
 
     def process_bam_file(self, reads_and_locations: dict):
+        count = 0
         for read in self.samfile.fetch():
+            count += 1
+            if count % 10000 == 0:
+                output_manager.output_line({
+                    "line": "Processed " + str(count) + " reads",
+                    "end_line": "\r",
+                    "is_info": True
+                })
             if read.qname in reads_and_locations:
                 for location in reads_and_locations[read.qname]:
                     self.process_single_read(location)
@@ -78,6 +79,10 @@ class AlignmentParser:
             filename (str): _description_
             location (int): _description_
         """
+        output_manager.output_line({
+            "line": "Processing file: " + filename,
+            "is_info": True
+        })
         self.initialize_file(filename)
         self.process_bam_file(reads_and_locations)
 
