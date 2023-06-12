@@ -62,7 +62,15 @@ class BamManager:
                     reads_and_locations[read] = []
                 reads_and_locations[read].append(value)
 
-        print(len(reads_and_locations))
+        output_manager.output_line({
+            "line": "MATCHING CASES:" + str(len(self.matching_cases_dict)),
+            "is_info": True
+        })
+
+        output_manager.outputline({
+            "line": "READS AND LOCATIONS: " + str(len(reads_and_locations)),
+            "is_info": True
+        })
         # alignment_parser.execute(self.bam_path, reads_and_locations)
         # print(alignment_parser.case_count)
         self.remove_temporary_path()
