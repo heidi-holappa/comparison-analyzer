@@ -27,7 +27,7 @@ class AlignmentParser:
         # pylint: disable=no-member
         self.samfile = pysam.AlignmentFile(filename, "rb")
 
-    def process_single_read(self, location: int):
+    def process_single_read(self, read, location: int):
         """
         Process a read and count the number of insertions and deletions at a given location.
 
@@ -35,27 +35,26 @@ class AlignmentParser:
             location (int): given location
         """
 
-        for read in self.samfile.fetch():
-            pairs = read.get_aligned_pairs()
-            aligned = False
-            deletion_found = False
-            insertion_found = False
-            for i in range(len(pairs) - 1):
-                if pairs[i][0] and pairs[i][1] and pairs[i][1] < location:
-                    aligned = True
+        pairs = read.get_aligned_pairs()
+        aligned = False
+        deletion_found = False
+        insertion_found = False
+        for i in range(len(pairs) - 1):
+            if pairs[i][0] and pairs[i][1] and pairs[i][1] < location:
+                aligned = True
 
-                if aligned and not pairs[i+1][1] == None and pairs[i+1][1] > location:
-                    # print(read.qname, pairs[i-5:i])
-                    for index in range(i-5, i):
-                        if index < 0:
-                            continue
-                        if not pairs[index][0] and not deletion_found:
-                            self.case_count["deletion"] += 1
-                            deletion_found = True
-                        if not pairs[index][1] and not insertion_found:
-                            self.case_count["insertion"] += 1
-                            insertion_found = True
-                    break
+            if aligned and not pairs[i+1][1] == None and pairs[i+1][1] > location:
+                # print(read.qname, pairs[i-5:i])
+                for index in range(i-5, i):
+                    if index < 0:
+                        continue
+                    if not pairs[index][0] and not deletion_found:
+                        self.case_count["deletion"] += 1
+                        deletion_found = True
+                    if not pairs[index][1] and not insertion_found:
+                        self.case_count["insertion"] += 1
+                        insertion_found = True
+                break
 
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
@@ -68,7 +67,7 @@ class AlignmentParser:
             })
             if read.qname in reads_and_locations:
                 for location in reads_and_locations[read.qname]:
-                    self.process_single_read(location)
+                    self.process_single_read(read, location)
 
     def execute(self, filename: str, reads_and_locations: dict):
         """
