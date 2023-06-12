@@ -67,7 +67,7 @@ class BamManager:
             "is_info": True
         })
 
-        output_manager.outputline({
+        output_manager.output_line({
             "line": "READS AND LOCATIONS: " + str(len(reads_and_locations)),
             "is_info": True
         })
