@@ -61,11 +61,12 @@ class AlignmentParser:
         for read in self.samfile.fetch():
             if read.qname in reads_and_locations:
                 count += 1
-                output_manager.output_line({
-                    "line": "Processed " + str(count) + " reads",
-                    "end_line": "\r",
-                    "is_info": True
-                })
+                if count % 1000 == 0:
+                    output_manager.output_line({
+                        "line": "Processed " + str(count) + " reads",
+                        "end_line": "\r",
+                        "is_info": True
+                    })
                 for location in reads_and_locations[read.qname]:
                     self.process_single_read(read, location)
 
