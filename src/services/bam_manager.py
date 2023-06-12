@@ -4,7 +4,7 @@ from pathlib import Path
 from services.filter_bam_multifile import create_output_filename_dict
 from services.filter_bam_multifile import create_read_dict
 from services.filter_bam_multifile import filter_reads
-from services.filter_bam_multifile import create_dict_of_reads
+from services.filter_bam_multifile import create_dict_of_transcripts_and_reads
 from services.output_manager import default_output_manager as output_manager
 from services.alignment_parser import default_alignment_parser as alignment_parser
 
@@ -47,13 +47,14 @@ class BamManager:
         # )
 
         # self.iterate_extracted_files()
-        dict_of_reads = create_dict_of_reads(
+        dict_of_transcripts_and_reads = create_dict_of_transcripts_and_reads(
             self.transcript_set, self.tsv_path)
         reads_and_locations = {}
         for key, value in self.matching_cases_dict.items():
-            if key[1] not in reads_and_locations:
-                reads_and_locations[key[1]] = []
-            reads_and_locations[key[1]].append(value)
+            for read in dict_of_transcripts_and_reads[key[0]]:
+                if read not in reads_and_locations:
+                    reads_and_locations[read] = []
+                reads_and_locations[read].append(value)
         alignment_parser.execute(self.bam_path, reads_and_locations)
         print(alignment_parser.case_count)
         self.remove_temporary_path()
