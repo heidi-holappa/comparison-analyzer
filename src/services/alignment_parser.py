@@ -3,6 +3,14 @@ import pysam
 
 class AlignmentParser:
 
+    def __new__(cls):
+        """
+            Singleton pattern.
+        """
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(AlignmentParser, cls).__new__(cls)
+        return cls.instance
+
     def __init__(self):
         """
             Parse a BAM-file and count the number of insertions and deletions at a given location.
@@ -18,7 +26,7 @@ class AlignmentParser:
         # pylint: disable=no-member
         self.samfile = pysam.AlignmentFile(filename, "rb")
 
-    def process_read(self, location: int):
+    def process_single_read(self, location: int):
         """
         Process a read and count the number of insertions and deletions at a given location.
 
@@ -47,7 +55,13 @@ class AlignmentParser:
                             insertion_found = True
                     break
 
-    def execute(self, filename: str, location: int):
+    def process_bam_file(self, reads_and_locations: dict):
+        for read in self.samfile.fetch():
+            if read.qname in reads_and_locations:
+                for location in reads_and_locations[read.qname]:
+                    self.process_single_read(location)
+
+    def execute(self, filename: str, reads_and_locations: dict):
         """
         Initialize AlignmentFile and execute the alignment parser.
 
@@ -56,7 +70,7 @@ class AlignmentParser:
             location (int): _description_
         """
         self.initialize_file(filename)
-        self.process_read(location)
+        self.process_bam_file(reads_and_locations)
 
 
 default_alignment_parser = AlignmentParser()
