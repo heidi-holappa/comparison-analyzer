@@ -1,6 +1,7 @@
 import pysam
 from services.output_manager import default_output_manager as output_manager
 
+
 class AlignmentParser:
 
     def __new__(cls):
@@ -38,7 +39,7 @@ class AlignmentParser:
             count += 1
             if count % 10000 == 0:
                 output_manager.output_line({
-                    "line": "Processed " + str(count) + " reads"
+                    "line": "Processed " + str(count) + " reads",
                     "end_line": "\r",
                     "is_info": True
                 })
