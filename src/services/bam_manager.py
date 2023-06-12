@@ -63,16 +63,16 @@ class BamManager:
                 reads_and_locations[read].append(value)
 
         output_manager.output_line({
-            "line": "MATCHING CASES:" + str(len(self.matching_cases_dict)),
+            "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
             "is_info": True
         })
 
         output_manager.output_line({
-            "line": "READS AND LOCATIONS: " + str(len(reads_and_locations)),
+            "line": "NUMBER OF READS: " + str(len(reads_and_locations)),
             "is_info": True
         })
-        # alignment_parser.execute(self.bam_path, reads_and_locations)
-        # print(alignment_parser.case_count)
+        alignment_parser.execute(self.bam_path, reads_and_locations)
+        print(alignment_parser.case_count)
         self.remove_temporary_path()
         # TODO: open each file and extract the reads
         # TODO: compare coordinates of reads with coordinates of matching_cases_dict
