@@ -5,7 +5,7 @@ from services.filter_bam_multifile import create_output_filename_dict
 from services.filter_bam_multifile import create_read_dict
 from services.filter_bam_multifile import filter_reads
 from services.output_manager import default_output_manager as output_manager
-from services.cigar_parser import CigarParser
+from services.alignment_parser import default_alignment_parser as alignment_parser
 
 from config import TEMPORARY_DIR, CIGAR_RESULTS_LOG
 
@@ -61,15 +61,21 @@ class BamManager:
             os.rmdir(TEMPORARY_DIR)
 
     def iterate_extracted_files(self):
-        cigar_parser = CigarParser()
-        cigar_results = {}
         for key, value in self.matching_cases_dict.items():
-            filename = Path(self.bam_path).stem + key[0] + ".bam"
+            filename = Path(self.bam_path).stem + "." + key[0] + ".bam"
+            print(filename, value)
+            print(os.listdir(TEMPORARY_DIR))
+            print(filename in os.listdir(TEMPORARY_DIR))
             if filename in os.listdir(TEMPORARY_DIR):
-                samfile = cigar_parser.initialize_file(filename)
-                cigar_results[filename] = cigar_parser.extract_cigar_symbol(
-                    samfile, value)
+                alignment_parser.execute(filename, location=value)
 
-        with open(CIGAR_RESULTS_LOG, "w") as file:
-            for key, value in cigar_results.items():
-                file.write(f"{key}: {value}\n")
+        output_manager.output_line({
+            "line": "Insertions and deletions found at given locations",
+            "is_info": True
+        })
+
+        for key, value in alignment_parser.case_count.items():
+            output_manager.output_line({
+                "line": f"{key}: {value}",
+                "is_info": True
+            })
