@@ -57,7 +57,7 @@ def create_output_filename_dict_cli(bam_file: str, transcript_list: str, suffix:
     for transcript in transcripts:
         filenames_dict[transcript] = os.path.dirname(os.path.abspath(
             transcript_list)) + "/" + Path(bam_file).stem + "." + \
-            Path(transcript).stem + suffix + ".bam"
+            transcript + suffix + ".bam"
     return filenames_dict
 
 

@@ -61,14 +61,21 @@ class BamManager:
             os.rmdir(TEMPORARY_DIR)
 
     def iterate_extracted_files(self):
+        files = {
+            "found": 0,
+            "not_found": 0
+        }
         for key, value in self.matching_cases_dict.items():
             filename = Path(self.bam_path).stem + "." + key[0] + ".bam"
-            print(filename, value)
-            print(os.listdir(TEMPORARY_DIR))
-            print(filename in os.listdir(TEMPORARY_DIR))
+
+            if filename in os.listdir(TEMPORARY_DIR):
+                files["found"] += 1
+            else:
+                files["not_found"] += 1
             if filename in os.listdir(TEMPORARY_DIR):
                 alignment_parser.execute(filename, location=value)
 
+        print(files)
         output_manager.output_line({
             "line": "Insertions and deletions found at given locations",
             "is_info": True
