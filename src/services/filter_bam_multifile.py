@@ -30,9 +30,9 @@ def create_dict_of_transcripts_and_reads(transcript_set: set, original_read_list
     with open(original_read_list, encoding="UTF-8") as file:
         for line in file:
             if line.rstrip("\n").split("\t")[1] in transcript_set:
-                if line.rstrip("\n").split("\t")[1] not in new_read_dict:
-                    new_read_dict[line.rstrip("\n").split("\t")[1]] = set()
-                new_read_dict[line.rstrip("\n").split("\t")[1]].add(
+                if line.rstrip("\n").split("\t")[1] not in dict_of_results:
+                    dict_of_results[line.rstrip("\n").split("\t")[1]] = set()
+                dict_of_results[line.rstrip("\n").split("\t")[1]].add(
                     line.rstrip("\n").split("\t")[0])
     return dict_of_results
 
