@@ -55,10 +55,13 @@ class BamManager:
             self.transcript_set, self.tsv_path)
         reads_and_locations = {}
         for key, value in self.matching_cases_dict.items():
+            if not key[0] in dict_of_transcripts_and_reads:
+                continue
             for read in dict_of_transcripts_and_reads[key[0]]:
                 if read not in reads_and_locations:
                     reads_and_locations[read] = []
                 reads_and_locations[read].append(value)
+        print(reads_and_locations)
         alignment_parser.execute(self.bam_path, reads_and_locations)
         print(alignment_parser.case_count)
         self.remove_temporary_path()
