@@ -62,8 +62,9 @@ class BamManager:
                     reads_and_locations[read] = []
                 reads_and_locations[read].append(value)
 
-        alignment_parser.execute(self.bam_path, reads_and_locations)
-        print(alignment_parser.case_count)
+        print(len(reads_and_locations))
+        # alignment_parser.execute(self.bam_path, reads_and_locations)
+        # print(alignment_parser.case_count)
         self.remove_temporary_path()
         # TODO: open each file and extract the reads
         # TODO: compare coordinates of reads with coordinates of matching_cases_dict
