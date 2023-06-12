@@ -59,13 +59,13 @@ class AlignmentParser:
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
         for read in self.samfile.fetch():
-            count += 1
-            output_manager.output_line({
-                "line": "Processed " + str(count) + " reads",
-                "end_line": "\r",
-                "is_info": True
-            })
             if read.qname in reads_and_locations:
+                count += 1
+                output_manager.output_line({
+                    "line": "Processed " + str(count) + " reads",
+                    "end_line": "\r",
+                    "is_info": True
+                })
                 for location in reads_and_locations[read.qname]:
                     self.process_single_read(read, location)
 
