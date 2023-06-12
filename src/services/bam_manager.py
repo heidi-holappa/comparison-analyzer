@@ -61,7 +61,7 @@ class BamManager:
                 if read not in reads_and_locations:
                     reads_and_locations[read] = []
                 reads_and_locations[read].append(value)
-        print(reads_and_locations)
+
         alignment_parser.execute(self.bam_path, reads_and_locations)
         print(alignment_parser.case_count)
         self.remove_temporary_path()
