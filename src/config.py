@@ -24,6 +24,7 @@ TEST_FILE_DIR = os.path.join(dirname, "..", test_file_directory)
 FASTA_OVERVIEW_FILE = os.path.join(LOG_FILE_DIR, fasta_overview)
 CIGAR_RESULTS_LOG = os.path.join(LOG_FILE_DIR, cigar_results)
 TITLE_FILE_LENGTH = os.getenv("TITLE_FILE_LENGTH") or 50
+DEFAULT_WINDOW_SIZE = os.getenv("DEFAULT_WINDOW_SIZE") or 8
 
 if not os.path.exists(LOG_FILE_DIR):
     os.mkdir(LOG_FILE_DIR)
