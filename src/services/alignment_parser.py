@@ -38,8 +38,8 @@ class AlignmentParser:
             if ref_position < relative_position:
                 alignment_position += cigar_code[1]
             else:
-                return alignment_position + relative_position - ref_position
-        return alignment_position + relative_position - ref_position
+                return alignment_position + ref_position - relative_position
+        return alignment_position + ref_position - relative_position
 
     def process_read(self, aligned_pairs: list, location: int):
         """
