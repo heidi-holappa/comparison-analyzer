@@ -18,10 +18,13 @@ class AlignmentParser:
             Follows the singleton pattern. Total case count for all processed BAM-files
             is stored in self.case_count.
         """
+
         self.case_count = {
-            "insertion": 0,
-            "deletion": 0,
+            "insertions": {},
+            "deletions": {},
         }
+        # TODO: add to configuration or to user arguments (window size)
+        self.window_size = 8
 
     def initialize_file(self, filename: str):
         # pylint: disable=no-member
@@ -52,29 +55,30 @@ class AlignmentParser:
 
         deletion_found = False
         insertion_found = False
-        # TODO: add to configuration or to user arguments (window size)
-        window_size = 8
-        # TODO: This is meant for the end of exon. Create similar function for the beginning of exon
+        deletions = 0
+        insertions = 0
+
         if type == "end":
-            for element in aligned_pairs[location-window_size:location]:
-                if not element[0] and not deletion_found:
-                    self.case_count["deletion"] += 1
-                    deletion_found = True
-                if element[1] and not insertion_found:
-                    self.case_count["insertion"] += 1
-                    insertion_found = True
-                if insertion_found and deletion_found:
-                    break
+            for element in aligned_pairs[location - self.window_size:location]:
+                if not element[0]:
+                    deletions += 1
+                if element[1]:
+                    insertions += 1
         elif type == "start":
-            for element in aligned_pairs[location:location-window_size]:
-                if not element[0] and not deletion_found:
-                    self.case_count["deletion"] += 1
-                    deletion_found = True
-                if element[1] and not insertion_found:
-                    self.case_count["insertion"] += 1
-                    insertion_found = True
-                if insertion_found and deletion_found:
-                    break
+            for element in aligned_pairs[location:location - self.window_size]:
+                if not element[0]:
+                    deletions += 1
+                if element[1]:
+                    insertions += 1
+
+        if deletions:
+            if deletions not in self.case_count["deletions"]:
+                self.indel_lenghts["deletions"][deletions] = 0
+            self.indel_lenghts["deletions"][deletions] += 1
+        if insertions:
+            if insertions not in self.case_count["insertions"]:
+                self.indel_lenghts["insertions"][insertions] = 0
+            self.indel_lenghts["insertions"][insertions] += 1
 
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
