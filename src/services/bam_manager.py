@@ -96,9 +96,9 @@ class BamManager:
             "line": "Insertions and deletions found at given locations",
             "is_info": True
         })
-        for line in alignment_parser.case_count:
+        for key, value in alignment_parser.case_count.items():
             output_manager.output_line({
-                "line": line,
+                "line": f"{key}: {value}",
                 "is_info": True
             })
 
@@ -129,7 +129,6 @@ class BamManager:
             if filename in os.listdir(TEMPORARY_DIR):
                 alignment_parser.execute(filename, location=value)
 
-        print(files)
         output_manager.output_line({
             "line": "Insertions and deletions found at given locations",
             "is_info": True

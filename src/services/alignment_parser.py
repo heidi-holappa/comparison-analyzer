@@ -39,7 +39,7 @@ class AlignmentParser:
                 alignment_position += cigar_code[1]
             else:
                 return alignment_position + ref_position - relative_position
-        print("Error: location not found in cigar string")
+
         return -1
 
     def process_read(self, aligned_pairs: list, location: int):
@@ -80,7 +80,6 @@ class AlignmentParser:
                 aligned = True
 
             if aligned and not pairs[i+1][1] == None and pairs[i+1][1] > location:
-                # print(read.qname, pairs[i-5:i])
                 for index in range(i-5, i):
                     if index < 0:
                         continue
@@ -106,15 +105,19 @@ class AlignmentParser:
                         "is_info": True
                     })
                 for location in reads_and_locations[read.qname]:
+
                     aligned_location = self.extract_location_from_cigar_string(
                         read.cigartuples,
                         read.reference_start,
                         location
                     )
-                    print(aligned_location)
-                    if aligned_location > 0:
-                        self.process_read(
-                            read.get_aligned_pairs(), aligned_location)
+
+                    self.process_read(
+                        read.get_aligned_pairs(), aligned_location)
+        output_manager.output_line({
+            "line": "\nFinished",
+            "is_info": True
+        })
 
     def execute(self, filename: str, reads_and_locations: dict):
         """
