@@ -42,7 +42,7 @@ class AlignmentParser:
 
         return -1
 
-    def process_read(self, aligned_pairs: list, location: int):
+    def process_read(self, aligned_pairs: list, location: int, type: str):
         """
         Process a read and count the number of insertions and deletions at a given location.
 
@@ -52,46 +52,29 @@ class AlignmentParser:
 
         deletion_found = False
         insertion_found = False
+        # TODO: add to configuration or to user arguments (window size)
         window_size = 8
-        for element in aligned_pairs[location-window_size:location]:
-            if not element[0] and not deletion_found:
-                self.case_count["deletion"] += 1
-                deletion_found = True
-            if element[1] and not insertion_found:
-                self.case_count["insertion"] += 1
-                insertion_found = True
-            if insertion_found and deletion_found:
-                break
-
-    def process_single_read(self, read, location: int):
-        """
-        Process a read and count the number of insertions and deletions at a given location.
-
-        Args:
-            location (int): given location
-        """
-
-        pairs = read.get_aligned_pairs()
-        aligned = False
-        deletion_found = False
-        insertion_found = False
-        for i in range(len(pairs) - 1):
-            if pairs[i][0] and pairs[i][1] and pairs[i][1] < location:
-                aligned = True
-
-            if aligned and not pairs[i+1][1] == None and pairs[i+1][1] > location:
-                for index in range(i-5, i):
-                    if index < 0:
-                        continue
-                    if not pairs[index][0] and not deletion_found:
-                        self.case_count["deletion"] += 1
-                        deletion_found = True
-                    if not pairs[index][1] and not insertion_found:
-                        self.case_count["insertion"] += 1
-                        insertion_found = True
-                    if insertion_found and deletion_found:
-                        break
-                break
+        # TODO: This is meant for the end of exon. Create similar function for the beginning of exon
+        if type == "end":
+            for element in aligned_pairs[location-window_size:location]:
+                if not element[0] and not deletion_found:
+                    self.case_count["deletion"] += 1
+                    deletion_found = True
+                if element[1] and not insertion_found:
+                    self.case_count["insertion"] += 1
+                    insertion_found = True
+                if insertion_found and deletion_found:
+                    break
+        elif type == "start":
+            for element in aligned_pairs[location:location-window_size]:
+                if not element[0] and not deletion_found:
+                    self.case_count["deletion"] += 1
+                    deletion_found = True
+                if element[1] and not insertion_found:
+                    self.case_count["insertion"] += 1
+                    insertion_found = True
+                if insertion_found and deletion_found:
+                    break
 
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
@@ -104,7 +87,7 @@ class AlignmentParser:
                         "end_line": "\r",
                         "is_info": True
                     })
-                for location in reads_and_locations[read.qname]:
+                for location, type in reads_and_locations[read.qname]:
 
                     aligned_location = self.extract_location_from_cigar_string(
                         read.cigartuples,
@@ -113,7 +96,9 @@ class AlignmentParser:
                     )
 
                     self.process_read(
-                        read.get_aligned_pairs(), aligned_location)
+                        read.get_aligned_pairs(),
+                        aligned_location,
+                        type)
         output_manager.output_line({
             "line": "\nFinished",
             "is_info": True
@@ -127,12 +112,39 @@ class AlignmentParser:
             filename (str): _description_
             location (int): _description_
         """
-        output_manager.output_line({
-            "line": "Processing file: " + filename,
-            "is_info": True
-        })
+
         self.initialize_file(filename)
         self.process_bam_file(reads_and_locations)
 
 
 default_alignment_parser = AlignmentParser()
+
+# def process_single_read(self, read, location: int):
+#     """
+#     Process a read and count the number of insertions and deletions at a given location.
+
+#     Args:
+#         location (int): given location
+#     """
+
+#     pairs = read.get_aligned_pairs()
+#     aligned = False
+#     deletion_found = False
+#     insertion_found = False
+#     for i in range(len(pairs) - 1):
+#         if pairs[i][0] and pairs[i][1] and pairs[i][1] < location:
+#             aligned = True
+
+#         if aligned and not pairs[i+1][1] == None and pairs[i+1][1] > location:
+#             for index in range(i-5, i):
+#                 if index < 0:
+#                     continue
+#                 if not pairs[index][0] and not deletion_found:
+#                     self.case_count["deletion"] += 1
+#                     deletion_found = True
+#                 if not pairs[index][1] and not insertion_found:
+#                     self.case_count["insertion"] += 1
+#                     insertion_found = True
+#                 if insertion_found and deletion_found:
+#                     break
+#             break

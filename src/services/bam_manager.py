@@ -1,9 +1,6 @@
 import os
 from pathlib import Path
 
-from services.filter_bam_multifile import create_output_filename_dict
-from services.filter_bam_multifile import create_read_dict
-from services.filter_bam_multifile import filter_reads
 from services.filter_bam_multifile import create_dict_of_transcripts_and_reads
 from services.output_manager import default_output_manager as output_manager
 from services.alignment_parser import default_alignment_parser as alignment_parser
@@ -21,6 +18,20 @@ class BamManager:
         for row in matching_cases_dict:
             self.transcript_set.add(row[0])
 
+    def write_debug_logs(self, transcripts_and_reads: dict, reads_and_locations: dict):
+        dict_of_transcripts_and_reads_log = os.path.join(
+            LOG_FILE_DIR, "dict_of_transcripts_and_reads.log")
+
+        with open(dict_of_transcripts_and_reads_log, "w") as f:
+            for key, value in transcripts_and_reads.items():
+                f.write(f"{key}\t{value}\n")
+
+        reads_and_locations_log = os.path.join(
+            LOG_FILE_DIR, "reads_and_locations.log")
+        with open(reads_and_locations_log, "w") as f:
+            for key, value in reads_and_locations.items():
+                f.write(f"{key}\t{value}\n")
+
     def generate_reads_and_locations(self, dict_of_transcripts_and_reads: dict):
         reads_and_locations = {}
         for key, value in self.matching_cases_dict.items():
@@ -29,7 +40,8 @@ class BamManager:
             for read in dict_of_transcripts_and_reads[key[0]]:
                 if read not in reads_and_locations:
                     reads_and_locations[read] = []
-                reads_and_locations[read].append(value)
+                location_and_type = (value, key[4])
+                reads_and_locations[read].append(location_and_type)
         return reads_and_locations
 
     def execute(self):
@@ -42,23 +54,6 @@ class BamManager:
             "is_info": True
         })
 
-        # output_filename_dict = create_output_filename_dict(
-        #     self.bam_path,
-        #     self.transcript_set,
-        #     TEMPORARY_DIR
-        # )
-        # read_dict = create_read_dict(
-        #     output_filename_dict,
-        #     self.tsv_path
-        # )
-        # filter_reads(
-        #     self.bam_path,
-        #     output_filename_dict,
-        #     read_dict
-        # )
-
-        # self.iterate_extracted_files()
-
         output_manager.output_line({
             "line": "Extracting reads from tsv-file",
             "is_info": True
@@ -67,20 +62,11 @@ class BamManager:
         dict_of_transcripts_and_reads = create_dict_of_transcripts_and_reads(
             self.transcript_set, self.tsv_path)
 
-        dict_of_transcripts_and_reads_log = os.path.join(
-            LOG_FILE_DIR, "dict_of_transcripts_and_reads.log")
-        with open(dict_of_transcripts_and_reads_log, "w") as f:
-            for key, value in dict_of_transcripts_and_reads.items():
-                f.write(f"{key}\t{value}\n")
-
         reads_and_locations = self.generate_reads_and_locations(
             dict_of_transcripts_and_reads)
 
-        reads_and_locations_log = os.path.join(
-            LOG_FILE_DIR, "reads_and_locations.log")
-        with open(reads_and_locations_log, "w") as f:
-            for key, value in reads_and_locations.items():
-                f.write(f"{key}\t{value}\n")
+        self.write_debug_logs(
+            dict_of_transcripts_and_reads, reads_and_locations)
 
         output_manager.output_line({
             "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
@@ -91,7 +77,14 @@ class BamManager:
             "line": "NUMBER OF READS: " + str(len(reads_and_locations)),
             "is_info": True
         })
+
+        output_manager.output_line({
+            "line": "Analyzing offset of reads. This may take a while.",
+            "is_info": True
+        })
+
         alignment_parser.execute(self.bam_path, reads_and_locations)
+
         output_manager.output_line({
             "line": "Insertions and deletions found at given locations",
             "is_info": True
@@ -114,28 +107,28 @@ class BamManager:
                 os.remove(os.path.join(TEMPORARY_DIR, file))
             os.rmdir(TEMPORARY_DIR)
 
-    def iterate_extracted_files(self):
-        files = {
-            "found": 0,
-            "not_found": 0
-        }
-        for key, value in self.matching_cases_dict.items():
-            filename = Path(self.bam_path).stem + "." + key[0] + ".bam"
+    # def iterate_extracted_files(self):
+    #     files = {
+    #         "found": 0,
+    #         "not_found": 0
+    #     }
+    #     for key, value in self.matching_cases_dict.items():
+    #         filename = Path(self.bam_path).stem + "." + key[0] + ".bam"
 
-            if filename in os.listdir(TEMPORARY_DIR):
-                files["found"] += 1
-            else:
-                files["not_found"] += 1
-            if filename in os.listdir(TEMPORARY_DIR):
-                alignment_parser.execute(filename, location=value)
+    #         if filename in os.listdir(TEMPORARY_DIR):
+    #             files["found"] += 1
+    #         else:
+    #             files["not_found"] += 1
+    #         if filename in os.listdir(TEMPORARY_DIR):
+    #             alignment_parser.execute(filename, location=value)
 
-        output_manager.output_line({
-            "line": "Insertions and deletions found at given locations",
-            "is_info": True
-        })
+    #     output_manager.output_line({
+    #         "line": "Insertions and deletions found at given locations",
+    #         "is_info": True
+    #     })
 
-        for key, value in alignment_parser.case_count.items():
-            output_manager.output_line({
-                "line": f"{key}: {value}",
-                "is_info": True
-            })
+    #     for key, value in alignment_parser.case_count.items():
+    #         output_manager.output_line({
+    #             "line": f"{key}: {value}",
+    #             "is_info": True
+    #         })
