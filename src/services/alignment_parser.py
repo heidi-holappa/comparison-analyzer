@@ -120,9 +120,9 @@ class AlignmentParser:
                         type)
                     if response:
                         errors.append(f"Read: {read.query_name}, location: {location}, \
-                                    align_location: {aligned_location}, type: {type}, \
-                                    read.reference_start: {read.reference_start}, \
-                                    read.reference_end: {read.reference_end}\n")
+align_location: {aligned_location}, type: {type}, \
+read.reference_start: {read.reference_start}, \
+read.reference_end: {read.reference_end}\n")
         with open("alignment_errors.txt", "w") as file:
             file.writelines(errors)
 
