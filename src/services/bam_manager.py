@@ -21,6 +21,17 @@ class BamManager:
         for row in matching_cases_dict:
             self.transcript_set.add(row[0])
 
+    def generate_reads_and_locations(self, dict_of_transcripts_and_reads: dict):
+        reads_and_locations = {}
+        for key, value in self.matching_cases_dict.items():
+            if not key[0] in dict_of_transcripts_and_reads:
+                continue
+            for read in dict_of_transcripts_and_reads[key[0]]:
+                if read not in reads_and_locations:
+                    reads_and_locations[read] = []
+                reads_and_locations[read].append(value)
+        return reads_and_locations
+
     def execute(self):
         output_manager.output_line({
             "line": "PROCESSING BAM-FILE",
@@ -47,20 +58,17 @@ class BamManager:
         # )
 
         # self.iterate_extracted_files()
+
         output_manager.output_line({
             "line": "Extracting reads from tsv-file",
             "is_info": True
         })
+
         dict_of_transcripts_and_reads = create_dict_of_transcripts_and_reads(
             self.transcript_set, self.tsv_path)
-        reads_and_locations = {}
-        for key, value in self.matching_cases_dict.items():
-            if not key[0] in dict_of_transcripts_and_reads:
-                continue
-            for read in dict_of_transcripts_and_reads[key[0]]:
-                if read not in reads_and_locations:
-                    reads_and_locations[read] = []
-                reads_and_locations[read].append(value)
+
+        reads_and_locations = self.generate_reads_and_locations(
+            dict_of_transcripts_and_reads)
 
         output_manager.output_line({
             "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
@@ -72,11 +80,17 @@ class BamManager:
             "is_info": True
         })
         alignment_parser.execute(self.bam_path, reads_and_locations)
-        print(alignment_parser.case_count)
+        output_manager.output_line({
+            "line": "Insertions and deletions found at given locations",
+            "is_info": True
+        })
+        for line in alignment_parser.case_count:
+            output_manager.output_line({
+                "line": line,
+                "is_info": True
+            })
+
         self.remove_temporary_path()
-        # TODO: open each file and extract the reads
-        # TODO: compare coordinates of reads with coordinates of matching_cases_dict
-        # TODO: if there is an indel at the given position, do something. Perhaps calculate percentage of reads with indel?
 
     def create_temporary_path(self):
         if not os.path.exists(TEMPORARY_DIR):

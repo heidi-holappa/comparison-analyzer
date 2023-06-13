@@ -27,6 +27,40 @@ class AlignmentParser:
         # pylint: disable=no-member
         self.samfile = pysam.AlignmentFile(filename, "rb")
 
+    def extract_location_from_cigar_string(self, cigar_tuples: list, reference_start: int, location: int):
+        relative_position = location - reference_start
+        alignment_position = 0
+        ref_position = 0
+
+        for idx, cigar_code in enumerate(cigar_tuples):
+            if cigar_code[0] in [0, 2, 3, 7, 8]:
+                ref_position += cigar_code[1]
+            if ref_position < relative_position:
+                alignment_position += cigar_code[1]
+            else:
+                return alignment_position + relative_position - ref_position
+
+    def process_read(self, aligned_pairs: list, location: int):
+        """
+        Process a read and count the number of insertions and deletions at a given location.
+
+        Args:
+            location (int): given location
+        """
+
+        deletion_found = False
+        insertion_found = False
+        window_size = 8
+        for element in aligned_pairs[location-window_size:location]:
+            if not element[0] and not deletion_found:
+                self.case_count["deletion"] += 1
+                deletion_found = True
+            if element[1] and not insertion_found:
+                self.case_count["insertion"] += 1
+                insertion_found = True
+            if insertion_found and deletion_found:
+                break
+
     def process_single_read(self, read, location: int):
         """
         Process a read and count the number of insertions and deletions at a given location.
@@ -54,6 +88,8 @@ class AlignmentParser:
                     if not pairs[index][1] and not insertion_found:
                         self.case_count["insertion"] += 1
                         insertion_found = True
+                    if insertion_found and deletion_found:
+                        break
                 break
 
     def process_bam_file(self, reads_and_locations: dict):
@@ -68,7 +104,12 @@ class AlignmentParser:
                         "is_info": True
                     })
                 for location in reads_and_locations[read.qname]:
-                    self.process_single_read(read, location)
+                    location = self.extract_location_from_cigar_string(
+                        read.cigartuples,
+                        read.reference_start,
+                        location
+                    )
+                    self.process_read(read.get_aligned_pairs(), location)
 
     def execute(self, filename: str, reads_and_locations: dict):
         """
