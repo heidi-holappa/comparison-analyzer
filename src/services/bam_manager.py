@@ -4,6 +4,7 @@ from pathlib import Path
 from services.filter_bam_multifile import create_dict_of_transcripts_and_reads
 from services.output_manager import default_output_manager as output_manager
 from services.alignment_parser import default_alignment_parser as alignment_parser
+from services.graph_manager import default_graph_manager as graph_manager
 
 from config import TEMPORARY_DIR, CIGAR_RESULTS_LOG, LOG_FILE_DIR
 
@@ -91,9 +92,15 @@ class BamManager:
         })
         for key, value in alignment_parser.case_count.items():
             output_manager.output_line({
-                "line": f"{key}: {value}",
+                "line": f"{key}: {sorted(value.items())}",
                 "is_info": True
             })
+            graph_manager.construct_bar_chart_from_dict(
+                graph_values=value,
+                title=key,
+                x_label="Number of cases",
+                y_label="Number of reads",
+            )
 
         self.remove_temporary_path()
 
