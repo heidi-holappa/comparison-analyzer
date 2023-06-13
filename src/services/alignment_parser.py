@@ -73,12 +73,12 @@ class AlignmentParser:
 
         if deletions:
             if deletions not in self.case_count["deletions"]:
-                self.indel_lenghts["deletions"][deletions] = 0
-            self.indel_lenghts["deletions"][deletions] += 1
+                self.case_count["deletions"][deletions] = 0
+            self.case_count["deletions"][deletions] += 1
         if insertions:
             if insertions not in self.case_count["insertions"]:
-                self.indel_lenghts["insertions"][insertions] = 0
-            self.indel_lenghts["insertions"][insertions] += 1
+                self.case_count["insertions"][insertions] = 0
+            self.case_count["insertions"][insertions] += 1
 
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
