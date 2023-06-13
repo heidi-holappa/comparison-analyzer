@@ -100,6 +100,7 @@ class AlignmentParser:
                         "is_info": True
                     })
                 for location, type in reads_and_locations[read.query_name]:
+                    location = location - 1
 
                     if read.reference_start > location or read.reference_end < location:
                         continue
