@@ -8,7 +8,7 @@ from services.filter_bam_multifile import create_dict_of_transcripts_and_reads
 from services.output_manager import default_output_manager as output_manager
 from services.alignment_parser import default_alignment_parser as alignment_parser
 
-from config import TEMPORARY_DIR, CIGAR_RESULTS_LOG
+from config import TEMPORARY_DIR, CIGAR_RESULTS_LOG, LOG_FILE_DIR
 
 
 class BamManager:
@@ -67,8 +67,20 @@ class BamManager:
         dict_of_transcripts_and_reads = create_dict_of_transcripts_and_reads(
             self.transcript_set, self.tsv_path)
 
+        dict_of_transcripts_and_reads_log = os.path.join(
+            LOG_FILE_DIR, "dict_of_transcripts_and_reads.log")
+        with open(dict_of_transcripts_and_reads_log, "w") as f:
+            for key, value in dict_of_transcripts_and_reads.items():
+                f.write(f"{key}\t{value}\n")
+
         reads_and_locations = self.generate_reads_and_locations(
             dict_of_transcripts_and_reads)
+
+        reads_and_locations_log = os.path.join(
+            LOG_FILE_DIR, "reads_and_locations.log")
+        with open(reads_and_locations_log, "w") as f:
+            for key, value in reads_and_locations.items():
+                f.write(f"{key}\t{value}\n")
 
         output_manager.output_line({
             "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
