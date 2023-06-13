@@ -39,7 +39,7 @@ class AlignmentParser:
         for idx, cigar_code in enumerate(cigar_tuples):
             if cigar_code[0] in [0, 2, 3, 7, 8]:
                 ref_position += cigar_code[1]
-            if ref_position < relative_position:
+            if ref_position <= relative_position:
                 alignment_position += cigar_code[1]
             else:
                 return alignment_position + ref_position - relative_position
