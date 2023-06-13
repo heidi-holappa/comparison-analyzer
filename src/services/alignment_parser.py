@@ -109,6 +109,7 @@ class AlignmentParser:
                         read.reference_start,
                         location
                     )
+                    print(aligned_location)
                     self.process_read(
                         read.get_aligned_pairs(), aligned_location)
 
