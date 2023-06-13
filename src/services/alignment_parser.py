@@ -1,5 +1,6 @@
 import pysam
 from services.output_manager import default_output_manager as output_manager
+from config import DEFAULT_WINDOW_SIZE
 
 
 class AlignmentParser:
@@ -24,7 +25,7 @@ class AlignmentParser:
             "deletions": {},
         }
         # TODO: add to configuration or to user arguments (window size)
-        self.window_size = 8
+        self.window_size = int(DEFAULT_WINDOW_SIZE)
 
     def initialize_file(self, filename: str):
         # pylint: disable=no-member
@@ -50,11 +51,11 @@ class AlignmentParser:
         Process a read and count the number of insertions and deletions at a given location.
 
         Args:
+            aligned_pairs (list): list of tuples of aligned pairs
             location (int): given location
+            type (str): type of location (start or end)
         """
 
-        deletion_found = False
-        insertion_found = False
         deletions = 0
         insertions = 0
 
@@ -80,12 +81,16 @@ class AlignmentParser:
                 self.case_count["insertions"][insertions] = 0
             self.case_count["insertions"][insertions] += 1
 
+        if deletions > 8 or insertions > 8:
+            return True
+        return False
+
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
         for read in self.samfile.fetch():
             if read.is_supplementary:
                 continue
-            if read.qname in reads_and_locations:
+            if read.query_name in reads_and_locations:
                 count += 1
                 if count % 1000 == 0:
                     output_manager.output_line({
@@ -93,9 +98,12 @@ class AlignmentParser:
                         "end_line": "\r",
                         "is_info": True
                     })
-                for location, type in reads_and_locations[read.qname]:
+                for location, type in reads_and_locations[read.query_name]:
 
                     if read.reference_start > location or read.reference_end < location:
+                        continue
+
+                    if not read.cigartuples:
                         continue
 
                     aligned_location = self.extract_location_from_cigar_string(
@@ -104,10 +112,15 @@ class AlignmentParser:
                         location
                     )
 
-                    self.process_read(
+                    response = self.process_read(
                         read.get_aligned_pairs(),
                         aligned_location,
                         type)
+                    if response:
+                        output_manager.output_line({
+                            "line": f"\nSomething went wrong. Read: {read.query_name}, location: {aligned_location}, type: {type}\n",
+                            "is_error": True
+                        })
         output_manager.output_line({
             "line": "\nFinished",
             "is_info": True
@@ -127,33 +140,3 @@ class AlignmentParser:
 
 
 default_alignment_parser = AlignmentParser()
-
-# def process_single_read(self, read, location: int):
-#     """
-#     Process a read and count the number of insertions and deletions at a given location.
-
-#     Args:
-#         location (int): given location
-#     """
-
-#     pairs = read.get_aligned_pairs()
-#     aligned = False
-#     deletion_found = False
-#     insertion_found = False
-#     for i in range(len(pairs) - 1):
-#         if pairs[i][0] and pairs[i][1] and pairs[i][1] < location:
-#             aligned = True
-
-#         if aligned and not pairs[i+1][1] == None and pairs[i+1][1] > location:
-#             for index in range(i-5, i):
-#                 if index < 0:
-#                     continue
-#                 if not pairs[index][0] and not deletion_found:
-#                     self.case_count["deletion"] += 1
-#                     deletion_found = True
-#                 if not pairs[index][1] and not insertion_found:
-#                     self.case_count["insertion"] += 1
-#                     insertion_found = True
-#                 if insertion_found and deletion_found:
-#                     break
-#             break
