@@ -39,7 +39,8 @@ class AlignmentParser:
                 alignment_position += cigar_code[1]
             else:
                 return alignment_position + ref_position - relative_position
-        return alignment_position + ref_position - relative_position
+        print("Error: location not found in cigar string")
+        return -1
 
     def process_read(self, aligned_pairs: list, location: int):
         """
@@ -111,8 +112,9 @@ class AlignmentParser:
                         location
                     )
                     print(aligned_location)
-                    self.process_read(
-                        read.get_aligned_pairs(), aligned_location)
+                    if aligned_location > 0:
+                        self.process_read(
+                            read.get_aligned_pairs(), aligned_location)
 
     def execute(self, filename: str, reads_and_locations: dict):
         """
