@@ -87,6 +87,7 @@ class AlignmentParser:
 
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
+        errors = []
         for read in self.samfile.fetch():
             if read.is_supplementary:
                 continue
@@ -117,10 +118,13 @@ class AlignmentParser:
                         aligned_location,
                         type)
                     if response:
-                        output_manager.output_line({
-                            "line": f"\nSomething went wrong. Read: {read.query_name}, location: {aligned_location}, type: {type}\n",
-                            "is_error": True
-                        })
+                        errors.append(f"Read: {read.query_name}, location: {location}, \
+                                    align_location: {aligned_location}, type: {type}, \
+                                    read.reference_start: {read.reference_start}, \
+                                    read.reference_end: {read.reference_end}\n")
+        with open("alignment_errors.txt", "w") as file:
+            file.writelines(errors)
+
         output_manager.output_line({
             "line": "\nFinished",
             "is_info": True
