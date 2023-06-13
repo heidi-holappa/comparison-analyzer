@@ -104,12 +104,13 @@ class AlignmentParser:
                         "is_info": True
                     })
                 for location in reads_and_locations[read.qname]:
-                    location = self.extract_location_from_cigar_string(
+                    aligned_location = self.extract_location_from_cigar_string(
                         read.cigartuples,
                         read.reference_start,
                         location
                     )
-                    self.process_read(read.get_aligned_pairs(), location)
+                    self.process_read(
+                        read.get_aligned_pairs(), aligned_location)
 
     def execute(self, filename: str, reads_and_locations: dict):
         """
