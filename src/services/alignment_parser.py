@@ -83,6 +83,8 @@ class AlignmentParser:
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
         for read in self.samfile.fetch():
+            if read.is_supplementary:
+                continue
             if read.qname in reads_and_locations:
                 count += 1
                 if count % 1000 == 0:
@@ -92,6 +94,9 @@ class AlignmentParser:
                         "is_info": True
                     })
                 for location, type in reads_and_locations[read.qname]:
+
+                    if read.reference_start > location or read.reference_end < location:
+                        continue
 
                     aligned_location = self.extract_location_from_cigar_string(
                         read.cigartuples,
