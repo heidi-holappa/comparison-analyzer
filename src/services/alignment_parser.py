@@ -81,7 +81,7 @@ class AlignmentParser:
                 self.case_count["insertions"][insertions] = 0
             self.case_count["insertions"][insertions] += 1
 
-        if deletions > 8 or insertions > 8:
+        if deletions > 8 or insertions >= 8:
             return True
         return False
 
