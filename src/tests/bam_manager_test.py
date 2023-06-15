@@ -49,12 +49,13 @@ class TestBamManagerExecution(TestCase):
         self.bam_path = file_manager.bam_file
         self.tsv_path = file_manager.tsv_file
         self.matching_cases_dict = {
-            ("transcript1.chr1.nnic", "case_1"): "case_1"
+            ("transcript1.chr1.nnic", "case_1", 2, '+', 'start'): 100
         }
         self.bam_manager = BamManager(
             self.bam_path, self.tsv_path, self.matching_cases_dict)
         self.bam_manager.create_temporary_path()
 
+    # TODO: activate test
     def test_bam_manager_execute_runs_without_errors(self):
         self.bam_manager.execute()
 
