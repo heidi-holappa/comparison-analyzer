@@ -84,7 +84,8 @@ class BamManager:
             "is_info": True
         })
 
-        alignment_parser.execute(self.bam_path, reads_and_locations)
+        alignment_parser.execute(
+            self.bam_path, reads_and_locations, dict_of_transcripts_and_reads)
 
         output_manager.output_line({
             "line": "Insertions and deletions found at given locations",

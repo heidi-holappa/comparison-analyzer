@@ -13,6 +13,7 @@ class AlignmentParser:
             cls.instance = super(AlignmentParser, cls).__new__(cls)
         return cls.instance
 
+    # TODO: remove reads and transcripts. It is for debugging purposes.
     def __init__(self):
         """
             Parse a BAM-file and count the number of insertions and deletions at a given location.
@@ -20,6 +21,7 @@ class AlignmentParser:
             is stored in self.case_count.
         """
 
+        self.reads_and_transcripts = {}
         self.case_count = {
             "insertions": {},
             "deletions": {},
@@ -119,11 +121,11 @@ class AlignmentParser:
                         aligned_location,
                         type)
                     if response:
-                        errors.append(f"Read: {read.query_name}, location: {location}, \
-align_location: {aligned_location}, type: {type}, \
-read.reference_start: {read.reference_start}, \
-read.reference_end: {read.reference_end}\n")
+                        errors.append(
+                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{location}\t{aligned_location}\t{type}\t{read.reference_start}\t{read.reference_end}\n")
         with open("alignment_errors.txt", "w") as file:
+            file.write(
+                "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\n")
             file.writelines(errors)
 
         output_manager.output_line({
@@ -131,7 +133,8 @@ read.reference_end: {read.reference_end}\n")
             "is_info": True
         })
 
-    def execute(self, filename: str, reads_and_locations: dict):
+    # TODO: remove transcripts and reads. It is here for debugging
+    def execute(self, filename: str, reads_and_locations: dict, transcripts_and_reads: dict):
         """
         Initialize AlignmentFile and execute the alignment parser.
 
@@ -139,6 +142,12 @@ read.reference_end: {read.reference_end}\n")
             filename (str): _description_
             location (int): _description_
         """
+
+        for key, value in transcripts_and_reads.items():
+            for read in value:
+                if read not in self.reads_and_transcripts:
+                    self.reads_and_transcripts[read] = set()
+                self.reads_and_transcripts[read].add(key)
 
         self.initialize_file(filename)
         self.process_bam_file(reads_and_locations)
