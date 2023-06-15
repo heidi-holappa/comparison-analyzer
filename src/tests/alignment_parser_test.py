@@ -62,6 +62,16 @@ class TestCigarParser(TestCase):
             cigar, reference_start, location)
         self.assertEqual(result, expected_output)
 
+    def test_more_complicated_test_returns_correct_position(self):
+        cigar_tuples = [(4, 156), (0, 12), (2, 3), (0, 2), (2, 2), (0, 10), (2, 2), (0, 4), (2, 3), (0, 7), (1, 1), (0, 16), (1, 4), (0, 23), (1, 1), (0, 7),
+                        (1, 1), (0, 9), (2, 1), (0, 13), (2, 1), (0, 15), (2, 2), (0, 3), (1, 2), (0, 19), (2, 2), (0, 20), (2, 1), (0, 32), (3, 294), (0, 36), (4, 25)]
+        reference_start = 72822568
+        position = 72823071
+        expected_output = 668
+        result = alignment_parser.extract_location_from_cigar_string(
+            cigar_tuples, reference_start, position)
+        self.assertEqual(result, expected_output)
+
 
 class TestReadParser(TestCase):
 
@@ -73,7 +83,7 @@ class TestReadParser(TestCase):
         location = 100
         loc_type = "start"
         expected_output = False
-        result = alignment_parser.process_read(read, location, loc_type)
+        result, list = alignment_parser.process_read(read, location, loc_type)
         self.assertEqual(result, expected_output)
 
     def test_read_with_no_aligned_pairs_does_not_change_the_dictionary_of_counts(self):
