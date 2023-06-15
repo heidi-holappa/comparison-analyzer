@@ -66,7 +66,6 @@ class AlignmentParser:
                 if not element[1]:
                     insertions += 1
         elif loc_type == "start":
-            print(aligned_pairs[location:location + self.window_size])
             for element in aligned_pairs[location:location + self.window_size]:
                 if not element[0]:
                     deletions += 1
