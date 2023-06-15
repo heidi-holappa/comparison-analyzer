@@ -60,14 +60,17 @@ class AlignmentParser:
 
         deletions = 0
         insertions = 0
+        debug_list = []
 
         if loc_type == "end":
+            debug_list = aligned_pairs[location - self.window_size:location]
             for element in aligned_pairs[location - self.window_size:location]:
                 if not element[0]:
                     deletions += 1
                 if not element[1]:
                     insertions += 1
         elif loc_type == "start":
+            debug_list = aligned_pairs[location:location + self.window_size]
             for element in aligned_pairs[location:location + self.window_size]:
                 if not element[0]:
                     deletions += 1
@@ -84,8 +87,8 @@ class AlignmentParser:
             self.case_count["insertions"][insertions] += 1
 
         if deletions > 8 or insertions >= 8:
-            return True
-        return False
+            return True, debug_list
+        return False, debug_list
 
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
@@ -116,16 +119,16 @@ class AlignmentParser:
                         location
                     )
 
-                    response = self.process_read(
+                    response, debug_list = self.process_read(
                         read.get_aligned_pairs(),
                         aligned_location,
                         type)
                     if response:
                         errors.append(
-                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{location}\t{aligned_location}\t{type}\t{read.reference_start}\t{read.reference_end}\n")
+                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{location}\t{aligned_location}\t{type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
         with open("alignment_errors.txt", "w") as file:
             file.write(
-                "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\n")
+                "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\tlist of alignments\n")
             file.writelines(errors)
 
         output_manager.output_line({
