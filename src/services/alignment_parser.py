@@ -46,7 +46,7 @@ class AlignmentParser:
 
         return -1
 
-    def process_read(self, aligned_pairs: list, location: int, type: str):
+    def process_read(self, aligned_pairs: list, location: int, loc_type: str):
         """
         Process a read and count the number of insertions and deletions at a given location.
 
@@ -59,17 +59,18 @@ class AlignmentParser:
         deletions = 0
         insertions = 0
 
-        if type == "end":
+        if loc_type == "end":
             for element in aligned_pairs[location - self.window_size:location]:
                 if not element[0]:
                     deletions += 1
-                if element[1]:
+                if not element[1]:
                     insertions += 1
-        elif type == "start":
-            for element in aligned_pairs[location:location - self.window_size]:
+        elif loc_type == "start":
+            print(aligned_pairs[location:location + self.window_size])
+            for element in aligned_pairs[location:location + self.window_size]:
                 if not element[0]:
                     deletions += 1
-                if element[1]:
+                if not element[1]:
                     insertions += 1
 
         if deletions:
