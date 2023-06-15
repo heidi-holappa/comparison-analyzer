@@ -90,17 +90,19 @@ class BamManager:
             "line": "Insertions and deletions found at given locations",
             "is_info": True
         })
+        print(alignment_parser.case_count)
         for key, value in alignment_parser.case_count.items():
             output_manager.output_line({
                 "line": f"{key}: {sorted(value.items())}",
                 "is_info": True
             })
-            graph_manager.construct_bar_chart_from_dict(
-                graph_values=value,
-                title=key,
-                x_label="Number of cases",
-                y_label="Number of reads",
-            )
+            if value:
+                graph_manager.construct_bar_chart_from_dict(
+                    graph_values=value,
+                    title=key,
+                    x_label="Number of cases",
+                    y_label="Number of reads",
+                )
 
         self.remove_temporary_path()
 
