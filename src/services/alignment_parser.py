@@ -29,6 +29,8 @@ class AlignmentParser:
         }
         # TODO: add to configuration or to user arguments (window size)
         self.window_size = int(DEFAULT_WINDOW_SIZE)
+        self.error_file_output_dir = os.path.join(
+            LOG_FILE_DIR, "alignment_errors.log")
 
     def initialize_file(self, filename: str):
         # pylint: disable=no-member
@@ -88,13 +90,12 @@ class AlignmentParser:
                 self.case_count["insertions"][insertions] = 0
             self.case_count["insertions"][insertions] += 1
 
-        if deletions > 8 or insertions >= 8:
+        if deletions >= self.window_size or insertions >= self.window_size:
             return True, debug_list
         return False, debug_list
 
     def write_alignment_errors_to_file(self, errors: list):
-        filepath = os.path.join(LOG_FILE_DIR, "alignment_errors.txt")
-        with open(filepath, "w") as file:
+        with open(self.error_file_output_dir, "w") as file:
             file.write(
                 "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\tlist of alignments\n")
             file.writelines(errors)
@@ -120,6 +121,10 @@ class AlignmentParser:
                         continue
 
                     if not read.cigartuples:
+                        continue
+
+                    if not read.reference_end:
+                        errors.append(f"{read.query_name}\tno reference end\n")
                         continue
 
                     aligned_location = self.extract_location_from_cigar_string(
