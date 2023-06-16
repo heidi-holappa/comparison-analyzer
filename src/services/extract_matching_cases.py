@@ -16,6 +16,8 @@ class MatchingCasesExtractor:
     def extract_candidates_matching_selected_offset(self):
         extracted_candidates = {}
         for key, value in self.offset_results.items():
+            if key[2] == '-':
+                value.reverse()
             for i in range(1, len(value)-1):
                 if abs(value[i][0]) == self.offset:
                     if value[i][0] > 0:
