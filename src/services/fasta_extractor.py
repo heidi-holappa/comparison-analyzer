@@ -132,17 +132,7 @@ class FastaExtractor:
                 "is_info": True
             })
 
-    def execute_fasta_extraction(self):
-        self.output_section_header()
-        self.initialize_fasta()
-        if self.check_errors():
-            return
-
-        output_manager.output_line({
-            "line": f"Offset value: {self.offset}",
-            "is_info": True
-        })
-
+    def extract_nucleotides(self):
         results = {}
         for key, value in self.matching_cases_dict.items():
             chromosome = key[0].split('.')[1]
@@ -155,4 +145,19 @@ class FastaExtractor:
             results[key] = str(chars)
 
         self.write_results_to_file(results)
+        return results
+
+    def execute_fasta_extraction(self):
+        self.output_section_header()
+        self.initialize_fasta()
+        if self.check_errors():
+            return
+
+        output_manager.output_line({
+            "line": f"Offset value: {self.offset}",
+            "is_info": True
+        })
+
+        results = self.extract_nucleotides()
+
         return results
