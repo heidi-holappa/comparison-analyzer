@@ -91,6 +91,8 @@ class AlignmentParser:
             self.case_count["insertions"][insertions] += 1
 
         if deletions >= self.window_size or insertions >= self.window_size:
+            debug_list.append(
+                f"deletions: {deletions}, insertions: {insertions}")
             return True, debug_list
         return False, debug_list
 
