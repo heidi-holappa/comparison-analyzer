@@ -51,6 +51,10 @@ def init_argparser():
         '-t', '--reads_tsv',
         help='tsv-file for read mapping created by IsoQuant',
         metavar='')
+    parser.add_argument(
+        '-w', '--window_size',
+        help='window from which indels and mismatches are to be searched in interesting locations',
+        metavar='')
 
     parser_args = parser.parse_args()
     parser_dict = vars(parser_args)
