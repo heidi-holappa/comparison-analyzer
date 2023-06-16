@@ -5,7 +5,7 @@ from services.output_manager import default_output_manager as output_manager
 from services.alignment_parser import default_alignment_parser as alignment_parser
 from services.graph_manager import default_graph_manager as graph_manager
 
-from config import TEMPORARY_DIR, LOG_FILE_DIR
+from config import LOG_FILE_DIR
 
 
 class BamManager:
@@ -44,7 +44,7 @@ class BamManager:
                 reads_and_locations[read].append(location_and_type)
         return reads_and_locations
 
-    def execute(self):
+    def output_heading_information(self):
         output_manager.output_line({
             "line": "PROCESSING BAM-FILE",
             "is_title": True
@@ -59,6 +59,7 @@ class BamManager:
             "is_info": True
         })
 
+    def generate_dictionaries(self):
         dict_of_transcripts_and_reads = create_dict_of_transcripts_and_reads(
             self.transcript_set, self.tsv_path)
 
@@ -83,9 +84,9 @@ class BamManager:
             "is_info": True
         })
 
-        alignment_parser.execute(
-            self.bam_path, reads_and_locations, dict_of_transcripts_and_reads)
+        return reads_and_locations, dict_of_transcripts_and_reads
 
+    def output_results(self, alignment_parser):
         output_manager.output_line({
             "line": "Insertions and deletions found at given locations",
             "is_info": True
@@ -104,14 +105,16 @@ class BamManager:
                     y_label="Number of reads",
                 )
 
-        self.remove_temporary_path()
+    def execute(self):
 
-    def create_temporary_path(self):
-        if not os.path.exists(TEMPORARY_DIR):
-            os.mkdir(TEMPORARY_DIR)
+        self.output_heading_information()
 
-    def remove_temporary_path(self):
-        if os.path.exists(TEMPORARY_DIR):
-            for file in os.listdir(TEMPORARY_DIR):
-                os.remove(os.path.join(TEMPORARY_DIR, file))
-            os.rmdir(TEMPORARY_DIR)
+        reads_and_locations, dict_of_transcripts_and_reads = self.generate_dictionaries()
+
+        alignment_parser.execute(
+            self.bam_path,
+            reads_and_locations,
+            dict_of_transcripts_and_reads
+        )
+
+        self.output_results(alignment_parser)
