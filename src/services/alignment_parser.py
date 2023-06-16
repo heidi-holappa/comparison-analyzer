@@ -1,6 +1,7 @@
+import os
 import pysam
 from services.output_manager import default_output_manager as output_manager
-from config import DEFAULT_WINDOW_SIZE
+from config import DEFAULT_WINDOW_SIZE, LOG_FILE_DIR
 
 
 class AlignmentParser:
@@ -91,6 +92,13 @@ class AlignmentParser:
             return True, debug_list
         return False, debug_list
 
+    def write_alignment_errors_to_file(self, errors: list):
+        filepath = os.path.join(LOG_FILE_DIR, "alignment_errors.txt")
+        with open(filepath, "w") as file:
+            file.write(
+                "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\tlist of alignments\n")
+            file.writelines(errors)
+
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
         errors = []
@@ -128,10 +136,8 @@ class AlignmentParser:
                     if response:
                         errors.append(
                             f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
-        with open("alignment_errors.txt", "w") as file:
-            file.write(
-                "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\tlist of alignments\n")
-            file.writelines(errors)
+        if errors:
+            self.write_alignment_errors_to_file(errors)
 
         output_manager.output_line({
             "line": "\nFinished",
