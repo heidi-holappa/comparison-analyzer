@@ -77,3 +77,10 @@ class TestParser(unittest.TestCase):
         assert not parser.force
         assert parser.stats
         assert parser.class_code == 'j c k'
+
+    def test_missing_args_returns_help(self):
+        sys.argv = [
+            'compAna.py',
+        ]
+        with self.assertRaises(SystemExit):
+            init_argparser()
