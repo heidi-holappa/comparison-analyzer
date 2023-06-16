@@ -33,7 +33,7 @@ class AlignmentParser:
         # pylint: disable=no-member
         self.samfile = pysam.AlignmentFile(filename, "rb")
 
-    def extract_location_from_cigar_string(self, cigar_tuples: list, reference_start: int, location: int):
+    def extract_location_from_cigar_string(self, cigar_tuples: list, reference_start: int, reference_end: int, location: int):
         relative_position = location - reference_start
         alignment_position = 0
         ref_position = 0
@@ -42,7 +42,7 @@ class AlignmentParser:
 
             if cigar_code[0] in [0, 2, 3, 7, 8]:
                 ref_position += cigar_code[1]
-            if ref_position <= relative_position:
+            if ref_position <= relative_position and not reference_start + ref_position == reference_end:
                 alignment_position += cigar_code[1]
             else:
                 return alignment_position + (cigar_code[1] - (ref_position - relative_position))
@@ -106,9 +106,9 @@ class AlignmentParser:
                         "is_info": True
                     })
                 for location, type in reads_and_locations[read.query_name]:
-                    location = location - 1
+                    idx_corrected_location = location - 1
 
-                    if read.reference_start > location or read.reference_end < location:
+                    if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
                         continue
 
                     if not read.cigartuples:
@@ -117,7 +117,8 @@ class AlignmentParser:
                     aligned_location = self.extract_location_from_cigar_string(
                         read.cigartuples,
                         read.reference_start,
-                        location
+                        read.reference_end,
+                        idx_corrected_location
                     )
 
                     response, debug_list = self.process_read(
@@ -126,7 +127,7 @@ class AlignmentParser:
                         type)
                     if response:
                         errors.append(
-                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{location}\t{aligned_location}\t{type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
+                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
         with open("alignment_errors.txt", "w") as file:
             file.write(
                 "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\tlist of alignments\n")
