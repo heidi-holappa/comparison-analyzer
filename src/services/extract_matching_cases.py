@@ -21,12 +21,12 @@ class MatchingCasesExtractor:
                     for exon in self.reference_db.children(key[1], featuretype='exon', order_by='start'):
                         if int(exon['exon_number'][0]) == i + 1:
                             extracted_candidates[(
-                                key[0], key[1], key[2], i + 1, 'start')] = exon.start
+                                key[0], key[1], key[2], i + 1, 'start', self.offset)] = exon.start
                             break
                 elif abs(value[i][1]) == self.offset:
                     for exon in self.reference_db.children(key[1], featuretype='exon', order_by='start'):
                         if int(exon['exon_number'][0]) == i + 1:
                             extracted_candidates[(
-                                key[0], key[1], key[2], i + 1, 'end')] = exon.end
+                                key[0], key[1], key[2], i + 1, 'end', self.offset)] = exon.end
                             break
         return extracted_candidates
