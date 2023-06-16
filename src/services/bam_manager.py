@@ -5,7 +5,7 @@ from services.output_manager import default_output_manager as output_manager
 from services.alignment_parser import default_alignment_parser as alignment_parser
 from services.graph_manager import default_graph_manager as graph_manager
 
-from config import TEMPORARY_DIR, CIGAR_RESULTS_LOG, LOG_FILE_DIR
+from config import TEMPORARY_DIR, LOG_FILE_DIR
 
 
 class BamManager:
