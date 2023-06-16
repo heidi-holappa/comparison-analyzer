@@ -1,7 +1,6 @@
 import os
-from pathlib import Path
 
-from services.filter_bam_multifile import create_dict_of_transcripts_and_reads
+from services.read_management import create_dict_of_transcripts_and_reads
 from services.output_manager import default_output_manager as output_manager
 from services.alignment_parser import default_alignment_parser as alignment_parser
 from services.graph_manager import default_graph_manager as graph_manager
@@ -116,29 +115,3 @@ class BamManager:
             for file in os.listdir(TEMPORARY_DIR):
                 os.remove(os.path.join(TEMPORARY_DIR, file))
             os.rmdir(TEMPORARY_DIR)
-
-    # def iterate_extracted_files(self):
-    #     files = {
-    #         "found": 0,
-    #         "not_found": 0
-    #     }
-    #     for key, value in self.matching_cases_dict.items():
-    #         filename = Path(self.bam_path).stem + "." + key[0] + ".bam"
-
-    #         if filename in os.listdir(TEMPORARY_DIR):
-    #             files["found"] += 1
-    #         else:
-    #             files["not_found"] += 1
-    #         if filename in os.listdir(TEMPORARY_DIR):
-    #             alignment_parser.execute(filename, location=value)
-
-    #     output_manager.output_line({
-    #         "line": "Insertions and deletions found at given locations",
-    #         "is_info": True
-    #     })
-
-    #     for key, value in alignment_parser.case_count.items():
-    #         output_manager.output_line({
-    #             "line": f"{key}: {value}",
-    #             "is_info": True
-    #         })
