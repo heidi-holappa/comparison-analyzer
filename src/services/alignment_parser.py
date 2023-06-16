@@ -1,6 +1,7 @@
+import os
 import pysam
 from services.output_manager import default_output_manager as output_manager
-from config import DEFAULT_WINDOW_SIZE
+from config import DEFAULT_WINDOW_SIZE, LOG_FILE_DIR
 
 
 class AlignmentParser:
@@ -28,6 +29,8 @@ class AlignmentParser:
         }
         # TODO: add to configuration or to user arguments (window size)
         self.window_size = int(DEFAULT_WINDOW_SIZE)
+        self.error_file_output_dir = os.path.join(
+            LOG_FILE_DIR, "alignment_errors.log")
 
     def initialize_file(self, filename: str):
         # pylint: disable=no-member
@@ -87,9 +90,15 @@ class AlignmentParser:
                 self.case_count["insertions"][insertions] = 0
             self.case_count["insertions"][insertions] += 1
 
-        if deletions > 8 or insertions >= 8:
+        if deletions >= self.window_size or insertions >= self.window_size:
             return True, debug_list
         return False, debug_list
+
+    def write_alignment_errors_to_file(self, errors: list):
+        with open(self.error_file_output_dir, "w") as file:
+            file.write(
+                "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\tlist of alignments\n")
+            file.writelines(errors)
 
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
@@ -114,6 +123,10 @@ class AlignmentParser:
                     if not read.cigartuples:
                         continue
 
+                    if not read.reference_end:
+                        errors.append(f"{read.query_name}\tno reference end\n")
+                        continue
+
                     aligned_location = self.extract_location_from_cigar_string(
                         read.cigartuples,
                         read.reference_start,
@@ -128,10 +141,8 @@ class AlignmentParser:
                     if response:
                         errors.append(
                             f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
-        with open("alignment_errors.txt", "w") as file:
-            file.write(
-                "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\tlist of alignments\n")
-            file.writelines(errors)
+        if errors:
+            self.write_alignment_errors_to_file(errors)
 
         output_manager.output_line({
             "line": "\nFinished",

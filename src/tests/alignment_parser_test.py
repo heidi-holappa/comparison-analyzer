@@ -1,6 +1,10 @@
+import os
+
 from unittest import TestCase
 from services.alignment_parser import default_alignment_parser as alignment_parser
 from services.alignment_parser import AlignmentParser
+
+from config import TEST_FILE_DIR
 
 
 class TestCigarParser(TestCase):
@@ -141,7 +145,7 @@ class TestReadParser(TestCase):
         alignment_parser.process_read(read, location, loc_type)
         self.assertEqual(dictionary_of_counts, alignment_parser.case_count)
 
-    def test_read_with_ten_aligned_pairs_window_size_two_returns_insertion_of_one_for_selected_location(self):
+    def test_read_with_ten_aligned_pairs_loc_type_start_window_size_two_returns_insertion_of_one_for_selected_location(self):
         """
         List items 3,4 are iterated over and the number of insertions is counted
         """
@@ -160,14 +164,33 @@ class TestReadParser(TestCase):
         result = self.parser.case_count
         self.assertEqual(result, expected_output)
 
-    def test_read_with_ten_pairs_with_deletion_counts_correct_amount_of_deletions(self):
+    def test_read_with_ten_aligned_pairs_loc_type_end_window_size_two_returns_insertion_of_two_for_selected_location(self):
+        """
+        List items 3,4 are iterated over and the number of insertions is counted
+        """
+        aligned_pairs = [(0, None), (1, None), (2, None), (3, None), (4, 105),
+                         (5, 105), (6, 106), (7, 107), (8, 108), (9, 109)]
+        location = 5
+        self.parser.window_size = 2
+        loc_type = "end"
+        expected_output = {
+            "insertions": {
+                1: 1
+            },
+            "deletions": {}
+        }
+        self.parser.process_read(aligned_pairs, location, loc_type)
+        result = self.parser.case_count
+        self.assertEqual(result, expected_output)
+
+    def test_read_with_ten_pairs_loc_type_end_with_deletion_counts_correct_amount_of_deletions(self):
         """
         List indexes 2,3,4 are iterated over and the number of deletions is counted        
         """
         aligned_pairs = [(0, 100), (1, 101), (None, 103), (None, 104), (3, 105),
                          (4, 105), (5, 106), (6, 107), (7, 108), (8, 109)]
-        location = 5
-        self.parser.window_size = 3
+        location = 4
+        self.parser.window_size = 2
         loc_type = "end"
         expected_output = {
             "insertions": {},
@@ -178,3 +201,62 @@ class TestReadParser(TestCase):
         self.parser.process_read(aligned_pairs, location, loc_type)
         result = self.parser.case_count
         self.assertEqual(result, expected_output)
+
+    def test_read_with_ten_pairs_loc_type_start_with_deletion_counts_correct_amount_of_deletions(self):
+        """
+        List indexes 2,3,4 are iterated over and the number of deletions is counted        
+        """
+        aligned_pairs = [(0, 100), (1, 101), (None, 103), (None, 104), (3, 105),
+                         (4, 105), (5, 106), (6, 107), (7, 108), (8, 109)]
+        location = 2
+        self.parser.window_size = 3
+        loc_type = "start"
+        expected_output = {
+            "insertions": {},
+            "deletions": {
+                2: 1
+            }
+        }
+        self.parser.process_read(aligned_pairs, location, loc_type)
+        result = self.parser.case_count
+        self.assertEqual(result, expected_output)
+
+    def test_window_size_count_of_deletions_returns_true_as_first_arg(self):
+        aligned_pairs = [(0, 100), (1, 101), (None, 103),
+                         (None, 104), (3, 105)]
+        location = 2
+        self.parser.window_size = 2
+        loc_type = "start"
+        result, debug_list = self.parser.process_read(
+            aligned_pairs, location, loc_type)
+        expected_output = True
+        self.assertEqual(result, expected_output)
+
+    def test_error_log_file_is_written_correctly(self):
+        filepath = self.parser.error_file_output_dir
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        errors = ["error1"]
+        self.parser.write_alignment_errors_to_file(errors)
+        with open(filepath, "r") as f:
+            result = f.read()
+        print(result)
+
+        self.assertTrue("error1" in result)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+
+class TestBamReader(TestCase):
+
+    def setUp(self):
+        self.parser = AlignmentParser()
+        test_bam_file = os.path.join(
+            TEST_FILE_DIR, "Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.bam")
+        self.parser.initialize_file(test_bam_file)
+
+    def test_bam_reader_runs_without_errors(self):
+        reads_and_locations = {
+            "ENSMUST00000208994_1011_aligned_5112815_F_38_212_77": [(36796992, "end")]
+        }
+        self.parser.process_bam_file(reads_and_locations)

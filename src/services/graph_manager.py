@@ -24,14 +24,6 @@ class GraphManagement:
         plt.cla()
         plt.clf()
         plt.close()
-        # keys = list(graph_values.keys())
-        # values = list(graph_values.values())
-
-        # plt.bar(range(len(graph_values)), values, tick_label=keys)
-        # plt.xlabel(x_label)
-        # plt.ylabel(y_label)
-        # plt.title(title)
-        # plt.savefig(os.path.join(self.graph_dir, title + ".png"))
 
 
 default_graph_manager = GraphManagement()
