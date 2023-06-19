@@ -124,6 +124,45 @@ class TestCigarParser(TestCase):
         self.assertEqual(result, expected_output)
 
 
+class TestIndelCountingFromCigarCodes(TestCase):
+    def setUp(self):
+        self.parser = AlignmentParser()
+
+    def test_indel_counter_returns_false_and_an_empty_debug_list_for_given_empty_list(self):
+        cigar_tuples = []
+        aligned_location = 100
+        loc_type = "start"
+        expected_result, expected_debug_list = False, [[]]
+        result, debug_list = alignment_parser.count_indels_from_cigar_codes_in_given_window(
+            cigar_tuples, aligned_location, loc_type)
+        self.assertEqual((result, debug_list),
+                         (expected_result, expected_debug_list))
+
+    def test_indels_are_counted_correctly(self):
+        cigar_tuples = [(0, 20), (2, 3), (1, 2), (0, 10)]
+        self.parser.window_size = 8
+        aligned_location = 20
+        loc_type = "start"
+        expected_errors, expected_debug_list = False, [2, 2, 2, 1, 1, 0, 0, 0]
+
+        errors, debug_list = alignment_parser.count_indels_from_cigar_codes_in_given_window(
+            cigar_tuples, aligned_location, loc_type)
+        self.assertEqual((errors, debug_list[0]),
+                         (expected_errors, expected_debug_list))
+
+    def test_full_window_of_dels_returns_true_for_errors(self):
+        cigar_tuples = [(0, 20), (2, 8), (1, 2), (0, 10)]
+        self.parser.window_size = 8
+        aligned_location = 20
+        loc_type = "start"
+        expected_errors, expected_debug_list = True, [2, 2, 2, 2, 2, 2, 2, 2]
+
+        errors, debug_list = alignment_parser.count_indels_from_cigar_codes_in_given_window(
+            cigar_tuples, aligned_location, loc_type)
+        self.assertEqual((errors, debug_list[0]),
+                         (expected_errors, expected_debug_list))
+
+
 class TestReadParser(TestCase):
 
     def setUp(self):
