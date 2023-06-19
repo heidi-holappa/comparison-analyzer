@@ -52,10 +52,10 @@ class AlignmentParser:
 
         return -1
 
-    def fetch_cigar_codes_from_given_window(self,
-                                            cigar_tuples: list,
-                                            aligned_location: int,
-                                            loc_type: str):
+    def count_indels_from_cigar_codes_in_given_window(self,
+                                                      cigar_tuples: list,
+                                                      aligned_location: int,
+                                                      loc_type: str):
         """
         Get cigar codes in a given window.
 
@@ -84,7 +84,7 @@ class AlignmentParser:
                     [cigar_code[0] for _ in range(min(self.window_size - len(cigar_code_list), overlap))])
             location += cigar_code[1]
 
-        debug_list = cigar_code_list
+        debug_list.append(cigar_code_list)
         for cigar_code in cigar_code_list:
             if cigar_code == 2:
                 deletions += 1
@@ -148,7 +148,7 @@ class AlignmentParser:
             debug_list.append(
                 f"deletions: {deletions}, insertions: {insertions}")
             return True, debug_list
-        return True, debug_list
+        return False, debug_list
 
     def write_alignment_errors_to_file(self, errors: list):
         with open(self.error_file_output_dir, "w") as file:
@@ -195,7 +195,7 @@ class AlignmentParser:
                     #     aligned_location,
                     #     type)
 
-                    response, debug_list = self.fetch_cigar_codes_from_given_window(
+                    response, debug_list = self.count_indels_from_cigar_codes_in_given_window(
                         read.cigartuples,
                         aligned_location,
                         type)
@@ -232,59 +232,3 @@ class AlignmentParser:
 
 
 default_alignment_parser = AlignmentParser()
-
-# def create_updated_cigar_tuples(self, cigar_tuples: list, ):
-#     cigar_code_list = []
-#     index_counter = 0
-
-#     for cigar_tuple in cigar_tuples:
-#         for _ in range(cigar_tuple[1]):
-#             cigar_code_list.append((cigar_tuple[0], index_counter))
-#             index_counter += 1
-
-#     return cigar_code_list
-
-# def get_cigar_codes_in_window(self, cigar_code_list: list, aligned_location: int, loc_type: str):
-#     """
-#     Get cigar codes in a given window.
-
-#     Args:
-#         cigar_tuples (list): list of cigar tuples (cigar code, aligned position)
-#         aligned_location (int): aligned location
-#         loc_type (str): type of location (start or end)
-#     """
-#     deletions = 0
-#     insertions = 0
-#     debug_list = []
-
-#     if loc_type == "end":
-#         for cigar_code in cigar_code_list[aligned_location - self.window_size:aligned_location]:
-#             debug_list = cigar_code_list[aligned_location -
-#                                          self.window_size:aligned_location]
-#             if cigar_code[0] == 2:
-#                 deletions += 1
-#             if cigar_code[0] == 1:
-#                 insertions += 1
-#     elif loc_type == "start":
-#         debug_list = cigar_code_list[aligned_location:
-#                                      aligned_location + self.window_size]
-#         for cigar_code in cigar_code_list[aligned_location:aligned_location + self.window_size]:
-#             if cigar_code[0] == 2:
-#                 deletions += 1
-#             if cigar_code[0] == 1:
-#                 insertions += 1
-
-#     if deletions:
-#         if deletions not in self.case_count["deletions"]:
-#             self.case_count["deletions"][deletions] = 0
-#         self.case_count["deletions"][deletions] += 1
-#     if insertions:
-#         if insertions not in self.case_count["insertions"]:
-#             self.case_count["insertions"][insertions] = 0
-#         self.case_count["insertions"][insertions] += 1
-
-#     if deletions >= self.window_size or insertions >= self.window_size:
-#         debug_list.append(
-#             f"deletions: {deletions}, insertions: {insertions}")
-#         return True, debug_list
-#     return False, debug_list
