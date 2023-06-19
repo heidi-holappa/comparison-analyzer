@@ -10,13 +10,18 @@ from config import LOG_FILE_DIR
 
 class BamManager:
 
-    def __init__(self, bam_path: str, tsv_path: str, matching_cases_dict: dict):
+    def __init__(self,
+                 bam_path: str,
+                 tsv_path: str,
+                 matching_cases_dict: dict,
+                 extended_debugging: bool = False):
         self.bam_path = bam_path
         self.tsv_path = tsv_path
         self.matching_cases_dict = matching_cases_dict
         self.transcript_set = set()
         for row in matching_cases_dict:
             self.transcript_set.add(row[0])
+        self.extended_debugging = extended_debugging
 
     def write_debug_logs(self, transcripts_and_reads: dict, reads_and_locations: dict):
         dict_of_transcripts_and_reads_log = os.path.join(
@@ -66,8 +71,9 @@ class BamManager:
         reads_and_locations = self.generate_reads_and_locations(
             dict_of_transcripts_and_reads)
 
-        self.write_debug_logs(
-            dict_of_transcripts_and_reads, reads_and_locations)
+        if self.extended_debugging:
+            self.write_debug_logs(
+                dict_of_transcripts_and_reads, reads_and_locations)
 
         output_manager.output_line({
             "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
@@ -105,7 +111,7 @@ class BamManager:
                     y_label="Number of reads",
                 )
 
-    def execute(self):
+    def execute(self, window_size: int):
 
         self.output_heading_information()
 
@@ -113,6 +119,7 @@ class BamManager:
 
         alignment_parser.execute(
             self.bam_path,
+            window_size,
             reads_and_locations,
             dict_of_transcripts_and_reads
         )
