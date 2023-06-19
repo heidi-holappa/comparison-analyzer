@@ -126,7 +126,7 @@ class AlignmentParser:
                         "end_line": "\r",
                         "is_info": True
                     })
-                for location, type in reads_and_locations[read.query_name]:
+                for location, loc_type in reads_and_locations[read.query_name]:
                     idx_corrected_location = location - 1
 
                     if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
@@ -146,19 +146,14 @@ class AlignmentParser:
                         idx_corrected_location
                     )
 
-                    # response, debug_list = self.process_read(
-                    #     read.get_aligned_pairs(),
-                    #     aligned_location,
-                    #     type)
-
                     response, debug_list = self.count_indels_from_cigar_codes_in_given_window(
                         read.cigartuples,
                         aligned_location,
-                        type)
+                        loc_type)
 
                     if response:
                         errors.append(
-                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
+                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{loc_type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
         if errors:
             self.write_alignment_errors_to_file(errors)
 
@@ -168,14 +163,17 @@ class AlignmentParser:
         })
 
     # TODO: remove transcripts and reads. It is here for debugging
-    def execute(self, filename: str, reads_and_locations: dict, transcripts_and_reads: dict):
+    def execute(self, filename: str, window_size: int,
+                reads_and_locations: dict, transcripts_and_reads: dict):
         """
         Initialize AlignmentFile and execute the alignment parser.
 
         Args:
-            filename (str): _description_
-            location (int): _description_
+            filename (str): path of BAM-file to iterate
+            location (int): coordinate of the interesting event
         """
+
+        self.window_size = window_size
 
         for key, value in transcripts_and_reads.items():
             for read in value:
