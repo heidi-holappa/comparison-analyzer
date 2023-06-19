@@ -1,7 +1,7 @@
 import json
 from pyfaidx import Fasta
 from services.output_manager import default_output_manager as output_manager
-from config import FASTA_OVERVIEW_FILE
+from config import FASTA_OVERVIEW_FILE, DEFAULT_WINDOW_SIZE
 
 
 class FastaExtractor:
@@ -15,6 +15,8 @@ class FastaExtractor:
         self.class_codes = fasta_config.get('class_codes', '')
         self.matching_cases_dict = fasta_config.get(
             'matching_cases_dict', {})
+        self.window_size = int(fasta_config.get(
+            'window_size', DEFAULT_WINDOW_SIZE))
 
     def initialize_fasta(self):
         if self.fasta_path:
@@ -132,7 +134,7 @@ class FastaExtractor:
                 "is_info": True
             })
 
-    def extract_nucleotides(self):
+    def extract_splice_cite_nucleotides(self):
         results = {}
         for key, value in self.matching_cases_dict.items():
             chromosome = key[0].split('.')[1]
@@ -145,7 +147,21 @@ class FastaExtractor:
             results[key] = str(chars)
 
         self.write_results_to_file(results)
-        return results
+
+    def extract_window_nucleotides(self):
+        updated_matching_cases_dict = {}
+        for key, value in self.matching_cases_dict.items():
+            chromosome = key[0].split('.')[1]
+            if key[4] == 'end':
+                coordinates = (chromosome, value - self.window_size, value)
+            else:
+                coordinates = (chromosome, value, value + self.window_size)
+            nucleotides = self.extract_characters_at_given_coordinates(
+                coordinates)
+            updated_matching_cases_dict[(
+                key[0], key[1], key[2], key[3], key[4], str(nucleotides))] = value
+
+        return updated_matching_cases_dict
 
     def execute_fasta_extraction(self):
         self.output_section_header()
@@ -158,6 +174,7 @@ class FastaExtractor:
             "is_info": True
         })
 
-        results = self.extract_nucleotides()
+        self.extract_splice_cite_nucleotides()
+        results = self.extract_window_nucleotides()
 
         return results
