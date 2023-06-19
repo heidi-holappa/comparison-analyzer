@@ -39,18 +39,20 @@ def run_pipeline(parser_args):
             "gffcompare_gtf": parser_args.gffcompare_gtf,
             "reference_gtf": parser_args.reference_gtf,
             "class_codes": parser_args.class_code,
-            "matching_cases_dict": matching_cases_dict
+            "matching_cases_dict": matching_cases_dict,
+            "window_size": parser_args.window_size
         }
         reference_fasta_extractor = FastaExtractor(fasta_config)
-        result = reference_fasta_extractor.execute_fasta_extraction()
+        reference_fasta_extractor.execute_fasta_extraction()
 
     if matching_cases_dict and parser_args.reads_tsv and parser_args.reads_bam:
         bam_manager = BamManager(
             parser_args.reads_bam,
             parser_args.reads_tsv,
-            matching_cases_dict
+            matching_cases_dict,
+            parser_args.extended_debugging
         )
-        bam_manager.execute()
+        bam_manager.execute(parser_args.window_size)
     output_manager.output_footer()
 
 
