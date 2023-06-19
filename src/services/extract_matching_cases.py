@@ -20,21 +20,13 @@ class MatchingCasesExtractor:
                 value.reverse()
             for i in range(1, len(value)-1):
                 if abs(value[i][0]) == self.offset:
-                    if value[i][0] > 0:
-                        order_by = 'end'
-                    else:
-                        order_by = 'start'
-                    for exon in self.reference_db.children(key[1], featuretype='exon', order_by=order_by):
+                    for exon in self.reference_db.children(key[1], featuretype='exon'):
                         if int(exon['exon_number'][0]) == i + 1:
                             extracted_candidates[(
                                 key[0], key[1], key[2], i + 1, 'start')] = exon.start + value[i][0]
                             break
-                elif abs(value[i][1]) == self.offset:
-                    if value[i][1] > 0:
-                        order_by = 'end'
-                    else:
-                        order_by = 'start'
-                    for exon in self.reference_db.children(key[1], featuretype='exon', order_by=order_by):
+                if abs(value[i][1]) == self.offset:
+                    for exon in self.reference_db.children(key[1], featuretype='exon'):
                         if int(exon['exon_number'][0]) == i + 1:
                             extracted_candidates[(
                                 key[0], key[1], key[2], i + 1, 'end')] = exon.end + value[i][1]
