@@ -41,4 +41,5 @@ class TestBamManagerExecution(TestCase):
     # TODO: activate test
 
     def test_bam_manager_execute_runs_without_errors(self):
-        self.bam_manager.execute()
+        window_size = 10
+        self.bam_manager.execute(window_size)
