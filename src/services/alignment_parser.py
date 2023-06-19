@@ -52,6 +52,62 @@ class AlignmentParser:
 
         return -1
 
+    def create_updated_cigar_tuples(self, cigar_tuples: list, ):
+        cigar_code_list = []
+        index_counter = 0
+
+        for cigar_tuple in cigar_tuples:
+            for _ in range(cigar_tuple[1]):
+                cigar_code_list.append((cigar_tuple[0], index_counter))
+                index_counter += 1
+
+        return cigar_code_list
+
+    def get_cigar_codes_in_window(self, cigar_code_list: list, aligned_location: int, loc_type: str):
+        """
+        Get cigar codes in a given window.
+
+        Args:
+            cigar_tuples (list): list of cigar tuples (cigar code, aligned position)
+            aligned_location (int): aligned location
+            loc_type (str): type of location (start or end)
+        """
+        deletions = 0
+        insertions = 0
+        debug_list = []
+
+        if loc_type == "end":
+            for cigar_code in cigar_code_list[aligned_location - self.window_size:aligned_location]:
+                debug_list = cigar_code_list[aligned_location -
+                                             self.window_size:aligned_location]
+                if cigar_code[0] == 2:
+                    deletions += 1
+                if cigar_code[0] == 1:
+                    insertions += 1
+        elif loc_type == "start":
+            debug_list = cigar_code_list[aligned_location:
+                                         aligned_location + self.window_size]
+            for cigar_code in cigar_code_list[aligned_location:aligned_location + self.window_size]:
+                if cigar_code[0] == 2:
+                    deletions += 1
+                if cigar_code[0] == 1:
+                    insertions += 1
+
+        if deletions:
+            if deletions not in self.case_count["deletions"]:
+                self.case_count["deletions"][deletions] = 0
+            self.case_count["deletions"][deletions] += 1
+        if insertions:
+            if insertions not in self.case_count["insertions"]:
+                self.case_count["insertions"][insertions] = 0
+            self.case_count["insertions"][insertions] += 1
+
+        if deletions >= self.window_size or insertions >= self.window_size:
+            debug_list.append(
+                f"deletions: {deletions}, insertions: {insertions}")
+            return True, debug_list
+        return False, debug_list
+
     def process_read(self, aligned_pairs: list, location: int, loc_type: str):
         """
         Process a read and count the number of insertions and deletions at a given location.
@@ -136,10 +192,20 @@ class AlignmentParser:
                         idx_corrected_location
                     )
 
-                    response, debug_list = self.process_read(
-                        read.get_aligned_pairs(),
+                    # response, debug_list = self.process_read(
+                    #     read.get_aligned_pairs(),
+                    #     aligned_location,
+                    #     type)
+
+                    cigar_code_list_with_location = self.create_updated_cigar_tuples(
+                        read.cigartuples
+                    )
+
+                    response, debug_list = self.get_cigar_codes_in_window(
+                        cigar_code_list_with_location,
                         aligned_location,
                         type)
+
                     if response:
                         errors.append(
                             f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
