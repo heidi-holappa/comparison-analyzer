@@ -138,9 +138,9 @@ class AlignmentParser:
 
         for cigar_code in cigar_code_list:
             debug_list = cigar_code_list
-            if cigar_code[0] == 2:
+            if cigar_code == 2:
                 deletions += 1
-            if cigar_code[0] == 1:
+            if cigar_code == 1:
                 insertions += 1
 
         if deletions:
