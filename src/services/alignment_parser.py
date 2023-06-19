@@ -132,8 +132,8 @@ class AlignmentParser:
                 break
             if location + cigar_code[1] > aligned_location:
                 overlap = location + cigar_code[1] - aligned_location
-                cigar_code_list.append(
-                    cigar_code[0] * min(self.window_size - len(cigar_code_list), overlap))
+                cigar_code_list.extend(
+                    [cigar_code[0] for _ in range(min(self.window_size - len(cigar_code_list), overlap))])
                 location += cigar_code[1]
 
         for cigar_code in cigar_code_list:
