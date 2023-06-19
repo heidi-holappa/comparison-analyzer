@@ -50,7 +50,7 @@ def run_pipeline(parser_args):
             parser_args.reads_bam,
             parser_args.reads_tsv,
             matching_cases_dict,
-            parser_args.extended_debugging
+            parser_args.extended_debug
         )
         bam_manager.execute(parser_args.window_size)
     output_manager.output_footer()
