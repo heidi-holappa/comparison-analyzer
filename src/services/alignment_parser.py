@@ -106,50 +106,6 @@ class AlignmentParser:
             return True, debug_list
         return False, debug_list
 
-    def process_read(self, aligned_pairs: list, location: int, loc_type: str):
-        """
-        Process a read and count the number of insertions and deletions at a given location.
-
-        Args:
-            aligned_pairs (list): list of tuples of aligned pairs
-            location (int): given location
-            type (str): type of location (start or end)
-        """
-
-        deletions = 0
-        insertions = 0
-        debug_list = []
-
-        if loc_type == "end":
-            debug_list = aligned_pairs[location - self.window_size:location]
-            for element in aligned_pairs[location - self.window_size:location]:
-                if not element[0]:
-                    deletions += 1
-                if not element[1]:
-                    insertions += 1
-        elif loc_type == "start":
-            debug_list = aligned_pairs[location:location + self.window_size]
-            for element in aligned_pairs[location:location + self.window_size]:
-                if not element[0]:
-                    deletions += 1
-                if not element[1]:
-                    insertions += 1
-
-        if deletions:
-            if deletions not in self.case_count["deletions"]:
-                self.case_count["deletions"][deletions] = 0
-            self.case_count["deletions"][deletions] += 1
-        if insertions:
-            if insertions not in self.case_count["insertions"]:
-                self.case_count["insertions"][insertions] = 0
-            self.case_count["insertions"][insertions] += 1
-
-        if deletions >= self.window_size or insertions >= self.window_size:
-            debug_list.append(
-                f"deletions: {deletions}, insertions: {insertions}")
-            return True, debug_list
-        return False, debug_list
-
     def write_alignment_errors_to_file(self, errors: list):
         with open(self.error_file_output_dir, "w") as file:
             file.write(
