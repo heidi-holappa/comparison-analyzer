@@ -1,6 +1,8 @@
 import argparse
 import json
 
+from config import DEFAULT_WINDOW_SIZE
+
 
 def init_argparser():
     parser = argparse.ArgumentParser(
@@ -55,6 +57,10 @@ def init_argparser():
         '-w', '--window_size',
         help='window from which indels and mismatches are to be searched in interesting locations',
         metavar='')
+    parser.add_argument(
+        '-e', '--extended_debug',
+        help='enable extended debug output',
+        action='store_true')
 
     parser_args = parser.parse_args()
     parser_dict = vars(parser_args)
@@ -67,5 +73,8 @@ def init_argparser():
     if not parser_args.gffcompare_gtf or not parser_args.reference_gtf:
         parser.print_help()
         exit(1)
+
+    if not parser_args.window_size:
+        parser_dict["window_size"] = DEFAULT_WINDOW_SIZE
 
     return parser_args
