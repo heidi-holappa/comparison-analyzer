@@ -11,9 +11,27 @@ class TestBamManagerInit(TestCase):
         self.bam_path = file_manager.bam_file
         self.tsv_path = file_manager.tsv_file
         self.matching_cases_dict = {
-            ("transcript_1", "case_1"): "case_1",
-            ("transcript_2", "case_2"): "case_2",
-            ("transcript_3", "case_3"): "case_3"
+            'transcript1.chr1.nnic.exon_4.start': {
+                'transcript_id': 'transcript1.chr1.nnic',
+                'strand': '+',
+                'location_type': 'start',
+                'exon_number': 3,
+                'location': 210,
+            },
+            'transcript1.chr1.nnic.exon_4.end': {
+                'transcript_id': 'transcript1.chr1.nnic',
+                'strand': '+',
+                'location_type': 'end',
+                'exon_number': 4,
+                'location': 45,
+            },
+            'transcript3.chr1.nnic.exon_2.start': {
+                'transcript_id': 'transcript3.chr1.nnic',
+                'strand': '-',
+                'location_type': 'start',
+                'exon_number': 1,
+                'location': 20,
+            }
         }
         self.bam_manager = BamManager(
             self.bam_path, self.tsv_path, self.matching_cases_dict)
@@ -24,7 +42,7 @@ class TestBamManagerInit(TestCase):
         self.assertEqual(self.bam_manager.matching_cases_dict,
                          self.matching_cases_dict)
         self.assertEqual(self.bam_manager.transcript_set, set(
-            ["transcript_1", "transcript_2", "transcript_3"]))
+            ["transcript1.chr1.nnic", "transcript3.chr1.nnic"]))
 
 
 class TestBamManagerExecution(TestCase):
@@ -33,7 +51,13 @@ class TestBamManagerExecution(TestCase):
         self.bam_path = file_manager.bam_file
         self.tsv_path = file_manager.tsv_file
         self.matching_cases_dict = {
-            ("transcript1.chr1.nnic", "case_1", 2, '+', 'start'): 100
+            'transcript1.chr1.nnic.exon_4.start': {
+                'transcript_id': 'transcript1.chr1.nnic',
+                'strand': '+',
+                'location_type': 'start',
+                'exon_number': 3,
+                'location': 210,
+            },
         }
         self.bam_manager = BamManager(
             self.bam_path, self.tsv_path, self.matching_cases_dict)

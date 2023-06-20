@@ -132,9 +132,10 @@ class TestIndelCountingFromCigarCodes(TestCase):
         cigar_tuples = []
         aligned_location = 100
         loc_type = "start"
+        strand = "+"
         expected_result, expected_debug_list = False, [[]]
         result, debug_list = alignment_parser.count_indels_from_cigar_codes_in_given_window(
-            cigar_tuples, aligned_location, loc_type)
+            cigar_tuples, aligned_location, loc_type, strand)
         self.assertEqual((result, debug_list),
                          (expected_result, expected_debug_list))
 
@@ -143,10 +144,11 @@ class TestIndelCountingFromCigarCodes(TestCase):
         self.parser.window_size = 8
         aligned_location = 20
         loc_type = "start"
+        strand = "+"
         expected_errors, expected_debug_list = False, [2, 2, 2, 1, 1, 0, 0, 0]
 
         errors, debug_list = alignment_parser.count_indels_from_cigar_codes_in_given_window(
-            cigar_tuples, aligned_location, loc_type)
+            cigar_tuples, aligned_location, loc_type, strand)
         self.assertEqual((errors, debug_list[0]),
                          (expected_errors, expected_debug_list))
 
@@ -155,10 +157,11 @@ class TestIndelCountingFromCigarCodes(TestCase):
         self.parser.window_size = 8
         aligned_location = 20
         loc_type = "start"
+        strand = "+"
         expected_errors, expected_debug_list = True, [2, 2, 2, 2, 2, 2, 2, 2]
 
         errors, debug_list = alignment_parser.count_indels_from_cigar_codes_in_given_window(
-            cigar_tuples, aligned_location, loc_type)
+            cigar_tuples, aligned_location, loc_type, strand)
         self.assertEqual((errors, debug_list[0]),
                          (expected_errors, expected_debug_list))
 
@@ -173,6 +176,12 @@ class TestBamReader(TestCase):
 
     def test_bam_reader_runs_without_errors(self):
         reads_and_locations = {
-            "ENSMUST00000208994_1011_aligned_5112815_F_38_212_77": [(36796992, "end")]
+            "ENSMUST00000208994_1011_aligned_5112815_F_38_212_77": [
+                {
+                    'location': 5112815,
+                    'location_type': 'start',
+                    'strand': '+'
+                }
+            ]
         }
         self.parser.process_bam_file(reads_and_locations)

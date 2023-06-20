@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 from services.offset_computation import compute_offsets
-from services.offset_computation import initialize_output_file, write_to_output_file
+from services.offset_computation import write_to_output_file
 from services.offset_computation import execute_offset_computation
 from config import OFFSET_LOG, TEST_FILE_DIR
 from tests.sample_file_management import default_test_file_manager
@@ -89,30 +89,45 @@ class TestOffsetComputationFileManagement(TestCase):
 
     def test_a_test_file_is_initialized(self):
         self.tearDown()
-        initialize_output_file()
+        write_to_output_file({})
         self.assertTrue(os.path.exists(OFFSET_LOG))
 
     def test_initialized_log_file_only_has_header(self):
         self.tearDown()
-        initialize_output_file()
+        write_to_output_file({})
         with open(OFFSET_LOG, 'r') as f:
             lines = f.readlines()
             self.assertEqual(len(lines), 1)
 
     def test_lines_are_written_to_log_file(self):
         self.tearDown()
-        initialize_output_file()
+        write_to_output_file({})
         class_code = "j"
-        class_code_results_dict = {
-            "transcript_1": [(1, 2), (3, 4)],
-            "transcript_2": [(5, 6), (7, 8)],
-            "transcript_3": [(9, 10), (11, 12)]
+        offset_results_dict = {
+            "transcript_1": {
+                "reference_id": "ref_1",
+                "strand": "+",
+                "class_code": "j",
+                "offsets": [(1, 2), (3, 4)],
+            },
+            "transcript_2": {
+                "reference_id": "ref_2",
+                "strand": "-",
+                "class_code": "j",
+                "offsets": [(1, 2), (3, 4)],
+            },
+            "transcript_3": {
+                "reference_id": "ref_3",
+                "strand": "+",
+                "class_code": "x",
+                "offsets": [(1, 2), (3, 4)],
+            },
         }
 
-        write_to_output_file(class_code_results_dict, class_code)
+        write_to_output_file(offset_results_dict)
         with open(OFFSET_LOG, 'r') as f:
             lines = f.readlines()
-            self.assertEqual(len(lines), 6)
+            self.assertEqual(len(lines), 4)
 
     def tearDown(self) -> None:
         if os.path.exists(OFFSET_LOG):
