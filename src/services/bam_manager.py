@@ -19,8 +19,8 @@ class BamManager:
         self.tsv_path = tsv_path
         self.matching_cases_dict = matching_cases_dict
         self.transcript_set = set()
-        for row in matching_cases_dict:
-            self.transcript_set.add(row[0])
+        for value in self.matching_cases_dict.values():
+            self.transcript_set.add(value['transcript_id'])
         self.extended_debugging = extended_debugging
 
     def write_debug_logs(self, transcripts_and_reads: dict, reads_and_locations: dict):
@@ -40,12 +40,16 @@ class BamManager:
     def generate_reads_and_locations(self, dict_of_transcripts_and_reads: dict):
         reads_and_locations = {}
         for key, value in self.matching_cases_dict.items():
-            if not key[0] in dict_of_transcripts_and_reads:
+            if not value['transcript_id'] in dict_of_transcripts_and_reads:
                 continue
-            for read in dict_of_transcripts_and_reads[key[0]]:
+            for read in dict_of_transcripts_and_reads[value['transcript_id']]:
                 if read not in reads_and_locations:
                     reads_and_locations[read] = []
-                location_and_type = (value, key[4])
+                location_and_type = {
+                    "location": value['location'],
+                    'location_type': value['location_type'],
+                    'strand': value['strand'],
+                }
                 reads_and_locations[read].append(location_and_type)
         return reads_and_locations
 
@@ -99,17 +103,18 @@ class BamManager:
         })
         print(alignment_parser.case_count)
         for key, value in alignment_parser.case_count.items():
-            output_manager.output_line({
-                "line": f"{key}: {sorted(value.items())}",
-                "is_info": True
-            })
-            if value:
-                graph_manager.construct_bar_chart_from_dict(
-                    graph_values=value,
-                    title=key,
-                    x_label="Number of cases",
-                    y_label="Number of reads",
-                )
+            for key2, value2 in value.items():
+                output_manager.output_line({
+                    "line": f"{key} (strand {key2}): {value2}",
+                    "is_info": True
+                })
+                if value2:
+                    graph_manager.construct_bar_chart_from_dict(
+                        graph_values=value2,
+                        title=key + " (strand " + key2 + ")",
+                        x_label="Number of cases",
+                        y_label="Number of reads",
+                    )
 
     def execute(self, window_size: int):
 

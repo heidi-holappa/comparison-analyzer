@@ -24,8 +24,8 @@ class AlignmentParser:
 
         self.reads_and_transcripts = {}
         self.case_count = {
-            "insertions": {},
-            "deletions": {},
+            "insertions": {'+': {}, '-': {}},
+            "deletions": {'+': {}, '-': {}},
         }
         # TODO: add to configuration or to user arguments (window size)
         self.window_size = int(DEFAULT_WINDOW_SIZE)
@@ -55,7 +55,8 @@ class AlignmentParser:
     def count_indels_from_cigar_codes_in_given_window(self,
                                                       cigar_tuples: list,
                                                       aligned_location: int,
-                                                      loc_type: str):
+                                                      loc_type: str,
+                                                      strand: str):
         """
         Get cigar codes in a given window.
 
@@ -92,13 +93,13 @@ class AlignmentParser:
                 insertions += 1
 
         if deletions:
-            if deletions not in self.case_count["deletions"]:
-                self.case_count["deletions"][deletions] = 0
-            self.case_count["deletions"][deletions] += 1
+            if deletions not in self.case_count["deletions"][strand]:
+                self.case_count["deletions"][strand][deletions] = 0
+            self.case_count["deletions"][strand][deletions] += 1
         if insertions:
-            if insertions not in self.case_count["insertions"]:
-                self.case_count["insertions"][insertions] = 0
-            self.case_count["insertions"][insertions] += 1
+            if insertions not in self.case_count["insertions"][strand]:
+                self.case_count["insertions"][strand][insertions] = 0
+            self.case_count["insertions"][strand][insertions] += 1
 
         if deletions >= self.window_size or insertions >= self.window_size:
             debug_list.append(
@@ -126,7 +127,9 @@ class AlignmentParser:
                         "end_line": "\r",
                         "is_info": True
                     })
-                for location, loc_type in reads_and_locations[read.query_name]:
+                for dict_item in reads_and_locations[read.query_name]:
+                    location, loc_type = dict_item['location'], dict_item['location_type']
+                    strand = dict_item['strand']
                     idx_corrected_location = location - 1
 
                     if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
@@ -149,7 +152,8 @@ class AlignmentParser:
                     response, debug_list = self.count_indels_from_cigar_codes_in_given_window(
                         read.cigartuples,
                         aligned_location,
-                        loc_type)
+                        loc_type,
+                        strand)
 
                     if response:
                         errors.append(
