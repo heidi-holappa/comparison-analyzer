@@ -105,13 +105,13 @@ class BamManager:
         for key, value in alignment_parser.case_count.items():
             for key2, value2 in value.items():
                 output_manager.output_line({
-                    "line": f"{key} (strand {key2}): {value2}",
+                    "line": f"{key} ({key2}): {value2}",
                     "is_info": True
                 })
                 if value2:
                     graph_manager.construct_bar_chart_from_dict(
                         graph_values=value2,
-                        title=key + " (strand " + key2 + ")",
+                        title=key + " (" + key2 + ")",
                         x_label="Number of cases",
                         y_label="Number of reads",
                     )
