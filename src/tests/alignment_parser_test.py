@@ -142,8 +142,8 @@ class TestIndelCountingFromCigarCodes(TestCase):
     def test_indels_are_counted_correctly(self):
         cigar_tuples = [(0, 20), (2, 3), (1, 2), (0, 10)]
         self.parser.window_size = 8
-        aligned_location = 20
-        loc_type = "start"
+        aligned_location = 27
+        loc_type = "end"
         strand = "+"
         expected_errors, expected_debug_list = False, [2, 2, 2, 1, 1, 0, 0, 0]
 
@@ -185,3 +185,19 @@ class TestBamReader(TestCase):
             ]
         }
         self.parser.process_bam_file(reads_and_locations)
+
+
+class TestErrorsToFileWriter(TestCase):
+
+    def setUp(self):
+        self.parser = AlignmentParser()
+        if os.path.exists(self.parser.error_file_output_dir):
+            os.remove(self.parser.error_file_output_dir)
+
+    def test_errors_are_written_to_file(self):
+        self.parser.write_alignment_errors_to_file(["test_error"])
+        self.assertTrue(os.path.exists(self.parser.error_file_output_dir))
+
+    def tearDown(self):
+        if os.path.exists(self.parser.error_file_output_dir):
+            os.remove(self.parser.error_file_output_dir)
