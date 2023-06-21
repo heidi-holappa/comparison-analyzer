@@ -77,19 +77,15 @@ def fetch_exons(transcript, class_code, gffcompare_db, reference_db):
     return aligned_exons, reference_exons
 
 
-def initialize_output_file():
+def write_to_output_file(offset_results: dict):
     with open(OFFSET_LOG, 'w', encoding="utf-8") as file:
-        file.write("Offset results for most recent run:\n")
+        file.write("transcript_id\treference_id\tclass_code\tstrand\toffsets\n")
+        for key, value in offset_results.items():
+            file.write(
+                f"{key}\t{value['reference_id']}\t{value['class_code']}\t{value['strand']}\t{value['offsets']}\n")
 
 
-def write_to_output_file(class_code_results: dict, class_code: str):
-    with open(OFFSET_LOG, 'a', encoding="utf-8") as file:
-        file.write(f"\nClass code: {class_code}\n")
-        for key, value in class_code_results.items():
-            file.write(f"{key}: {value}\n")
-
-
-def execute_offset_computation(class_code, gffcompare_db, reference_db):
+def execute_offset_computation(class_code, gffcompare_db, reference_db) -> dict:
     output_manager.output_line({
         "line": "ANNOTATION COMPARISON",
         "is_info": True
@@ -98,10 +94,10 @@ def execute_offset_computation(class_code, gffcompare_db, reference_db):
         "line": "Counting class code instances for: " + class_code,
         "is_info": True
     })
-    initialize_output_file()
-    offset_results = {}
+
+    offset_results_as_dict = {}
     for class_code in class_code.strip().split(" "):
-        class_code_results = {}
+
         for tc_element in gffcompare_db.features_of_type('transcript'):
             aligned_exons, reference_exons = fetch_exons(
                 tc_element,
@@ -111,13 +107,16 @@ def execute_offset_computation(class_code, gffcompare_db, reference_db):
             )
             if aligned_exons:
                 offsets = compute_offsets(aligned_exons, reference_exons)
-                dict_key = (tc_element.id,
-                            tc_element['cmp_ref'][0], tc_element.strand)
-                class_code_results[dict_key] = offsets
-                offset_results[dict_key] = offsets
-        write_to_output_file(class_code_results, class_code)
+                offset_results_as_dict[tc_element.id] = {
+                    "offsets": offsets,
+                    "reference_id": tc_element['cmp_ref'][0],
+                    "strand": tc_element.strand,
+                    "class_code": class_code
+                }
+
+    write_to_output_file(offset_results_as_dict)
     output_manager.output_line({
         "line": f"Offset results written to: {OFFSET_LOG}",
         "is_info": True
     })
-    return offset_results
+    return offset_results_as_dict

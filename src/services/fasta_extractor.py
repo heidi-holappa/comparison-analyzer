@@ -1,7 +1,7 @@
 import json
 from pyfaidx import Fasta
 from services.output_manager import default_output_manager as output_manager
-from config import FASTA_OVERVIEW_FILE
+from config import FASTA_OVERVIEW_FILE, DEFAULT_WINDOW_SIZE
 
 
 class FastaExtractor:
@@ -15,6 +15,8 @@ class FastaExtractor:
         self.class_codes = fasta_config.get('class_codes', '')
         self.matching_cases_dict = fasta_config.get(
             'matching_cases_dict', {})
+        self.window_size = int(fasta_config.get(
+            'window_size', DEFAULT_WINDOW_SIZE))
 
     def initialize_fasta(self):
         if self.fasta_path:
@@ -57,7 +59,7 @@ class FastaExtractor:
             })
         return errors
 
-    def write_results_to_file(self, results: dict):
+    def write_results_to_file(self):
         json_overview = {
             "strand": {
                 "+": {
@@ -71,10 +73,12 @@ class FastaExtractor:
             },
 
         }
-        for key, value in results.items():
-            if str(value) not in json_overview['strand'][key[2]][key[4]]:
-                json_overview['strand'][key[2]][key[4]][str(value)] = 0
-            json_overview['strand'][key[2]][key[4]][str(value)] += 1
+        for key, value in self.matching_cases_dict.items():
+            strand, location_type = value['strand'], value['location_type']
+            splice_cite_sequence = str(value['splice_cite_sequence'])
+            if splice_cite_sequence not in json_overview['strand'][strand][location_type]:
+                json_overview['strand'][strand][location_type][splice_cite_sequence] = 0
+            json_overview['strand'][strand][location_type][splice_cite_sequence] += 1
 
         for strand in json_overview['strand']:
             for position in json_overview['strand'][strand]:
@@ -115,37 +119,52 @@ class FastaExtractor:
             file.write(
                 "| transcript | read_id | strand | exon | nucleotides |\n")
             file.write("| --- | --- | --- | --- | --- |\n")
-            for key, value in results.items():
-                chromosome = key[0].split('.')[1]
+            for key, value in self.matching_cases_dict.items():
+                chromosome = value['transcript_id'].split('.')[1]
                 if current_chromosome != chromosome:
                     file.write(f'\n### {chromosome}\n')
                     file.write(
-                        "| transcript | read_id | strand | exon | nucleotides |\n")
+                        "| transcript | strand | exon | nucleotides |\n")
                     file.write("| --- | --- | --- | --- | --- |\n")
                     current_chromosome = chromosome
-                file.write("| " + str(key[0]) + " | " + str(key[1]) +
-                           " | " + str(key[2]) + " | " + str(key[3]) +
-                           " | " + str(value) + " |\n")
+                file.write("| " + str(value['transcript_id']) + " | " +
+                           " | " + str(value['strand']) + " | " + str(value['exon_number']) +
+                           " | " + str(value['splice_cite_sequence']) + " |\n")
             file.close()
             output_manager.output_line({
                 "line": "Results written to file: " + FASTA_OVERVIEW_FILE,
                 "is_info": True
             })
 
-    def extract_nucleotides(self):
-        results = {}
+    def extract_splice_cite_sequence(self):
         for key, value in self.matching_cases_dict.items():
-            chromosome = key[0].split('.')[1]
-            if key[4] == 'end':
-                coordinates = (chromosome, value, value + 2)
+            chromosome = value['transcript_id'].split('.')[1]
+            location = value['location']
+            if value['location_type'] == 'end':
+                coordinates = (chromosome, location - 1, location + 1)
             else:
-                coordinates = (chromosome, value - 3, value - 1)
+                coordinates = (chromosome, location, location + 2)
             chars = self.extract_characters_at_given_coordinates(
                 coordinates)
-            results[key] = str(chars)
+            value['splice_cite_sequence'] = str(chars)
 
-        self.write_results_to_file(results)
-        return results
+        self.write_results_to_file()
+
+    def extract_window_nucleotides(self):
+
+        for key, value in self.matching_cases_dict.items():
+            chromosome = value['transcript_id'].split('.')[1]
+            location = value['location']
+            if value['location_type'] == 'end':
+                coordinates = (chromosome, location -
+                               self.window_size - 1, location + 1)
+            else:
+                coordinates = (chromosome, location,
+                               location + self.window_size)
+            nucleotides = self.extract_characters_at_given_coordinates(
+                coordinates)
+            self.matching_cases_dict[key]['position_sequence'] = str(
+                nucleotides)
 
     def execute_fasta_extraction(self):
         self.output_section_header()
@@ -158,6 +177,5 @@ class FastaExtractor:
             "is_info": True
         })
 
-        results = self.extract_nucleotides()
-
-        return results
+        self.extract_splice_cite_sequence()
+        self.extract_window_nucleotides()

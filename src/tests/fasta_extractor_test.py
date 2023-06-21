@@ -17,8 +17,20 @@ class TestFastaExtractor(TestCase):
             when the sample data is updated.
         """
         matching_cases_dict = {
-            ('transcript1.chr1.nnic', 'ENSMUST00000208994.2', '+', 3, 'end'): 63,
-            ('transcript1.chr1.nnic', 'ENSMUST00000208994.2', '+', 5, 'end'): 210
+            'transcript1.chr1.nnic.exon_4.start': {
+                'transcript_id': 'transcript1.chr1.nnic',
+                'strand': '+',
+                'location_type': 'start',
+                'exon_number': 3,
+                'location': 210,
+            },
+            'transcript1.chr1.nnic.exon_4.end': {
+                'transcript_id': 'transcript1.chr1.nnic',
+                'strand': '+',
+                'location_type': 'end',
+                'exon_number': 4,
+                'location': 45,
+            },
         }
         self.fasta_config = {
             "fasta_path": file_manager.reference_fasta,
@@ -54,8 +66,10 @@ class TestFastaExtractor(TestCase):
         captured = self.capsys.readouterr()
         assert 'FASTA EXTRACTION' in captured.out
 
-    def test_successful_execution_of_extraction_returns_a_dictionary(self):
+    def test_successful_execution_of_extraction_updates_dictionary(self):
         extractor = FastaExtractor(self.fasta_config)
-        result = extractor.execute_fasta_extraction()
-        print(result)
-        self.assertIsInstance(result, dict)
+        extractor.execute_fasta_extraction()
+        result = bool(
+            'splice_cite_sequence' in extractor.matching_cases_dict['transcript1.chr1.nnic.exon_4.start'])
+        print(extractor.matching_cases_dict)
+        self.assertTrue(result)

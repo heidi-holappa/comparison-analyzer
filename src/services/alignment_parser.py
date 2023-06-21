@@ -24,8 +24,8 @@ class AlignmentParser:
 
         self.reads_and_transcripts = {}
         self.case_count = {
-            "insertions": {},
-            "deletions": {},
+            "insertions": {'+': {}, '-': {}},
+            "deletions": {'+': {}, '-': {}},
         }
         # TODO: add to configuration or to user arguments (window size)
         self.window_size = int(DEFAULT_WINDOW_SIZE)
@@ -55,7 +55,8 @@ class AlignmentParser:
     def count_indels_from_cigar_codes_in_given_window(self,
                                                       cigar_tuples: list,
                                                       aligned_location: int,
-                                                      loc_type: str):
+                                                      loc_type: str,
+                                                      strand: str):
         """
         Get cigar codes in a given window.
 
@@ -92,57 +93,13 @@ class AlignmentParser:
                 insertions += 1
 
         if deletions:
-            if deletions not in self.case_count["deletions"]:
-                self.case_count["deletions"][deletions] = 0
-            self.case_count["deletions"][deletions] += 1
+            if deletions not in self.case_count["deletions"][strand]:
+                self.case_count["deletions"][strand][deletions] = 0
+            self.case_count["deletions"][strand][deletions] += 1
         if insertions:
-            if insertions not in self.case_count["insertions"]:
-                self.case_count["insertions"][insertions] = 0
-            self.case_count["insertions"][insertions] += 1
-
-        if deletions >= self.window_size or insertions >= self.window_size:
-            debug_list.append(
-                f"deletions: {deletions}, insertions: {insertions}")
-            return True, debug_list
-        return False, debug_list
-
-    def process_read(self, aligned_pairs: list, location: int, loc_type: str):
-        """
-        Process a read and count the number of insertions and deletions at a given location.
-
-        Args:
-            aligned_pairs (list): list of tuples of aligned pairs
-            location (int): given location
-            type (str): type of location (start or end)
-        """
-
-        deletions = 0
-        insertions = 0
-        debug_list = []
-
-        if loc_type == "end":
-            debug_list = aligned_pairs[location - self.window_size:location]
-            for element in aligned_pairs[location - self.window_size:location]:
-                if not element[0]:
-                    deletions += 1
-                if not element[1]:
-                    insertions += 1
-        elif loc_type == "start":
-            debug_list = aligned_pairs[location:location + self.window_size]
-            for element in aligned_pairs[location:location + self.window_size]:
-                if not element[0]:
-                    deletions += 1
-                if not element[1]:
-                    insertions += 1
-
-        if deletions:
-            if deletions not in self.case_count["deletions"]:
-                self.case_count["deletions"][deletions] = 0
-            self.case_count["deletions"][deletions] += 1
-        if insertions:
-            if insertions not in self.case_count["insertions"]:
-                self.case_count["insertions"][insertions] = 0
-            self.case_count["insertions"][insertions] += 1
+            if insertions not in self.case_count["insertions"][strand]:
+                self.case_count["insertions"][strand][insertions] = 0
+            self.case_count["insertions"][strand][insertions] += 1
 
         if deletions >= self.window_size or insertions >= self.window_size:
             debug_list.append(
@@ -170,7 +127,9 @@ class AlignmentParser:
                         "end_line": "\r",
                         "is_info": True
                     })
-                for location, type in reads_and_locations[read.query_name]:
+                for dict_item in reads_and_locations[read.query_name]:
+                    location, loc_type = dict_item['location'], dict_item['location_type']
+                    strand = dict_item['strand']
                     idx_corrected_location = location - 1
 
                     if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
@@ -190,19 +149,15 @@ class AlignmentParser:
                         idx_corrected_location
                     )
 
-                    # response, debug_list = self.process_read(
-                    #     read.get_aligned_pairs(),
-                    #     aligned_location,
-                    #     type)
-
                     response, debug_list = self.count_indels_from_cigar_codes_in_given_window(
                         read.cigartuples,
                         aligned_location,
-                        type)
+                        loc_type,
+                        strand)
 
                     if response:
                         errors.append(
-                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
+                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{loc_type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
         if errors:
             self.write_alignment_errors_to_file(errors)
 
@@ -212,14 +167,17 @@ class AlignmentParser:
         })
 
     # TODO: remove transcripts and reads. It is here for debugging
-    def execute(self, filename: str, reads_and_locations: dict, transcripts_and_reads: dict):
+    def execute(self, filename: str, window_size: int,
+                reads_and_locations: dict, transcripts_and_reads: dict):
         """
         Initialize AlignmentFile and execute the alignment parser.
 
         Args:
-            filename (str): _description_
-            location (int): _description_
+            filename (str): path of BAM-file to iterate
+            location (int): coordinate of the interesting event
         """
+
+        self.window_size = window_size
 
         for key, value in transcripts_and_reads.items():
             for read in value:
