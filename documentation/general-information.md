@@ -68,7 +68,7 @@ In cases 2 and 3 we notice that an exon from either the reference data or the al
 
 The following pseudocode computes the offsets following the rules given in definition two:
 
-```
+```python
 function compute_offset(list E, list X)
   list_of_results = []
   x_start_index = 0
