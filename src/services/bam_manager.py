@@ -22,18 +22,18 @@ class BamManager:
         for value in self.matching_cases_dict.values():
             self.transcript_set.add(value['transcript_id'])
         self.extended_debugging = extended_debugging
+        self.debug_log_path_transcripts_and_reads = os.path.join(
+            LOG_FILE_DIR, "dict_of_transcripts_and_reads.log")
+        self.debug_log_path_reads_and_locations = os.path.join(
+            LOG_FILE_DIR, "reads_and_locations.log")
 
     def write_debug_logs(self, transcripts_and_reads: dict, reads_and_locations: dict):
-        dict_of_transcripts_and_reads_log = os.path.join(
-            LOG_FILE_DIR, "dict_of_transcripts_and_reads.log")
 
-        with open(dict_of_transcripts_and_reads_log, "w") as f:
+        with open(self.debug_log_path_transcripts_and_reads, "w") as f:
             for key, value in transcripts_and_reads.items():
                 f.write(f"{key}\t{value}\n")
 
-        reads_and_locations_log = os.path.join(
-            LOG_FILE_DIR, "reads_and_locations.log")
-        with open(reads_and_locations_log, "w") as f:
+        with open(self.debug_log_path_reads_and_locations, "w") as f:
             for key, value in reads_and_locations.items():
                 f.write(f"{key}\t{value}\n")
 
