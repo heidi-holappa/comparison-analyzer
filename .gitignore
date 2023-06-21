@@ -1,6 +1,14 @@
 venv/
 *cache*
 .env
+.env.test
 .coverage
 sample-data/
 sandbox/
+overview.md
+.vscode/
+.coverage
+pylint.log
+offsets.txt
+htmlcov/
+logs/

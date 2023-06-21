@@ -1,116 +1,65 @@
-import os
-import gffutils
-import argparse
-from services.offset_computation import compute_offsets
+from services.bam_manager import BamManager
 
-parser = argparse.ArgumentParser(
-    description='compAna: a tool for comparing annotations',
-    usage='python3 compAna.py -i <input.gtf> [-f] [-s]'
-    )
-parser.add_argument('-i', '--input', help='gtf-file to be imported into the database', required=True, metavar='')
-parser.add_argument('-r', '--reference', help='reference gtf-file to be compared against', required=True, metavar='')
-parser.add_argument('-f', '--force', help='force overwrite of existing database', action='store_true')
-parser.add_argument('-s', '--stats', help='output statistics of class codes', action='store_true')
-parser.add_argument('-c', '--class-code', nargs='+', help='specify gffcompare class code to analyze.')
-
-arguments = parser.parse_args()
-
-gtf_paths = {
-    'gffcompare': arguments.input,
-    'reference': arguments.reference
-}
-
-db_paths = {
-    'gffcompare': arguments.input[:-4] + '-ca.db',
-    'reference': arguments.reference[:-4] + '-ca.db'
-}
-
-print("=========================================")
-print("compAna: a tool for comparing annotations")
-print("=========================================")
-print("===========DATABASE MANAGEMENT===========\n")
-
-print("============ FILE INFORMATION ===========\n")
-print(f"Gffcompare GTF-file: {os.path.basename(arguments.input)}")
-print(f"Reference GTF-file: {os.path.basename(arguments.reference)}\n")
+from services.offset_computation import execute_offset_computation
+from services.argument_parser import init_argparser
+from services.db_initializer import init_databases
+from services.class_code_stats import ClassCodeStats
+from services.extract_matching_cases import MatchingCasesExtractor
+from services.fasta_extractor import FastaExtractor
+from services.output_manager import default_output_manager as output_manager
 
 
-for key, value in db_paths.items():
-    db_exists = os.path.exists(f'{value}')
+def run_pipeline(parser_args):
+    output_manager.output_heading()
 
-    if not arguments.force and db_exists:
-        print(f"{key}: using existing db file. Use -f to force overwrite existing db-files.")
-        # gffutils_db = gffutils.FeatureDB(f'{db_path}/{db_name}')
-    else:
-        print(f'{key}: creating database... this might take a while.')
-        gffutils.create_db(
-            gtf_paths[key], 
-            dbfn=f'{value}', 
-            force=True, 
-            keep_order=True, 
-            merge_strategy='merge', 
-            sort_attribute_values=True,
-            disable_infer_genes=True,
-            disable_infer_transcripts=True
-            )
-        print(f"{key}: database created successfully!")
+    gffcompare_db, reference_db = init_databases(
+        parser_args.gffcompare_gtf, parser_args.reference_gtf, parser_args.force)
 
-gffcompare_db = gffutils.FeatureDB(f'{db_paths["gffcompare"]}')
-reference_db = gffutils.FeatureDB(f'{db_paths["reference"]}')
+    if parser_args.stats:
+        class_code_stats = ClassCodeStats(gffcompare_db)
+        class_code_stats.compute_class_code_stats()
 
-print("\n=========================================\n")
+    offset_results = {}
+    if parser_args.class_code:
+        offset_results = execute_offset_computation(
+            parser_args.class_code, gffcompare_db, reference_db)
 
-if arguments.stats:
-    print("==========CLASS CODE STATISTICS==========")
-    class_codes = {}
-    print('\nComputing statistics for class codes...\n')
-    for transcript in gffcompare_db.features_of_type('transcript'):
-        if 'class_code' in transcript.attributes:
-            class_code = transcript.attributes['class_code'][0]
-            if not class_code in class_codes:
-                class_codes[class_code] = 0
-            class_codes[class_code] += 1
+    matching_cases_dict = {}
+    if parser_args.offset:
+        extractor = MatchingCasesExtractor(
+            offset_results,
+            parser_args.offset,
+            reference_db)
+        matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
 
-    print(f"{'class code':<18}| {'n':<10}")
-    print('-' * 30)
-    for key, value in sorted(class_codes.items(), key=lambda item: item[1], reverse=True):
-        print(f"{key:<18}| {value:<10}")
+    if matching_cases_dict and parser_args.reference_fasta:
+        fasta_config = {
+            "fasta_path": parser_args.reference_fasta,
+            "offset": parser_args.offset,
+            "gffcompare_gtf": parser_args.gffcompare_gtf,
+            "reference_gtf": parser_args.reference_gtf,
+            "class_codes": parser_args.class_code,
+            "matching_cases_dict": matching_cases_dict,
+            "window_size": parser_args.window_size
+        }
+        reference_fasta_extractor = FastaExtractor(fasta_config)
+        reference_fasta_extractor.execute_fasta_extraction()
 
-print("\n=========================================")
-
-def fetch_exons(transcript, class_code):
-    aligned_exons = []
-    reference_exons = []
-    if not 'class_code' in transcript.attributes or not class_code in transcript.attributes['class_code']:
-        return aligned_exons, reference_exons
-    for exon in gffcompare_db.children(transcript, featuretype='exon', order_by='start'):
-        aligned_exons.append((exon.start, exon.end))
-    ref_transcript_id = transcript['cmp_ref'][0]
-    for exon in reference_db.children(ref_transcript_id, featuretype='exon', order_by='start'):
-        if transcript['cmp_ref'] != exon['transcript_id']:
-            continue
-        reference_exons.append((exon.start, exon.end))
-    return aligned_exons, reference_exons
+    if matching_cases_dict and parser_args.reads_tsv and parser_args.reads_bam:
+        bam_manager = BamManager(
+            parser_args.reads_bam,
+            parser_args.reads_tsv,
+            matching_cases_dict,
+            parser_args.extended_debug
+        )
+        bam_manager.execute(parser_args.window_size)
+    output_manager.output_footer()
 
 
-
-if arguments.class_code:
-        
-    for class_code in arguments.class_code:
-        print("==========ANNOTATION COMPARISON==========")
-        print(f"Analyzing class code: {class_code}")
-        offset_results = {}
-        for transcript in gffcompare_db.features_of_type('transcript'):
-            analyzed_exons, reference_exons = fetch_exons(transcript, class_code)
-            if analyzed_exons:
-                offsets = compute_offsets(analyzed_exons, reference_exons)
-                dict_key = (transcript.id, transcript['cmp_ref'][0], transcript.strand)
-                offset_results[dict_key] = offsets
-        for key, value in offset_results.items():
-            print(f"{key}: {value}")
-                    
-        print("=========================================\n")
+def main():
+    parser_args = init_argparser()
+    run_pipeline(parser_args)
 
 
-
-print("================= END ===================")
+if __name__ == "__main__":
+    main()

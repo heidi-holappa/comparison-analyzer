@@ -1,0 +1,12 @@
+{
+    "reads_bam": "<file.bam>",
+    "reads_tsv": "<file.tsv>",
+    "reference_gtf": "<file.gtf>",
+    "reference_fasta": "<file.fa>",
+    "gffcompare_gtf": "<file.gtf>",
+    "offset": 0,
+    "class_code": "j c k",
+    "force": false,
+    "window_size": 8,
+    "extended_debugging": false
+}
