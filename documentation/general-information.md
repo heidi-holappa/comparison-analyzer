@@ -1,18 +1,23 @@
 # General information
 
-The purpose of this application is to provide further information based on the information produced by `gffcompare`. `gffcompare` provides comparison information on the accuracy of one or more `GFF`-files. Our interest has been in the further comparison of `GTF`-files.  
+The purpose of this application is to study what happens in the locations, where the transcript provided by IsoQuant differs from the reference data.  
 
-The purpose for this application is
+The application uses the following libraries to process information: [pysam](https://pysam.readthedocs.io/en/latest/), [gffutils](http://daler.github.io/gffutils/) and [pyfaidx](https://github.com/mdshw5/pyfaidx/)
 
-- to produce overview statistical data on the results provided by `gffcompare` 
-- to provide further analysis on each transcript, regarding the amount of offset. 
+The application expects the user to provide the following files:
+1. A GTF-file produced by gffcompare. The gffcompare should be run with the GTF-file produced by IsoQuant and a reference GTF-file. 
+2. The reference GTF-file
+3. BAM-file containing the reads
+4. (Optional and currently unnecessary) reference FASTA-file. 
+5. A TSV-file produced by IsoQuant ending in 'model_reads.tsv'
 
+User should provide additional arguments to define
+- the gffcompare class-codes to select transcripts for processing
+- the offset -case that will be looked into
 
-## Statistical overview
+With optional arguments user can adjust debugging, creating simple additional statistics or to force recreating the sqlite3-databases created by gffutils. For more information see [instruction manual](instruction-manual.md)
 
-At the moment the statistical data is limited. Data provides the $n$ amount of each class code in the `gffcompare` - output. 
-
-## Further analysis - Offsets
+## Offsets
 
 ### Defining offset
 
@@ -120,18 +125,206 @@ Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of refer
 3. A tuple $(-\inf, -\inf)$ that no optimal match for an exon in the reference data was found (i.e. there's possibly an exon is missing from the analyzed data)
 
 
-## Offset character comparison output
+## Extracting information 
+Once the offsets for each transcript are calculated, we can extract cases matching our interests. The offset results are iterated and for cases matching the pre-defined interesting case (wanted offset), results are extracted. 
 
-Data strcuture:
+```python
+def extract_candidates_matching_selected_offset(offset_results: dict, wanted_offset, reference_db):
+  extracted_candidates = {}
+  for key and value in offset_results:
+    if stand is negative:
+      reverse value (list)
+    for offset_pair in value:
+      if abs(offset_pair[0]) == wanted_offset:
+        fetch the correct exon from reference_db
+        location of event = exon.start + value[i][0]
+        store transcript_id, location, location type as 'start', strand
+      if abs(value[i][1]) == self.offset:
+        fetch the correct exon from reference_db
+        location of event = exon.end + value[i][0]
+        store transcript_id, location, location type as 'end', strand
+  return extracted_candidates
+```
+
+The values are stored as a dictionary. The key is concatenated from the transcript\_id, exon number and location type (start/end) to ensure uniqueness. The dictionary contains the following values:
+
+- transcript_id: id for IsoQuant transcript
+- strand: +/-
+- exon_number: number of exon in question (base-1)
+- location: the location of the interesting event 
+- location_type: start/end
+
+The stored value is the location of the start or end of an exon in the IsoQuant transcript. The motivation behind this is that we want to look at what happens after the start or before the end of an exon in a pre-defined window. 
+
+### Processing the imported BAM-file
+The reads are fetched from a given BAM-file with pysam-libary. Reads are iterated through and for primary and secondary reads insertions and deletions are counted. See next sections for details on the functions called. 
+
+```python
+function process_bam_file(reads_and_locations: dict):
+  for read in samfile.fetch():
+    if read.is_supplementary:
+        continue
+    if read.query_name in reads_and_locations:
+      for location, type in reads_and_locations[read.query_name]:
+        make correction to location (by -1)
+        validate: location in is in read, read has a cigar string, read has an end location        
+
+        aligned_location = extract_location_from_cigar_string(
+          read.cigartuples,
+          read.reference_start,
+          read.reference_end,
+          idx_corrected_location)
+
+        count_indels(
+            read.cigartuples,
+            aligned_location,
+            location_type,
+            strand)
+```
+
+### Processing a CIGAR-string
+With [pysam](https://pysam.readthedocs.io/en/latest/) the cigar string for a read can be imported as a list of tuples using the `cigartuples` method. Additionally the location of the interesting event from offset computation and the POS-coordinate from the currently processed read are needed (POS = position, which is reference_start in the following pseudcode). 
+
+
+The CIGAR-parsing begins by computing the relative position: `relative_position = location - reference_start`. This gives the distance to the location of the interesting event in the reference genome from the `start_location`, which is stored within the read. At the end we are interested in the position in the CIGAR-string matching this `relative_position`. To compute this we need to keep track of the reference position (`ref_position`) to know, when we reach the sought location. 
+
+From the [SAM-tools documentation](https://samtools.github.io/hts-specs/SAMv1.pdf) we find the following table of information:
+
+| Op | BAM | Description                   | Consumes query | Consumes reference |
+|----|-----|-------------------------------|----------------|--------------------|
+| M  | 0   | alignment match               | yes            | yes                |
+| I  | 1   | insertion to the reference    | yes            | no                 |
+| D  | 2   | deletion from the reference   | no             | yes                |
+| N  | 3   | skipped region from reference | no             | yes                |
+| S  | 4   | soft clipping                 | yes            | no                 |
+| H  | 5   | hard clipping                 | no             | no                 |
+| P  | 6   | padding                       | no             | no                 |
+| =  | 7   | sequence match                | yes            | yes                |
+| X  | 8   | sequence mismatch             | yes            | yes                |
+
+
+All operation codes consume either query or reference, and the operation codes [0,2,3,7,8] consume reference. As we iterate through the tuples, each tuple cumulates the aligned_pairs_position. The operation codes [0,2,3,7,8] also cumulate the reference. We iterate as long as the ref_location is less than or equal to the relative_position. Once the ref_position exceeds the relative_position, we then calculate the exact aligned_pairs_position as follows. 
+
+
+**Definition** Let $a$ be the position of `aligned_pairs_position`, $r_{\text{ref}}$ the ref\_position, $r_{\text{rela}}$ the relative\_position and $(x, n)$ be a `cigar_tuple` in which $x\in [0,2,3,7,8]$. That is $x$ is an op code that consumes reference and $n$ is the number of consecutive operations. Furthermore assume that 
+
+$$r_{\text{ref}} < r_{\text{rela}} < r_{\text{ref}} + n.$$ 
+
+The final aligned position is now 
+
+$$a + n - (r_{\text{ref}} - r_{\text{rela}})$$
+
+
+Some considerations: 
+
+- reads are validated before calling the method, but some validation is still done. If the given CIGAR-string does not consume any reference, $-1$ is returned to indicate an error has occured
+- if the `ref_position` is points to the location of the `reference_end`, return the result even if `ref_position` is less than or equal to relative\_position. 
+
+
+And so we get the final pseudo code:
+
+```python
+function extract_location_from_cigar_string(self, cigar_tuples: list, reference_start: int, reference_end: int, location: int):
+    relative_position = location - reference_start
+    aligned_pairs_position = 0
+    ref_position = 0
+
+    for cigar_code_tuple in cigar_tuples:
+
+        if cigar_code_tuple[0] in [0, 2, 3, 7, 8]:
+            ref_position += cigar_code_tuple[1]
+        if ref_position <= relative_position and not reference_start + ref_position == reference_end:
+            aligned_pairs_position += cigar_code_tuple[1]
+        else:
+            return aligned_pairs_position + (cigar_code_tuple[1] - (ref_position - relative_position))
+
+    return -1
+```
+
+## Extracting CIGAR-codes from the window next to aligned location
+
+The method [cigartuples()](https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.cigartuples) from pysam-library returns a list of tuples with CIGAR-codes and number of operations for each code. \\
+
+The following pseudo code demonstrates how the CIGAR-codes from the given window are extracted:
+
+```python
+function count_indels(cigar_tuples: list, aligned_location: int, loc_type: str):
+    
+  cigar_code_list = []    
+  deletions = 0
+  insertions = 0
+  location = 0
+    
+
+  if loc_type == "end":
+    aligned_location = aligned_location - window_size + 1
+
+  for cigar_code in cigar_tuples:
+    if window_size == len(cigar_code_list):
+      break
+    if location + cigar_code[1] > aligned_location:
+      overlap = location + cigar_code[1] - (aligned_location + len(cigar_code_list))
+      append min(window_size - len(cigar_code_list), overlap) times cigar_code[0] to cigar_code_list
+      location += cigar_code[1]
+
+
+  for cigar_code in cigar_code_list:
+    if cigar_code == 2:
+      deletions += 1
+    if cigar_code == 1:
+      insertions += 1
+
+  store results 
+```
+
+As arguments the functions receives CIGAR-tuples, the location of the interesting event and the type of the location (start/end).  
+
+First a few variables are initialized. The `cigar_code_list` will contain the CIGAR op-codes in the window we are interested in. Results will be in ascending order. Variables deletions and insertions simply count indels. Location keeps track of our current aligned location. If the location type is "end", we shift the window to the 'left' side of the aligned position, taking into account that we need to do an index correction of one.
+
+We iterate the CIGAR-tuples until we find the first event in which the sum of the current location and next CIGAR operations exceeds the aligned location. After this, we input all or as many as possible op-codes to the `cigar_code_list`. If the size of the list is less than the window size, we continue interating. After the window is full, we calculate the number of indels from the CIGAR-codes and save the result.  
+
+**Note:** At this time only deletions and insertions are counted, but the code can be easily adapted to collect information on all CIGAR-codes. 
+
+## Data structures
+
+After some benchmarking with python data structures `tuple`, `namedtuple` and `dict`, it appears that for this application and it's use casesthe differences in efficiency are not very significant, at least without some level of refactoring. For easier readibility and expandability dictionaries are for now used for data structures. 
+
+**CASE: offset_results**
+The offset results will be returned in a dictionary of dictionaries with the following structure:
 ```python
 {
-  gffcompare-gtf: '<filename>',
-  reference-gtf: '<filename>',
-  reference-FASTA: '<filename>',
-  condition: "eq_4",
-  transcripts: {
-    id_1: '<string_1>',
-    id_2: '<string_2>',
-  }
-} 
+    'transcript_id': {
+        'ref_id': '<str>',
+        'strand': '<str>',
+        'offsets': '<list of tuples>'
+        'class_code': '<str>'
+    }
+}
+```
+
+**CASE: matching_cases_dictionary**
+With the offsets computated we next extract the cases of interest. These are as well stored in a dictionary of dictionaries. The key consists of the transcript_id, exon number and location to guarantee the key to be unique:
+```python
+{
+    'transcript_id.exon_<number>.loc_type': {
+        'exon': '<int>',
+        'location': '<int>',
+        'location_type': '<str>',
+        'strand': '<string>',
+        'transcript_id': 'str'
+    }
+}
+```
+
+**CASE: reads_and_locations**
+For computing the indels in given locations for each read, we finally need a list of reads and related information. Each read can be aligned to multiple transcripts. We again use a dictionary of dictionaries:
+```python
+{
+    'read_id': {
+        'location': '<int>',
+        'location_type': '<str>',
+        'strand': '<string>',
+        'offset': 'int'
+    }
+}
 ```
