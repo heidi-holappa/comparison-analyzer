@@ -21,9 +21,9 @@ With optional arguments user can adjust debugging, creating simple additional st
 
 ### Defining offset
 
-`gffcompare` output contains class codes for transcripts. These class codes provide information on the quality of the alignment. One interesting aspect in the case of misalignments is the amount of the offset in the misalignment. Here we provide a definition for offset and detail how offset is calculated in this application. 
+GTF-file `gffcompare` outputs contains class codes for transcripts. These class codes provide information on the quality of the alignment. One interesting aspect in the case of misalignments is the amount of the offset in the misalignment. This section provides a definition for offset and details how offset is calculated in this application. 
 
-Let $S$ be  a transcript from an analyzed read and assume that $S$ has one or more exons as children. Let the set of these exons be $E = \\{e_1, \ldots , e_n\\},\\,n\in\mathbb{N},\\,\mid E\mid \ge 1$. Let $R$ be a reference transcript to which $S$ is being compared to. Let exons children in $R$ be $X = \\{x_1, \ldots, x_m\\}$. 
+Let $S$ be  a transcript from an analyzed read and assume that $S$ has one or more exons as children. Let the set of these exons be $E = \\{e_1, \ldots , e_n\\},\\,n\in\mathbb{N},\\,\mid E\mid \ge 1$. Let $R$ be a reference transcript to which $S$ is being compared to. Let exon "children" in $R$ be $X = \\{x_1, \ldots, x_m\\}$. 
 
 Each exon is given as a tuple with a start index and end index $(a, b)\\, a,b\in\mathbb{N},\\,a < b$. Let $e_i\in E$ and $x_j\in X$ be an arbitrary exons and let $e_i = (a_{e_i}, b_{e_j})$ and $x_j = (a_{x_i}, b_{x_j})$.  
 
@@ -157,7 +157,7 @@ The values are stored as a dictionary. The key is concatenated from the transcri
 The stored value is the location of the start or end of an exon in the IsoQuant transcript. The motivation behind this is that we want to look at what happens after the start or before the end of an exon in a pre-defined window. 
 
 ### Processing the imported BAM-file
-The reads are fetched from a given BAM-file with pysam-libary. Reads are iterated through and for primary and secondary reads insertions and deletions are counted. See next sections for details on the functions called. 
+Next the reads are fetched from a given BAM-file with pysam-libary. Reads are iterated through and for primary and secondary reads insertions and deletions are counted. 
 
 ```python
 function process_bam_file(reads_and_locations: dict):
@@ -173,7 +173,7 @@ function process_bam_file(reads_and_locations: dict):
           read.cigartuples,
           read.reference_start,
           read.reference_end,
-          idx_corrected_location)
+          corrected location)
 
         count_indels(
             read.cigartuples,
@@ -183,10 +183,9 @@ function process_bam_file(reads_and_locations: dict):
 ```
 
 ### Processing a CIGAR-string
-With [pysam](https://pysam.readthedocs.io/en/latest/) the cigar string for a read can be imported as a list of tuples using the `cigartuples` method. Additionally the location of the interesting event from offset computation and the POS-coordinate from the currently processed read are needed (POS = position, which is reference_start in the following pseudcode). 
+With [pysam](https://pysam.readthedocs.io/en/latest/) the cigar string for a read can be imported as a list of tuples using the `cigartuples` method. With knowing the location of the interesting event, we can now compute what cigar-codes are in the predefined window next to the location the interesting event. To achieve this, we use the POS-information from the BAM file.  
 
-
-The CIGAR-parsing begins by computing the relative position: `relative_position = location - reference_start`. This gives the distance to the location of the interesting event in the reference genome from the `start_location`, which is stored within the read. At the end we are interested in the position in the CIGAR-string matching this `relative_position`. To compute this we need to keep track of the reference position (`ref_position`) to know, when we reach the sought location. 
+The CIGAR-parsing begins by computing the relative position: `relative_position = location - reference_start`. This gives the distance to the location of the interesting event in the reference genome from the `start_location`, which is stored within the read. At the end we are interested in the position in the CIGAR-string matching the location of the interesting event in the reference. To compute this we need to keep track of the reference position (`ref_position`) and simultaneously calculate an aligned position.  
 
 From the [SAM-tools documentation](https://samtools.github.io/hts-specs/SAMv1.pdf) we find the following table of information:
 
@@ -243,7 +242,7 @@ function extract_location_from_cigar_string(self, cigar_tuples: list, reference_
 
 ## Extracting CIGAR-codes from the window next to aligned location
 
-The method [cigartuples()](https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.cigartuples) from pysam-library returns a list of tuples with CIGAR-codes and number of operations for each code. \\
+The method [cigartuples()](https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.cigartuples) from pysam-library returns a list of tuples with CIGAR-codes and number of operations for each code. 
 
 The following pseudo code demonstrates how the CIGAR-codes from the given window are extracted:
 
@@ -277,7 +276,10 @@ function count_indels(cigar_tuples: list, aligned_location: int, loc_type: str):
   store results 
 ```
 
-As arguments the functions receives CIGAR-tuples, the location of the interesting event and the type of the location (start/end).  
+As arguments the function receives 
+- CIGAR-tuples provided by pysam
+- the location of the interesting event
+- the type of the location (start/end).  
 
 First a few variables are initialized. The `cigar_code_list` will contain the CIGAR op-codes in the window we are interested in. Results will be in ascending order. Variables deletions and insertions simply count indels. Location keeps track of our current aligned location. If the location type is "end", we shift the window to the 'left' side of the aligned position, taking into account that we need to do an index correction of one.
 
@@ -294,7 +296,7 @@ The offset results will be returned in a dictionary of dictionaries with the fol
 ```python
 {
     'transcript_id': {
-        'ref_id': '<str>',
+        'reference_id': '<str>',
         'strand': '<str>',
         'offsets': '<list of tuples>'
         'class_code': '<str>'
@@ -324,7 +326,6 @@ For computing the indels in given locations for each read, we finally need a lis
         'location': '<int>',
         'location_type': '<str>',
         'strand': '<string>',
-        'offset': 'int'
     }
 }
 ```
