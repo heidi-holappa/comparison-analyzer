@@ -6,5 +6,6 @@
     "gffcompare_gtf": "<file.gtf>",
     "offset": 0,
     "class_code": "j c k",
-    "force": false
+    "force": false,
+    "extended_debugging": false
 }
