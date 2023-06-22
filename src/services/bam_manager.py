@@ -49,6 +49,7 @@ class BamManager:
                     "location": value['location'],
                     'location_type': value['location_type'],
                     'strand': value['strand'],
+                    'offset': value['offset']
                 }
                 reads_and_locations[read].append(location_and_type)
         return reads_and_locations
