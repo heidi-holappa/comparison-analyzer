@@ -173,7 +173,7 @@ class FastaExtractor:
             return
 
         output_manager.output_line({
-            "line": f"Offset value: {self.offset}",
+            "line": f"Closed offset range: {self.offset}",
             "is_info": True
         })
 
