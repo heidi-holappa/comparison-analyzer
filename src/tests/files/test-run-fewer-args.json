@@ -1,0 +1,7 @@
+{
+    "reference_gtf": "src/tests/files/gencode.vM26.basic.annotation.extract.gtf",
+    "gffcompare_gtf": "src/tests/files/gffcompare.annotated.gtf",
+    "offset": "4 4",
+    "force": false,
+    "stats": true
+}
