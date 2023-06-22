@@ -128,6 +128,7 @@ class AlignmentParser:
             file.writelines(errors)
 
     def process_bam_file(self, reads_and_locations: dict):
+        print("READS_AND_LOCATIONS: ", reads_and_locations)
         count = 0
         errors = []
         for read in self.samfile.fetch():
@@ -142,8 +143,9 @@ class AlignmentParser:
                         "is_info": True
                     })
                 for dict_item in reads_and_locations[read.query_name]:
-                    location, loc_type = dict_item['location'], dict_item['location_type']
-                    strand = dict_item['strand']
+                    location, loc_type = dict_item["location"], dict_item["location_type"]
+                    strand = dict_item["strand"]
+                    offset = dict_item["offset"]
                     idx_corrected_location = location - 1
 
                     if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
@@ -167,7 +169,8 @@ class AlignmentParser:
                         read.cigartuples,
                         aligned_location,
                         loc_type,
-                        strand)
+                        strand,
+                        offset)
 
                     if response:
                         errors.append(
