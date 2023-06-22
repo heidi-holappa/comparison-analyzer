@@ -27,6 +27,7 @@ class AlignmentParser:
             "insertions": {'+': {}, '-': {}},
             "deletions": {'+': {}, '-': {}},
         }
+        self.updated_case_count = {}
         # TODO: add to configuration or to user arguments (window size)
         self.window_size = int(DEFAULT_WINDOW_SIZE)
         self.error_file_output_dir = os.path.join(
@@ -56,7 +57,8 @@ class AlignmentParser:
                                                       cigar_tuples: list,
                                                       aligned_location: int,
                                                       loc_type: str,
-                                                      strand: str):
+                                                      strand: str,
+                                                      offset: int = 0):
         """
         Get cigar codes in a given window.
 
@@ -93,10 +95,22 @@ class AlignmentParser:
                 insertions += 1
 
         if deletions:
+            del_key = ("deletions", strand, loc_type, offset)
+            if del_key not in self.updated_case_count:
+                self.updated_case_count[del_key] = {}
+            if deletions not in self.updated_case_count[del_key]:
+                self.updated_case_count[del_key][deletions] = 0
+            self.updated_case_count[del_key][deletions] += 1
             if deletions not in self.case_count["deletions"][strand]:
                 self.case_count["deletions"][strand][deletions] = 0
             self.case_count["deletions"][strand][deletions] += 1
         if insertions:
+            ins_key = ("insertions", strand, loc_type, offset)
+            if ins_key not in self.updated_case_count:
+                self.updated_case_count[ins_key] = {}
+            if insertions not in self.updated_case_count[ins_key]:
+                self.updated_case_count[ins_key][insertions] = 0
+            self.updated_case_count[ins_key][insertions] += 1
             if insertions not in self.case_count["insertions"][strand]:
                 self.case_count["insertions"][strand][insertions] = 0
             self.case_count["insertions"][strand][insertions] += 1
@@ -177,7 +191,7 @@ class AlignmentParser:
             location (int): coordinate of the interesting event
         """
 
-        self.window_size = window_size
+        self.window_size = int(window_size)
 
         for key, value in transcripts_and_reads.items():
             for read in value:
