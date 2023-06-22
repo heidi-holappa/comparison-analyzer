@@ -102,15 +102,15 @@ class BamManager:
             "line": "Insertions and deletions found at given locations",
             "is_info": True
         })
-        output_manager.output_line({
-            "line": str(alignment_parser.updated_case_count),
-            "is_info": True
-        })
-        for key, value in alignment_parser.case_count.items():
-            title = str(key[0]) + "." + str(key[1]) + "." + \
-                str(key[2]) + "." + str(key[3])
+        # output_manager.output_line({
+        #     "line": str(alignment_parser.updated_case_count),
+        #     "is_info": True
+        # })
+        for key, value in alignment_parser.updated_case_count.items():
+            title = str(key[0]) + ".strand-" + str(key[1]) + ".exon-loc-" + \
+                str(key[2]) + ".offset-(" + str(key[3]) + ")"
             output_manager.output_line({
-                "line": f"transcript_id: {key[0]}, strand: {key[1]}, : {key[2]}, offset: {key[3]}",
+                "line": f"in/del: {key[0]}, strand: {key[1]}, : {key[2]}, offset: {key[3]}",
                 "is_info": True
             })
             graph_manager.construct_bar_chart_from_dict(
