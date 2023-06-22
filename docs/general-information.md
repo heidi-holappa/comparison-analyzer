@@ -308,12 +308,13 @@ The offset results will be returned in a dictionary of dictionaries with the fol
 With the offsets computated we next extract the cases of interest. These are as well stored in a dictionary of dictionaries. The key consists of the transcript_id, exon number and location to guarantee the key to be unique:
 ```python
 {
-    'transcript_id.exon_<number>.loc_type': {
+    'transcript_id.exon_<number>.loc_type.offset_number': {
         'exon': '<int>',
         'location': '<int>',
         'location_type': '<str>',
         'strand': '<string>',
-        'transcript_id': 'str'
+        'transcript_id': '<str>',
+        'offset': '<int>'
     }
 }
 ```
@@ -326,6 +327,18 @@ For computing the indels in given locations for each read, we finally need a lis
         'location': '<int>',
         'location_type': '<str>',
         'strand': '<string>',
+        'offset': '<int>'
     }
 }
 ```
+
+## Output 
+
+Indel error lengths are stored in a dictionary:
+
+```python
+{
+    ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': '<int>'}
+}
+```
+For each key-value pair a histogram is generated. 
