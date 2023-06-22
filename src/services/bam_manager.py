@@ -107,18 +107,18 @@ class BamManager:
             "is_info": True
         })
         for key, value in alignment_parser.case_count.items():
-            for key2, value2 in value.items():
-                output_manager.output_line({
-                    "line": f"{key} ({key2}): {value2}",
-                    "is_info": True
-                })
-                if value2:
-                    graph_manager.construct_bar_chart_from_dict(
-                        graph_values=value2,
-                        title=key + " (" + key2 + ")",
-                        x_label="Number of cases",
-                        y_label="Number of reads",
-                    )
+            title = str(key[0]) + "." + str(key[1]) + "." + \
+                str(key[2]) + "." + str(key[3])
+            output_manager.output_line({
+                "line": f"transcript_id: {key[0]}, strand: {key[1]}, : {key[2]}, offset: {key[3]}",
+                "is_info": True
+            })
+            graph_manager.construct_bar_chart_from_dict(
+                graph_values=value,
+                title=title,
+                x_label="Number of cases",
+                y_label="Number of reads",
+            )
 
     def execute(self, window_size: int):
 
