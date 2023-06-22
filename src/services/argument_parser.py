@@ -27,7 +27,7 @@ def init_argparser():
     parser.add_argument(
         '-o', '--offset',
         help='offset from which canonical splice point is to be searched',
-        required=False,
+        nargs='+',
         metavar='')
     parser.add_argument(
         '-f', '--force',
@@ -69,10 +69,20 @@ def init_argparser():
         with open(parser_args.json, encoding="UTF-8") as json_file:
             json_dict = json.load(json_file)
             parser_dict.update(json_dict)
+            parser_dict["offset"] = str(parser_dict["offset"]).split(" ")
 
     if not parser_args.gffcompare_gtf or not parser_args.reference_gtf:
         parser.print_help()
         exit(1)
+
+    # TODO: Clean this. Problem is that nargs='+' returns a list of strings or a single string as json
+    if not parser_args.offset:
+        parser_dict["offset"] = (0, 0)
+    elif len(parser_args.offset) == 1:
+        parser_dict["offset"] = (0, max(0, int(parser_args.offset[0])))
+    else:
+        parser_dict["offset"] = (
+            max(0, int(parser_args.offset[0])), max(0, int(parser_args.offset[1])))
 
     if not parser_args.window_size:
         parser_dict["window_size"] = DEFAULT_WINDOW_SIZE
