@@ -1,6 +1,6 @@
 class MatchingCasesExtractor:
 
-    def __init__(self, offset_results: dict, offset: int, reference_db):
+    def __init__(self, offset_results: dict, offset_range: tuple, reference_db):
         """
             Extract candidates matching the selected offset.
 
@@ -10,7 +10,7 @@ class MatchingCasesExtractor:
             reference_db: reference to a gffutils database with the reference annotation
         """
         self.offset_results = offset_results
-        self.offset = offset
+        self.offset_range = offset_range
         self.reference_db = reference_db
 
     def extract_candidates_matching_selected_offset(self) -> dict:
@@ -22,7 +22,8 @@ class MatchingCasesExtractor:
                 offsets.reverse()
             for offset_exon_idx in range(1, len(offsets)-1):
                 offset_exon_number = offset_exon_idx + 1
-                if abs(offsets[offset_exon_idx][0]) == self.offset:
+                if abs(offsets[offset_exon_idx][0]) >= self.offset_range[0] and \
+                        abs(offsets[offset_exon_idx][0]) <= self.offset_range[1]:
                     entry_key = transcript_id + ".exon_" + \
                         str(offset_exon_number) + ".start" + \
                         '.offset_' + str(offsets[offset_exon_idx][0])
@@ -36,7 +37,8 @@ class MatchingCasesExtractor:
                                 "location": exon.start + offsets[offset_exon_idx][0],
                                 "offset": offsets[offset_exon_idx][0]
                             }
-                if abs(offsets[offset_exon_idx][1]) == self.offset:
+                if abs(offsets[offset_exon_idx][1]) >= self.offset_range[0] and \
+                        abs(offsets[offset_exon_idx][1]) <= self.offset_range[1]:
                     entry_key = transcript_id + ".exon_" + \
                         str(offset_exon_number) + ".end" + \
                         '.offset_' + str(offsets[offset_exon_idx][1])
