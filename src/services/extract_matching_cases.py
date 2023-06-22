@@ -24,7 +24,8 @@ class MatchingCasesExtractor:
                 offset_exon_number = offset_exon_idx + 1
                 if abs(offsets[offset_exon_idx][0]) == self.offset:
                     entry_key = transcript_id + ".exon_" + \
-                        str(offset_exon_number) + ".start"
+                        str(offset_exon_number) + ".start" + \
+                        '.offset_' + str(offsets[offset_exon_idx][0])
                     for exon in self.reference_db.children(reference_id, featuretype='exon'):
                         if int(exon['exon_number'][0]) == offset_exon_number:
                             extracted_candidates[entry_key] = {
@@ -32,11 +33,13 @@ class MatchingCasesExtractor:
                                 "strand": strand,
                                 "exon_number": offset_exon_number,
                                 "location_type": "start",
-                                "location": exon.start + offsets[offset_exon_idx][0]
+                                "location": exon.start + offsets[offset_exon_idx][0],
+                                "offset": offsets[offset_exon_idx][0]
                             }
                 if abs(offsets[offset_exon_idx][1]) == self.offset:
                     entry_key = transcript_id + ".exon_" + \
-                        str(offset_exon_number) + ".end"
+                        str(offset_exon_number) + ".end" + \
+                        '.offset_' + str(offsets[offset_exon_idx][1])
                     for exon in self.reference_db.children(reference_id, featuretype='exon'):
                         if int(exon['exon_number'][0]) == offset_exon_number:
                             extracted_candidates[entry_key] = {
@@ -44,6 +47,7 @@ class MatchingCasesExtractor:
                                 "strand": strand,
                                 "exon_number": offset_exon_number,
                                 "location_type": "end",
-                                "location": exon.end + offsets[offset_exon_idx][1]
+                                "location": exon.end + offsets[offset_exon_idx][1],
+                                "offset": offsets[offset_exon_idx][1]
                             }
         return extracted_candidates
