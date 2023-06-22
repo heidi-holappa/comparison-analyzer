@@ -24,13 +24,11 @@ def run_pipeline(parser_args):
         offset_results = execute_offset_computation(
             parser_args.class_code, gffcompare_db, reference_db)
 
-    matching_cases_dict = {}
-    if parser_args.offset:
-        extractor = MatchingCasesExtractor(
-            offset_results,
-            parser_args.offset,
-            reference_db)
-        matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
+    extractor = MatchingCasesExtractor(
+        offset_results,
+        parser_args.offset,
+        reference_db)
+    matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
 
     if matching_cases_dict and parser_args.reference_fasta:
         fasta_config = {
