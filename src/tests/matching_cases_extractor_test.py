@@ -14,7 +14,7 @@ class TestMatchingCasesExtractor(TestCase):
         class_code = "j"
         self.offset_results = execute_offset_computation(
             class_code, self.gffcompare_db, self.reference_db)
-        self.offset = 4
+        self.offset = (0, 4)
 
     def test_extract_matching_cases_for_offset_four_gives_correct_output(self):
         extractor = MatchingCasesExtractor(
@@ -23,12 +23,12 @@ class TestMatchingCasesExtractor(TestCase):
             self.reference_db
         )
         matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
-        self.assertEqual(len(matching_cases_dict), 2)
+        self.assertEqual(len(matching_cases_dict), 14)
 
     def test_extract_matching_cases_for_offset_zero_returns_correct_result(self):
         extractor = MatchingCasesExtractor(
             self.offset_results,
-            0,
+            (0, 0),
             self.reference_db
         )
         matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
@@ -88,13 +88,14 @@ class TestMatchingCasesExtractor(TestCase):
 
         extractor = MatchingCasesExtractor(
             custom_offset_results,
-            4,
+            (0, 4),
             self.reference_db
         )
 
         matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
-        print(matching_cases_dict)
-        self.assertEqual(len(matching_cases_dict), 1)
+        for key, value in matching_cases_dict.items():
+            print(key, value)
+        self.assertEqual(len(matching_cases_dict), 4)
 
     def tearDown(self) -> None:
         file_manager.remove_test_files()
