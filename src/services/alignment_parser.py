@@ -128,7 +128,6 @@ class AlignmentParser:
             file.writelines(errors)
 
     def process_bam_file(self, reads_and_locations: dict):
-        print("READS_AND_LOCATIONS: ", reads_and_locations)
         count = 0
         errors = []
         for read in self.samfile.fetch():
