@@ -49,6 +49,7 @@ class BamManager:
                     "location": value['location'],
                     'location_type': value['location_type'],
                     'strand': value['strand'],
+                    'offset': value['offset']
                 }
                 reads_and_locations[read].append(location_and_type)
         return reads_and_locations
@@ -101,7 +102,10 @@ class BamManager:
             "line": "Insertions and deletions found at given locations",
             "is_info": True
         })
-        print(alignment_parser.case_count)
+        output_manager.output_line({
+            "line": str(alignment_parser.updated_case_count),
+            "is_info": True
+        })
         for key, value in alignment_parser.case_count.items():
             for key2, value2 in value.items():
                 output_manager.output_line({

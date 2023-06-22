@@ -31,7 +31,7 @@ class TestParser(unittest.TestCase):
         assert parser.reference_gtf == 'reference.gtf'
         assert parser.reads_bam == 'file.bam'
         assert parser.reads_tsv == 'file.tsv'
-        assert parser.offset == '10'
+        assert parser.offset == (0, 10)
         assert parser.force
         assert parser.stats
         assert parser.class_code == ['j k']
@@ -55,7 +55,7 @@ class TestParser(unittest.TestCase):
         assert parser.reference_gtf == 'reference.gtf'
         assert parser.reads_bam == 'file.bam'
         assert parser.reads_tsv == 'file.tsv'
-        assert parser.offset == '10'
+        assert parser.offset == (0, 10)
         assert parser.force
         assert parser.stats
         assert parser.class_code == ['j k']
@@ -73,7 +73,7 @@ class TestParser(unittest.TestCase):
         assert parser.reference_gtf == 'reference.gtf'
         assert parser.reads_bam == 'file.bam'
         assert parser.reads_tsv == 'file.tsv'
-        assert parser.offset == 10
+        assert parser.offset == (0, 10)
         assert not parser.force
         assert parser.stats
         assert parser.class_code == 'j c k'

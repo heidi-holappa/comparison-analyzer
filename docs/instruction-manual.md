@@ -29,7 +29,7 @@ The application accepts the following arguments
 | f | force | force re-creation of sqlite3 database. By default a new database is not created if one already exists to improve efficiency. |
 | s | stats | output statistics on class codes. | 
 | c | class-code | specify one or several class codes for which to generate offset data. | 
-| o | offset | provide an offset to be extracted from comparison results. |
+| o | offset | provide a **closed range** of offsets to be extracted from comparison results. Provide one or two values. If one value is given, the range will be set to (0, max(0, given value)) |
 | j | json | provide a filename for a json-file containing arguments. Example below. |
 | a | reference_fasta | provide full path for reference FASTA-file (e.g. `fa`) |
 | b | reads_bam | provide full path for reads provided to IsoQuant |
@@ -46,10 +46,10 @@ Arguments can also be given in json-format. An [example template](../arguments_t
     "reference_gtf": "<file.gtf>",
     "reference_fasta": "<file.fa>",
     "gffcompare_gtf": "<file.gtf>",
-    "offset": 0,
+    "offset": "0 4",
     "class_code": "j c k",
     "force": false,
-    "window_size": 8,
+    "window_size": "8",
     "extended_debugging": false
 }
 ```
@@ -61,14 +61,15 @@ The following insruction extracts arguments from a given json file
 python3 src/compana.py -j <arguments.json>
 ```
 
-The following instruction computes analysis for the files given with arguments `i` and `r`. If sqlite-databases exist for the given files, those are used. Argument `s` specifies that overview data is to be genegated and argument `-c` specifies that offsets should be calculated for classcodes `i` and `x`.
+The following instruction creates sqlite3 databases for the files given with arguments `g` and `r`. If sqlite-databases exist for the given files, the existing databases are used. Argument `s` specifies that overview data is to be genegated.
 
 ```
-python3 src/compana.py -i <gffcompare-file> -r <reference-file> -s -c i x
+python3 src/compana.py -i <gffcompare-file> -r <reference-file> -s 
 ```
 
-The following instruction takes files given with arguments `i` and `r`. Argument `f` specifies that new databases are to be created using `gffutils` from the given files. Any existing databases will overwritten.
+The following instruction takes files given with arguments `g` and `r`. Argument `f` specifies that new databases are to be created using `gffutils` from the given files. Any existing databases will overwritten.
 
 ```
 python3 src/compana.py -i <gffcompare-file> -r <reference-file> -f
 ```
+To run the full pipeline at the minimum the following arguments should be provided: `g r c o a b t`

@@ -1,18 +1,4 @@
 title: compAna
 author: Heidi Holappa
-navbar-links:
-  Home: "home"
-  Docs:
-    - Instructions: "docs/instruction-manual.md"
-    - General: "docs/general-informatiod.md"
-social-network-links:
-  linkedin: heidi-holappa
-  github: heidi-holappa
-post_search: true
-navbar-var-length: false
 theme: jekyll-theme-cayman
-markdown: kramdown
-kramdown:
-  input: GFM
-plugins:
-  - jekyll-sitemap
+markdown: GFM

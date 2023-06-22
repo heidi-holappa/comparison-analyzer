@@ -180,7 +180,8 @@ class TestBamReader(TestCase):
                 {
                     'location': 5112815,
                     'location_type': 'start',
-                    'strand': '+'
+                    'strand': '+',
+                    'offset': 4
                 }
             ]
         }

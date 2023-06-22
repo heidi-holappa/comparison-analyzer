@@ -55,6 +55,7 @@ class TestBamManagerExecution(TestCase):
             'transcript1.chr1.nnic.exon_4.start': {
                 'transcript_id': 'transcript1.chr1.nnic',
                 'strand': '+',
+                'offset': 4,
                 'location_type': 'start',
                 'exon_number': 3,
                 'location': 210,
@@ -62,8 +63,6 @@ class TestBamManagerExecution(TestCase):
         }
         self.bam_manager = BamManager(
             self.bam_path, self.tsv_path, self.matching_cases_dict)
-
-    # TODO: activate test
 
     def test_bam_manager_execute_runs_without_errors(self):
         window_size = 10
