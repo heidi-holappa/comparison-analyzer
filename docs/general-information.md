@@ -126,16 +126,16 @@ Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of refer
 
 
 ## Extracting information 
-Once the offsets for each transcript are calculated, we can extract cases matching our interests. The offset results are iterated and for cases matching the pre-defined interesting case (wanted offset), results are extracted. 
+Once the offsets for each transcript are calculated, we can extract cases matching our interests. The offset results are iterated and for cases matching the pre-defined interesting case (range of offsets), results are extracted. 
 
 ```python
-def extract_candidates_matching_selected_offset(offset_results: dict, wanted_offset, reference_db):
+def extract_candidates_matching_selected_offset(offset_results: dict, offsets: tuple, reference_db):
   extracted_candidates = {}
   for key and value in offset_results:
     if stand is negative:
       reverse value (list)
     for offset_pair in value:
-      if abs(offset_pair[0]) == wanted_offset:
+      if abs(offset_pair[0]) in the range of offsets:
         fetch the correct exon from reference_db
         location of event = exon.start + value[i][0]
         store transcript_id, location, location type as 'start', strand
