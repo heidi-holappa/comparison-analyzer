@@ -58,6 +58,7 @@ class TestBamManagerExecution(TestCase):
                 'location_type': 'start',
                 'exon_number': 3,
                 'location': 210,
+                'offset': 4,
             },
         }
         self.bam_manager = BamManager(
