@@ -22,7 +22,7 @@ def run_pipeline(parser_args):
     offset_results = {}
     if parser_args.class_code:
         offset_results = execute_offset_computation(
-            parser_args.class_code, gffcompare_db, reference_db)
+            parser_args.class_code, gffcompare_db, reference_db, parser_args.extended_debug)
 
     extractor = MatchingCasesExtractor(
         offset_results,
@@ -52,6 +52,7 @@ def run_pipeline(parser_args):
         )
         bam_manager.execute(parser_args.window_size)
     output_manager.output_footer()
+    output_manager.write_log_file()
 
 
 def main():

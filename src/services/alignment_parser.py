@@ -94,26 +94,25 @@ class AlignmentParser:
             if cigar_code == 1:
                 insertions += 1
 
-        if deletions:
-            del_key = ("deletions", strand, loc_type, offset)
-            if del_key not in self.updated_case_count:
-                self.updated_case_count[del_key] = {}
-            if deletions not in self.updated_case_count[del_key]:
-                self.updated_case_count[del_key][deletions] = 0
-            self.updated_case_count[del_key][deletions] += 1
-            if deletions not in self.case_count["deletions"][strand]:
-                self.case_count["deletions"][strand][deletions] = 0
-            self.case_count["deletions"][strand][deletions] += 1
-        if insertions:
-            ins_key = ("insertions", strand, loc_type, offset)
-            if ins_key not in self.updated_case_count:
-                self.updated_case_count[ins_key] = {}
-            if insertions not in self.updated_case_count[ins_key]:
-                self.updated_case_count[ins_key][insertions] = 0
-            self.updated_case_count[ins_key][insertions] += 1
-            if insertions not in self.case_count["insertions"][strand]:
-                self.case_count["insertions"][strand][insertions] = 0
-            self.case_count["insertions"][strand][insertions] += 1
+        del_key = ("deletions", strand, loc_type, offset)
+        if del_key not in self.updated_case_count:
+            self.updated_case_count[del_key] = {}
+        if deletions not in self.updated_case_count[del_key]:
+            self.updated_case_count[del_key][deletions] = 0
+        self.updated_case_count[del_key][deletions] += 1
+        if deletions not in self.case_count["deletions"][strand]:
+            self.case_count["deletions"][strand][deletions] = 0
+        self.case_count["deletions"][strand][deletions] += 1
+
+        ins_key = ("insertions", strand, loc_type, offset)
+        if ins_key not in self.updated_case_count:
+            self.updated_case_count[ins_key] = {}
+        if insertions not in self.updated_case_count[ins_key]:
+            self.updated_case_count[ins_key][insertions] = 0
+        self.updated_case_count[ins_key][insertions] += 1
+        if insertions not in self.case_count["insertions"][strand]:
+            self.case_count["insertions"][strand][insertions] = 0
+        self.case_count["insertions"][strand][insertions] += 1
 
         if deletions >= self.window_size or insertions >= self.window_size:
             debug_list.append(
@@ -130,16 +129,25 @@ class AlignmentParser:
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
         errors = []
+        set_of_processed_reads = set()
+        read_counter = 0
         for read in self.samfile.fetch():
+
             if read.is_supplementary:
                 continue
             if read.query_name in reads_and_locations:
+                if read.query_name not in set_of_processed_reads:
+                    set_of_processed_reads.add(read.query_name)
+                else:
+                    read_counter += 1
+                    continue
                 count += 1
                 if count % 1000 == 0:
                     output_manager.output_line({
                         "line": "Processed " + str(count) + " reads",
                         "end_line": "\r",
-                        "is_info": True
+                        "is_info": True,
+                        "save_to_log": False
                     })
                 for dict_item in reads_and_locations[read.query_name]:
                     location, loc_type = dict_item["location"], dict_item["location_type"]
@@ -176,6 +184,12 @@ class AlignmentParser:
                             f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{loc_type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
         if errors:
             self.write_alignment_errors_to_file(errors)
+
+        if read_counter:
+            output_manager.output_line({
+                "line": str(read_counter) + " iterations extracted a already processed read from the BAM-file",
+                "is_error": True,
+            })
 
         output_manager.output_line({
             "line": "\nFinished",

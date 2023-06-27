@@ -79,6 +79,10 @@ class BamManager:
         if self.extended_debugging:
             self.write_debug_logs(
                 dict_of_transcripts_and_reads, reads_and_locations)
+            output_manager.output_line({
+                "line": "Dictionaries 'transcripts and reads' and 'reads and location' created.",
+                "is_info": True
+            })
 
         output_manager.output_line({
             "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
@@ -107,17 +111,19 @@ class BamManager:
         #     "is_info": True
         # })
         for key, value in alignment_parser.updated_case_count.items():
-            title = str(key[0]) + ".strand-" + str(key[1]) + ".exon-loc-" + \
+            title = f"Type: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}"
+            filename = str(key[0]) + ".strand_" + str(key[1]) + ".exon-loc-" + \
                 str(key[2]) + ".offset-(" + str(key[3]) + ")"
             output_manager.output_line({
-                "line": f"in/del: {key[0]}, strand: {key[1]}, : {key[2]}, offset: {key[3]}",
+                "line": f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}",
                 "is_info": True
             })
             graph_manager.construct_bar_chart_from_dict(
                 graph_values=value,
+                filename=filename,
                 title=title,
-                x_label="Number of cases",
-                y_label="Number of reads",
+                x_label=f"Number of errors (n of cases: {sum(value.values())})",
+                y_label="Portion of reads",
             )
 
     def execute(self, window_size: int):

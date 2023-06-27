@@ -17,7 +17,7 @@ class TestGraphManager(TestCase):
         x_label = "x"
         y_label = "y"
         graph_manager.construct_bar_chart_from_dict(
-            graph_values, title, x_label, y_label)
+            graph_values, "test_graph", title, x_label, y_label)
         assert os.path.exists(filepath)
         if os.path.exists(filepath):
             os.remove(filepath)
