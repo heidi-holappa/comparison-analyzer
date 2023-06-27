@@ -13,10 +13,7 @@ class GraphManagement:
             os.mkdir(self.graph_dir)
 
     def normalize_values(self, graph_values: dict):
-        factor = 1.0 / sum(graph_values.values())
-        normalized_graph_values = {
-            k: v*factor for k, v in graph_values.items()}
-        return normalized_graph_values
+        return {key: value / sum(graph_values.values()) for key, value in graph_values.items()}
 
     def construct_bar_chart_from_dict(self, graph_values: dict, title: str, x_label: str, y_label: str):
         normalized_graph_values = self.normalize_values(graph_values)
