@@ -145,7 +145,8 @@ class TestOffsetComputationExecution(TestCase):
         results = execute_offset_computation(
             class_code,
             self.test_file_manager.gffcompare_db,
-            self.test_file_manager.reference_db
+            self.test_file_manager.reference_db,
+            False
         )
         self.assertEqual(len(results), 1)
 

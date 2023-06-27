@@ -13,7 +13,7 @@ class TestMatchingCasesExtractor(TestCase):
         self.gffcompare_db = file_manager.gffcompare_db
         class_code = "j"
         self.offset_results = execute_offset_computation(
-            class_code, self.gffcompare_db, self.reference_db)
+            class_code, self.gffcompare_db, self.reference_db, False)
         self.offset = (0, 4)
 
     def test_extract_matching_cases_for_offset_four_gives_correct_output(self):
