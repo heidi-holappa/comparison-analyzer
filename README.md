@@ -6,7 +6,9 @@ The purpose of comparison analyzer compAna is to provide tools for analyzing wha
 ## Documentation
 - [Instruction manual](docs/instruction-manual.md)
 - [General information](docs/general-information.md)
-- [Definition of Done](dev/definition-of-done.md)
+
+**Development documentation:**
+- [Definition of Done](dev-docs/definition-of-done.md)
 
 ## Project state
 To review the project state please see [project board](https://github.com/users/heidi-holappa/projects/3/)
