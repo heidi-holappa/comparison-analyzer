@@ -136,6 +136,11 @@ class AlignmentParser:
             if read.is_supplementary:
                 continue
             if read.query_name in reads_and_locations:
+                if read.query_name not in set_of_processed_reads:
+                    set_of_processed_reads.add(read.query_name)
+                else:
+                    read_counter += 1
+                    continue
                 count += 1
                 if count % 1000 == 0:
                     output_manager.output_line({
@@ -143,11 +148,6 @@ class AlignmentParser:
                         "end_line": "\r",
                         "is_info": True
                     })
-                if read.query_name not in set_of_processed_reads:
-                    set_of_processed_reads.add(read.query_name)
-                else:
-                    read_counter += 1
-                    continue
                 for dict_item in reads_and_locations[read.query_name]:
                     location, loc_type = dict_item["location"], dict_item["location_type"]
                     strand = dict_item["strand"]
