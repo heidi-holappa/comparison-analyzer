@@ -146,7 +146,8 @@ class AlignmentParser:
                     output_manager.output_line({
                         "line": "Processed " + str(count) + " reads",
                         "end_line": "\r",
-                        "is_info": True
+                        "is_info": True,
+                        "save_to_log": False
                     })
                 for dict_item in reads_and_locations[read.query_name]:
                     location, loc_type = dict_item["location"], dict_item["location_type"]
