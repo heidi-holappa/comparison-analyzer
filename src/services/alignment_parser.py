@@ -130,17 +130,10 @@ class AlignmentParser:
         count = 0
         errors = []
         set_of_processed_reads = set()
+        read_counter = 0
         for read in self.samfile.fetch():
 
             if read.is_supplementary:
-                continue
-            if read.query_name not in set_of_processed_reads:
-                set_of_processed_reads.add(read.query_name)
-            else:
-                output_manager.output_line({
-                    "line": "Error: read " + str(read.query_name) + "already processed",
-                    "is_error": True
-                })
                 continue
             if read.query_name in reads_and_locations:
                 count += 1
@@ -150,6 +143,11 @@ class AlignmentParser:
                         "end_line": "\r",
                         "is_info": True
                     })
+                if read.query_name not in set_of_processed_reads:
+                    set_of_processed_reads.add(read.query_name)
+                else:
+                    read_counter += 1
+                    continue
                 for dict_item in reads_and_locations[read.query_name]:
                     location, loc_type = dict_item["location"], dict_item["location_type"]
                     strand = dict_item["strand"]
@@ -185,6 +183,12 @@ class AlignmentParser:
                             f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{loc_type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
         if errors:
             self.write_alignment_errors_to_file(errors)
+
+        if read_counter:
+            output_manager.output_line({
+                "line": str(read_counter) + " iterations extracted a already processed read from the BAM-file",
+                "is_error": True,
+            })
 
         output_manager.output_line({
             "line": "\nFinished",
