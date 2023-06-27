@@ -94,26 +94,25 @@ class AlignmentParser:
             if cigar_code == 1:
                 insertions += 1
 
-        if deletions:
-            del_key = ("deletions", strand, loc_type, offset)
-            if del_key not in self.updated_case_count:
-                self.updated_case_count[del_key] = {}
-            if deletions not in self.updated_case_count[del_key]:
-                self.updated_case_count[del_key][deletions] = 0
-            self.updated_case_count[del_key][deletions] += 1
-            if deletions not in self.case_count["deletions"][strand]:
-                self.case_count["deletions"][strand][deletions] = 0
-            self.case_count["deletions"][strand][deletions] += 1
-        if insertions:
-            ins_key = ("insertions", strand, loc_type, offset)
-            if ins_key not in self.updated_case_count:
-                self.updated_case_count[ins_key] = {}
-            if insertions not in self.updated_case_count[ins_key]:
-                self.updated_case_count[ins_key][insertions] = 0
-            self.updated_case_count[ins_key][insertions] += 1
-            if insertions not in self.case_count["insertions"][strand]:
-                self.case_count["insertions"][strand][insertions] = 0
-            self.case_count["insertions"][strand][insertions] += 1
+        del_key = ("deletions", strand, loc_type, offset)
+        if del_key not in self.updated_case_count:
+            self.updated_case_count[del_key] = {}
+        if deletions not in self.updated_case_count[del_key]:
+            self.updated_case_count[del_key][deletions] = 0
+        self.updated_case_count[del_key][deletions] += 1
+        if deletions not in self.case_count["deletions"][strand]:
+            self.case_count["deletions"][strand][deletions] = 0
+        self.case_count["deletions"][strand][deletions] += 1
+
+        ins_key = ("insertions", strand, loc_type, offset)
+        if ins_key not in self.updated_case_count:
+            self.updated_case_count[ins_key] = {}
+        if insertions not in self.updated_case_count[ins_key]:
+            self.updated_case_count[ins_key][insertions] = 0
+        self.updated_case_count[ins_key][insertions] += 1
+        if insertions not in self.case_count["insertions"][strand]:
+            self.case_count["insertions"][strand][insertions] = 0
+        self.case_count["insertions"][strand][insertions] += 1
 
         if deletions >= self.window_size or insertions >= self.window_size:
             debug_list.append(
