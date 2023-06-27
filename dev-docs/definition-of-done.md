@@ -1,5 +1,4 @@
 ## Definition of Done
-
 * The functionality defined as a User Story is added to the Project Board. The User Story includes acceptance criteria.
 * The necessary level of testing for the User Stories includes relevant unit tests. 
 * User Story is split into technical level tasks. The tasks are added to Project Board.
@@ -11,3 +10,6 @@
 * User Story has been approved by the client after a demonstration.
 * All acceptance criteria are fulfilled. 
 * Changes related to User Story have been merged to main branch.
+
+
+[Back to README.md](../README.md)

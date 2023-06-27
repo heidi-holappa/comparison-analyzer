@@ -1,5 +1,7 @@
 # General information
+[Back to README.md](../README.md)  
 
+**Content:**
 - [Offsets](#offsets)
   - [Defining offset](#defining-offset)
   - [Computing offset](#computing-offset)
@@ -10,7 +12,8 @@
   - [Processing CIGAR-string](#processing-a-cigar-string)
   - [Extracting CIGAR-codes](#extracting-cigar-codes-from-the-window-next-to-aligned-location)
 - [Data structures](#data-structures)
-- [Output](#output)
+  - [Normalizing results](#normalizing-results)
+- [Output](#compana-output-files)
 
 
 The purpose of this application is to study what happens in the locations, where the transcript provided by IsoQuant differs from the reference data.  
@@ -176,6 +179,7 @@ The stored value is the location of the start or end of an exon in the IsoQuant 
 
 ### Processing the imported BAM-file
 [Back to top](#general-information)  
+
 Next the reads are fetched from a given BAM-file with pysam-libary. Reads are iterated through and for primary and secondary reads insertions and deletions are counted. 
 
 ```python
@@ -207,6 +211,7 @@ function process_bam_file(reads_and_locations: dict):
 
 ### Processing a CIGAR-string
 [Back to top](#general-information)  
+
 With [pysam](https://pysam.readthedocs.io/en/latest/) the cigar string for a read can be imported as a list of tuples using the `cigartuples` method. With knowing the location of the interesting event, we can now compute what cigar-codes are in the predefined window next to the location the interesting event. To achieve this, we use the POS-information from the BAM file.  
 
 The CIGAR-parsing begins by computing the relative position: `relative_position = location - reference_start`. This gives the distance to the location of the interesting event in the reference genome from the `start_location`, which is stored within the read. At the end we are interested in the position in the CIGAR-string matching the location of the interesting event in the reference. To compute this we need to keep track of the reference position (`ref_position`) and simultaneously calculate an aligned position.  
