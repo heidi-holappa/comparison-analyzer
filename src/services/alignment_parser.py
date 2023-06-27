@@ -131,6 +131,9 @@ class AlignmentParser:
         errors = []
         set_of_processed_reads = set()
         for read in self.samfile.fetch():
+
+            if read.is_supplementary:
+                continue
             if read.query_name not in set_of_processed_reads:
                 set_of_processed_reads.add(read.query_name)
             else:
@@ -138,9 +141,6 @@ class AlignmentParser:
                     "line": "Error: read " + str(read.query_name) + "already processed",
                     "is_error": True
                 })
-                continue
-
-            if read.is_supplementary:
                 continue
             if read.query_name in reads_and_locations:
                 count += 1
