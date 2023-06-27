@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 
 dirname = os.path.dirname(__file__)
@@ -17,7 +18,8 @@ log_dir = os.getenv("LOG_FILE_DIR") or "logs"
 fasta_overview = os.getenv("FASTA_OVERVIEW_FILE") or "fasta_overview.md"
 cigar_results = os.getenv("CIGAR_RESULTS_LOG") or "cigar_results.md"
 
-LOG_FILE_DIR = os.path.join(dirname, "..", log_dir)
+LOG_FILE_DIR = os.path.join(dirname, "..", log_dir,
+                            datetime.now().strftime('%Y-%m-%d_%H-%M'))
 TEMPORARY_DIR = os.path.join(dirname, "..", temporary_dir_path)
 OFFSET_LOG = os.path.join(LOG_FILE_DIR, offset_log)
 TEST_FILE_DIR = os.path.join(dirname, "..", test_file_directory)
