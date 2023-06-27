@@ -52,6 +52,7 @@ def run_pipeline(parser_args):
         )
         bam_manager.execute(parser_args.window_size)
     output_manager.output_footer()
+    output_manager.write_log_file()
 
 
 def main():
