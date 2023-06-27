@@ -308,6 +308,7 @@ We iterate the CIGAR-tuples until we find the first event in which the sum of th
 
 **Note:** At this time only deletions and insertions are counted, but the code can be easily adapted to collect information on all CIGAR-codes. 
 
+
 ## Data structures
 [Back to top](#general-information)  
 
@@ -345,14 +346,32 @@ With the offsets computated we next extract the cases of interest. These are as 
 For computing the indels in given locations for each read, we finally need a list of reads and related information. Each read can be aligned to multiple transcripts. We again use a dictionary of dictionaries:
 ```python
 {
-    'read_id': {
+    'read_id': [
+      {
         'location': '<int>',
         'location_type': '<str>',
         'strand': '<string>',
         'offset': '<int>'
-    }
+      }
+    ]
 }
 ```
+
+### Normalizing results
+[Back to top](#general-information)  
+
+After extraction and processing, the computated results for insertions and deletions are stored in a dictionary:
+```python
+{
+    ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': '<int>'}
+}
+```
+
+As each given offset can have a positive or negative value as defined in the secion [offsets](#offsets), this means that for every offset in given range we have $2^4 = 16$ possible key combinations. These results are shown in the stdout and images are drawn from each key-value pair. In the stdout the results are shown as $n$-values, and in the images the results are normalized with the following reasoning:
+
+- transcript_ids are input into a set from the `matching_cases_dictionary` 
+- for each transcript_id in the set reads assigned to the given transcript_id are extracted from the IsoQuant `model_reads.tsv` - output file. 
+- a dictionary `reads_and_locations` is created in which all cases related to a transcript_id that is related to the given read are appended into a list of locations. This means that for a given read if the read is assigned to multiple transcripts, the same location can be in the list of locations multiple times.  
 
 ## Output 
 [Back to top](#general-information)  
@@ -363,7 +382,7 @@ For computing the indels in given locations for each read, we finally need a lis
 
 
 ### Images
-
+TBA 
 
 ### Log-information
 
