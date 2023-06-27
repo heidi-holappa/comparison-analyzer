@@ -69,20 +69,26 @@ def init_argparser():
         with open(parser_args.json, encoding="UTF-8") as json_file:
             json_dict = json.load(json_file)
             parser_dict.update(json_dict)
-            parser_dict["offset"] = str(parser_dict["offset"]).split(" ")
+    elif parser_args.offset:
+        parser_dict["offset"] = parser_args.offset[0].split(" ")
 
     if not parser_args.gffcompare_gtf or not parser_args.reference_gtf:
         parser.print_help()
         exit(1)
 
-    # TODO: Clean this. Problem is that nargs='+' returns a list of strings or a single string as json
     if not parser_args.offset:
-        parser_dict["offset"] = (0, 0)
-    elif len(parser_args.offset) == 1:
-        parser_dict["offset"] = (0, max(0, int(parser_args.offset[0])))
+        parser_dict["offset"] = (0, float('inf'))
     else:
+        offset_range = []
+        print(parser_args.offset)
+        for element in parser_args.offset:
+            if isinstance(element, str) and len(element) == 3:
+                offset_range.append(float('inf'))
+            else:
+                offset_range.append(int(element))
         parser_dict["offset"] = (
-            max(0, int(parser_args.offset[0])), max(0, int(parser_args.offset[1])))
+            max(0, offset_range[0]), max(0, offset_range[1])
+        )
 
     if not parser_args.window_size:
         parser_dict["window_size"] = DEFAULT_WINDOW_SIZE
