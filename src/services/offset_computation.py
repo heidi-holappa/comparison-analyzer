@@ -85,7 +85,7 @@ def write_to_output_file(offset_results: dict):
                 f"{key}\t{value['reference_id']}\t{value['class_code']}\t{value['strand']}\t{value['offsets']}\n")
 
 
-def execute_offset_computation(class_code, gffcompare_db, reference_db) -> dict:
+def execute_offset_computation(class_code: str, gffcompare_db, reference_db, extended_debug: bool) -> dict:
     output_manager.output_line({
         "line": "ANNOTATION COMPARISON",
         "is_info": True
@@ -114,9 +114,15 @@ def execute_offset_computation(class_code, gffcompare_db, reference_db) -> dict:
                     "class_code": class_code
                 }
 
-    write_to_output_file(offset_results_as_dict)
-    output_manager.output_line({
-        "line": f"Offset results written to: {OFFSET_LOG}",
-        "is_info": True
-    })
+    if extended_debug:
+        write_to_output_file(offset_results_as_dict)
+        output_manager.output_line({
+            "line": f"Offset results written to: {OFFSET_LOG}",
+            "is_info": True
+        })
+    else:
+        output_manager.output_line({
+            "line": "offset computation finished. Hint: to output results into a file, enable extended debug.",
+            "is_info": True
+        })
     return offset_results_as_dict
