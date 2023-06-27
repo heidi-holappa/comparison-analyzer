@@ -79,6 +79,10 @@ class BamManager:
         if self.extended_debugging:
             self.write_debug_logs(
                 dict_of_transcripts_and_reads, reads_and_locations)
+            output_manager.output_line({
+                "line": "Dictionaries 'transcripts and reads' and 'reads and location' created.",
+                "is_info": True
+            })
 
         output_manager.output_line({
             "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
