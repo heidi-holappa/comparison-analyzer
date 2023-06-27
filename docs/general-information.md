@@ -1,5 +1,18 @@
 # General information
 
+- [Offsets](#offsets)
+  - [Defining offset](#defining-offset)
+  - [Computing offset](#computing-offset)
+  - [Pseudocode](#pseudocode)
+  - [Offset output](#offset-output)
+- [Extracting information](#extracting-information)
+  - [Processing imported BAM-file](#processing-the-imported-bam-file)
+  - [Processing CIGAR-string](#processing-a-cigar-string)
+  - [Extracting CIGAR-codes](#extracting-cigar-codes-from-the-window-next-to-aligned-location)
+- [Data structures](#data-structures)
+- [Output](#output)
+
+
 The purpose of this application is to study what happens in the locations, where the transcript provided by IsoQuant differs from the reference data.  
 
 The application uses the following libraries to process information: [pysam](https://pysam.readthedocs.io/en/latest/), [gffutils](http://daler.github.io/gffutils/) and [pyfaidx](https://github.com/mdshw5/pyfaidx/)
@@ -19,7 +32,8 @@ With optional arguments user can adjust debugging, creating simple additional st
 
 ## Offsets
 
-### Defining offset
+### Defining offset  
+[Back to top](#general-information)  
 
 GTF-file `gffcompare` outputs contains class codes for transcripts. These class codes provide information on the quality of the alignment. One interesting aspect in the case of misalignments is the amount of the offset in the misalignment. This section provides a definition for offset and details how offset is calculated in this application. 
 
@@ -41,6 +55,7 @@ $$ t_{e_i,x_j} =  \mid a_{e_i} - a_{x_j} \mid + \mid b_{e_i} - b_{x_j} \mid $$
 2. There is no other exon $e_k\in E$ for which condition one applies with $x_j$ and $t_{e_k,x_j} < t_{e_i, x_j}$. 
 
 ### Computing offset
+[Back to top](#general-information)  
 
 The basic idea in computing the offset is to have the lists of tuples $E$ and $X$ in ascending order. The list $E$ is then iterated over to find the optimal matches from list $X$ for the exons. At each index, if possible, the items in the next index are also considered for an optimal match.  
 
@@ -65,6 +80,7 @@ Each of these cases needs to be considered. In case of $e_{i+1}$ being an elemen
 In cases 2 and 3 we notice that an exon from either the reference data or the aligned data is left without a pair. These instances will need to be noted in the data. In case 4 $e_i$ is paired with $x_j$ even though for $e_{i+1}$ $x_j$ the offset $t_{e_{i+1}, x_j}$ was smaller, as $x_{j+1}$ was a more suitable pair for $e_{i+1}$
 
 ### Pseudocode
+[Back to top](#general-information)  
 
 The following pseudocode computes the offsets following the rules given in definition two:
 
@@ -119,6 +135,7 @@ Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of refer
 
 
 ### Offset output
+[Back to top](#general-information)  
 
 1. In case of a match the offset is expressed from the point of view of the analyzed transcript in the form of a tuple of two integers $(a, b),\\,a,b\in\mathbb{Z}$. A negative integer indicates that the exon $e_i$ from the analyzed data has a smaller value than the matching reference exon $x_j$ and similarily a positive value indicates that the exon $e_i$ has a higher value
 2. A tuple $(\inf, \inf)$ indicates that no optimal match for an exon in analyzed data was found (i.e. there's possibly an exon in the analyzed data that is not present in the reference data)
@@ -126,16 +143,17 @@ Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of refer
 
 
 ## Extracting information 
-Once the offsets for each transcript are calculated, we can extract cases matching our interests. The offset results are iterated and for cases matching the pre-defined interesting case (wanted offset), results are extracted. 
+[Back to top](#general-information)  
+Once the offsets for each transcript are calculated, we can extract cases matching our interests. The offset results are iterated and for cases matching the pre-defined interesting case (range of offsets), results are extracted. 
 
 ```python
-def extract_candidates_matching_selected_offset(offset_results: dict, wanted_offset, reference_db):
+def extract_candidates_matching_selected_offset(offset_results: dict, offsets: tuple, reference_db):
   extracted_candidates = {}
   for key and value in offset_results:
     if stand is negative:
       reverse value (list)
     for offset_pair in value:
-      if abs(offset_pair[0]) == wanted_offset:
+      if abs(offset_pair[0]) in the range of offsets:
         fetch the correct exon from reference_db
         location of event = exon.start + value[i][0]
         store transcript_id, location, location type as 'start', strand
@@ -157,6 +175,7 @@ The values are stored as a dictionary. The key is concatenated from the transcri
 The stored value is the location of the start or end of an exon in the IsoQuant transcript. The motivation behind this is that we want to look at what happens after the start or before the end of an exon in a pre-defined window. 
 
 ### Processing the imported BAM-file
+[Back to top](#general-information)  
 Next the reads are fetched from a given BAM-file with pysam-libary. Reads are iterated through and for primary and secondary reads insertions and deletions are counted. 
 
 ```python
@@ -165,9 +184,13 @@ function process_bam_file(reads_and_locations: dict):
     if read.is_supplementary:
         continue
     if read.query_name in reads_and_locations:
+      # validate that read has not yet been processed 
       for location, type in reads_and_locations[read.query_name]:
         make correction to location (by -1)
-        validate: location in is in read, read has a cigar string, read has an end location        
+        # validate: 
+        # location in is in read, 
+        # read has a cigar string, 
+        # read has an end location        
 
         aligned_location = extract_location_from_cigar_string(
           read.cigartuples,
@@ -183,6 +206,7 @@ function process_bam_file(reads_and_locations: dict):
 ```
 
 ### Processing a CIGAR-string
+[Back to top](#general-information)  
 With [pysam](https://pysam.readthedocs.io/en/latest/) the cigar string for a read can be imported as a list of tuples using the `cigartuples` method. With knowing the location of the interesting event, we can now compute what cigar-codes are in the predefined window next to the location the interesting event. To achieve this, we use the POS-information from the BAM file.  
 
 The CIGAR-parsing begins by computing the relative position: `relative_position = location - reference_start`. This gives the distance to the location of the interesting event in the reference genome from the `start_location`, which is stored within the read. At the end we are interested in the position in the CIGAR-string matching the location of the interesting event in the reference. To compute this we need to keep track of the reference position (`ref_position`) and simultaneously calculate an aligned position.  
@@ -241,6 +265,7 @@ function extract_location_from_cigar_string(self, cigar_tuples: list, reference_
 ```
 
 ## Extracting CIGAR-codes from the window next to aligned location
+[Back to top](#general-information)  
 
 The method [cigartuples()](https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.cigartuples) from pysam-library returns a list of tuples with CIGAR-codes and number of operations for each code. 
 
@@ -287,11 +312,13 @@ We iterate the CIGAR-tuples until we find the first event in which the sum of th
 
 **Note:** At this time only deletions and insertions are counted, but the code can be easily adapted to collect information on all CIGAR-codes. 
 
+
 ## Data structures
+[Back to top](#general-information)  
 
 After some benchmarking with python data structures `tuple`, `namedtuple` and `dict`, it appears that for this application and it's use casesthe differences in efficiency are not very significant, at least without some level of refactoring. For easier readibility and expandability dictionaries are for now used for data structures. 
 
-**CASE: offset_results**
+**offset_results**  
 The offset results will be returned in a dictionary of dictionaries with the following structure:
 ```python
 {
@@ -304,28 +331,98 @@ The offset results will be returned in a dictionary of dictionaries with the fol
 }
 ```
 
-**CASE: matching_cases_dictionary**
+**matching_cases_dictionary**  
 With the offsets computated we next extract the cases of interest. These are as well stored in a dictionary of dictionaries. The key consists of the transcript_id, exon number and location to guarantee the key to be unique:
 ```python
 {
-    'transcript_id.exon_<number>.loc_type': {
+    'transcript_id.exon_<number>.loc_type.offset_number': {
         'exon': '<int>',
         'location': '<int>',
         'location_type': '<str>',
         'strand': '<string>',
-        'transcript_id': 'str'
+        'transcript_id': '<str>',
+        'offset': '<int>'
     }
+}
+```
+**transcripts_and_reads**  
+Each transcript_id has one or several reads assigned to it. Same read can be assigned to multiple transcript_ids. To compute reads and locations first a dictionary of transcript_ids and read_ids is created:
+```python
+{
+  'transcript_id': { 'set of read_ids' }
 }
 ```
 
-**CASE: reads_and_locations**
+**Note:** An assumption is made that one read is assigned to one transcript_id no more than once. 
+
+
+**reads_and_locations**  
 For computing the indels in given locations for each read, we finally need a list of reads and related information. Each read can be aligned to multiple transcripts. We again use a dictionary of dictionaries:
 ```python
 {
-    'read_id': {
+    'read_id': [
+      {
         'location': '<int>',
         'location_type': '<str>',
         'strand': '<string>',
-    }
+        'offset': '<int>'
+      }
+    ]
 }
 ```
+
+### Normalizing results
+[Back to top](#general-information)  
+
+After extraction and processing, the computated results for insertions and deletions are stored in a dictionary:
+```python
+{
+    ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': '<int>'}
+}
+```
+These are output to the stdout.  
+
+
+As each given offset can have a positive or negative value as defined in the secion [offsets](#offsets), this means that for every offset in given range we have $2^4 = 16$ possible key combinations. These results are shown in the stdout and images are drawn from each key-value pair. In the stdout the results are shown as $n$-values. In the images the results are normalized with the following reasoning:
+
+- transcript_ids are input into a set from the `matching_cases_dictionary` 
+- for each transcript_id in the set reads assigned to the given transcript_id are extracted from the IsoQuant `model_reads.tsv` - output file. 
+- a dictionary `reads_and_locations` is created in which all cases related to a transcript_id that is related to the given read are appended into a list of locations. This means that for a given read if the read is assigned to multiple transcripts, the same location can be in the list of locations multiple times. 
+- reads are then imported from the BAM-file using pysam-library and for each imported read each stored location is processed (see section [extracting information](#extracting-information) for details) and number of errors (indels) in each read are counted 
+
+After this the normalization is performed by computing the portion of values for each amount of errors:
+
+```python
+normalized_values = {key: value / sum(value.values()) for key, value in original_values_as_dict.values()}
+```
+
+**Remarks:**
+- each read can contain both insertions and deletions. 
+- if read contains multiple deletions, the given output sums separate deletions together. For instance CIGAR-string 2D3M3D would give output five deletions. 
+- for each normalized result the total number of cases is the total number of interesting locations assigned to various reads. 
+
+## compAna output files 
+[Back to top](#general-information)  
+
+compAna outputs log-files and images. User can also option to output additional log-files for debugging. By default the output files are created into directory `<root>/logs/<datetime>/` 
+
+
+As a default the following files are created:
+- fasta_overview.md: contains basic information computed from the imported FASTA-file (work in progress). 
+- stdout written to a file (note: content of this file is appended)
+- a normalized graph for each combination of indel-type, strand, exon-location (left/right side intron location) and offset. 
+
+By opting to have extended debugging on, the additional files will be created. See section [data structures](#data-structures) for details:
+- offset-results.log
+- reads_and_location.log
+- dict_of_transcripts_and_reads.log
+
+
+Indel error lengths are stored in a dictionary:
+
+```python
+{
+    ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': '<int>'}
+}
+```
+For each key-value pair a histogram is generated. 

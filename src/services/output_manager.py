@@ -1,7 +1,12 @@
+import os
 from datetime import datetime
+from config import LOG_FILE_DIR
 
 
 class OutputManager:
+
+    def __init__(self):
+        self.log_output = []
 
     def output_line(self, config: dict):
         """Outputs given line to console. Can be used to output titles, info, errors and more. A simple custom logger.
@@ -17,6 +22,7 @@ class OutputManager:
         is_info = config.get('is_info', False)
         is_error = config.get('is_error', False)
         title_line_length = config.get('title_line_length', 50)
+        save_to_log = config.get('save_to_log', True)
         if is_title:
             line = self.generate_title(line, fill, title_line_length)
         if is_info:
@@ -26,6 +32,8 @@ class OutputManager:
         print(line, end=end_line)
         if additional_line_breaks:
             print("\n" * additional_line_breaks, end="")
+        if save_to_log:
+            self.log_output.append(line + "\n")
 
     def generate_title(self, title: str, fill: str, line_length: int):
         if len(title):
@@ -63,6 +71,17 @@ class OutputManager:
         })
         self.output_line({
             "line": "Thank you for using compAna",
+            "is_info": True
+        })
+
+    def write_log_file(self):
+        if not self.log_output:
+            return
+        file_path = os.path.join(LOG_FILE_DIR, 'stdout.log')
+        with open(file_path, 'a', encoding='utf-8') as file:
+            file.writelines(self.log_output)
+        self.output_line({
+            "line": "stdout appended to " + file_path,
             "is_info": True
         })
 

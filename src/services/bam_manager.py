@@ -49,6 +49,7 @@ class BamManager:
                     "location": value['location'],
                     'location_type': value['location_type'],
                     'strand': value['strand'],
+                    'offset': value['offset']
                 }
                 reads_and_locations[read].append(location_and_type)
         return reads_and_locations
@@ -78,6 +79,10 @@ class BamManager:
         if self.extended_debugging:
             self.write_debug_logs(
                 dict_of_transcripts_and_reads, reads_and_locations)
+            output_manager.output_line({
+                "line": "Dictionaries 'transcripts and reads' and 'reads and location' created.",
+                "is_info": True
+            })
 
         output_manager.output_line({
             "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
@@ -101,20 +106,25 @@ class BamManager:
             "line": "Insertions and deletions found at given locations",
             "is_info": True
         })
-        print(alignment_parser.case_count)
-        for key, value in alignment_parser.case_count.items():
-            for key2, value2 in value.items():
-                output_manager.output_line({
-                    "line": f"{key} ({key2}): {value2}",
-                    "is_info": True
-                })
-                if value2:
-                    graph_manager.construct_bar_chart_from_dict(
-                        graph_values=value2,
-                        title=key + " (" + key2 + ")",
-                        x_label="Number of cases",
-                        y_label="Number of reads",
-                    )
+        # output_manager.output_line({
+        #     "line": str(alignment_parser.updated_case_count),
+        #     "is_info": True
+        # })
+        for key, value in alignment_parser.updated_case_count.items():
+            title = f"Type: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}"
+            filename = str(key[0]) + ".strand_" + str(key[1]) + ".exon-loc-" + \
+                str(key[2]) + ".offset-(" + str(key[3]) + ")"
+            output_manager.output_line({
+                "line": f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}",
+                "is_info": True
+            })
+            graph_manager.construct_bar_chart_from_dict(
+                graph_values=value,
+                filename=filename,
+                title=title,
+                x_label=f"Number of errors (n of cases: {sum(value.values())})",
+                y_label="Portion of reads",
+            )
 
     def execute(self, window_size: int):
 

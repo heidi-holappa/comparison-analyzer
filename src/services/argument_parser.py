@@ -27,7 +27,7 @@ def init_argparser():
     parser.add_argument(
         '-o', '--offset',
         help='offset from which canonical splice point is to be searched',
-        required=False,
+        nargs='+',
         metavar='')
     parser.add_argument(
         '-f', '--force',
@@ -69,10 +69,26 @@ def init_argparser():
         with open(parser_args.json, encoding="UTF-8") as json_file:
             json_dict = json.load(json_file)
             parser_dict.update(json_dict)
+    elif parser_args.offset:
+        parser_dict["offset"] = parser_args.offset[0].split(" ")
 
     if not parser_args.gffcompare_gtf or not parser_args.reference_gtf:
         parser.print_help()
         exit(1)
+
+    if not parser_args.offset:
+        parser_dict["offset"] = (0, float('inf'))
+    else:
+        offset_range = []
+        print(parser_args.offset)
+        for element in parser_args.offset:
+            if isinstance(element, str) and len(element) == 3:
+                offset_range.append(float('inf'))
+            else:
+                offset_range.append(int(element))
+        parser_dict["offset"] = (
+            max(0, offset_range[0]), max(0, offset_range[1])
+        )
 
     if not parser_args.window_size:
         parser_dict["window_size"] = DEFAULT_WINDOW_SIZE

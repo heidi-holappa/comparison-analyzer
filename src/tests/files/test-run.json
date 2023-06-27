@@ -1,0 +1,11 @@
+{
+    "reads_bam": "src/tests/files/Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.bam",
+    "reads_tsv": "src/tests/files/00_Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.transcript_model_reads.tsv",
+    "reference_gtf": "src/tests/files/gencode.vM26.basic.annotation.extract.gtf",
+    "reference_fasta": "src/tests/files/gencode.vM26.transcripts.extract.fa",
+    "gffcompare_gtf": "src/tests/files/gffcompare.annotated.gtf",
+    "offset": [4, 4],
+    "class_code": "j c k",
+    "force": false,
+    "stats": true
+}

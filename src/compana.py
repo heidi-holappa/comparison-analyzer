@@ -22,15 +22,13 @@ def run_pipeline(parser_args):
     offset_results = {}
     if parser_args.class_code:
         offset_results = execute_offset_computation(
-            parser_args.class_code, gffcompare_db, reference_db)
+            parser_args.class_code, gffcompare_db, reference_db, parser_args.extended_debug)
 
-    matching_cases_dict = {}
-    if parser_args.offset:
-        extractor = MatchingCasesExtractor(
-            offset_results,
-            parser_args.offset,
-            reference_db)
-        matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
+    extractor = MatchingCasesExtractor(
+        offset_results,
+        parser_args.offset,
+        reference_db)
+    matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
 
     if matching_cases_dict and parser_args.reference_fasta:
         fasta_config = {
@@ -54,6 +52,7 @@ def run_pipeline(parser_args):
         )
         bam_manager.execute(parser_args.window_size)
     output_manager.output_footer()
+    output_manager.write_log_file()
 
 
 def main():
