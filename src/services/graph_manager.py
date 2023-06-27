@@ -15,7 +15,12 @@ class GraphManagement:
     def normalize_values(self, graph_values: dict):
         return {key: value / sum(graph_values.values()) for key, value in graph_values.items()}
 
-    def construct_bar_chart_from_dict(self, graph_values: dict, title: str, x_label: str, y_label: str):
+    def construct_bar_chart_from_dict(self,
+                                      graph_values: dict,
+                                      filename: str,
+                                      title: str,
+                                      x_label: str,
+                                      y_label: str):
         normalized_graph_values = self.normalize_values(graph_values)
         values = sorted(normalized_graph_values.items())
         x_values, y_values = zip(*values)
@@ -24,7 +29,7 @@ class GraphManagement:
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.title(title)
-        plt.savefig(os.path.join(self.graph_dir, title + ".png"))
+        plt.savefig(os.path.join(self.graph_dir, filename + ".png"))
         plt.cla()
         plt.clf()
         plt.close()
