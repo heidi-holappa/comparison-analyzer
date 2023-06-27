@@ -4,7 +4,7 @@
     "reference_gtf": "reference.gtf",
     "reference_fasta": "reference.fa>",
     "gffcompare_gtf": "gffcompare.gtf",
-    "offset": 10,
+    "offset": [0, 10],
     "class_code": "j c k",
     "force": false,
     "stats": true
