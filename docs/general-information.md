@@ -184,9 +184,13 @@ function process_bam_file(reads_and_locations: dict):
     if read.is_supplementary:
         continue
     if read.query_name in reads_and_locations:
+      # validate that read has not yet been processed 
       for location, type in reads_and_locations[read.query_name]:
         make correction to location (by -1)
-        validate: location in is in read, read has a cigar string, read has an end location        
+        # validate: 
+        # location in is in read, 
+        # read has a cigar string, 
+        # read has an end location        
 
         aligned_location = extract_location_from_cigar_string(
           read.cigartuples,
@@ -314,7 +318,7 @@ We iterate the CIGAR-tuples until we find the first event in which the sum of th
 
 After some benchmarking with python data structures `tuple`, `namedtuple` and `dict`, it appears that for this application and it's use casesthe differences in efficiency are not very significant, at least without some level of refactoring. For easier readibility and expandability dictionaries are for now used for data structures. 
 
-**CASE: offset_results**
+**offset_results**  
 The offset results will be returned in a dictionary of dictionaries with the following structure:
 ```python
 {
@@ -327,7 +331,7 @@ The offset results will be returned in a dictionary of dictionaries with the fol
 }
 ```
 
-**CASE: matching_cases_dictionary**
+**matching_cases_dictionary**  
 With the offsets computated we next extract the cases of interest. These are as well stored in a dictionary of dictionaries. The key consists of the transcript_id, exon number and location to guarantee the key to be unique:
 ```python
 {
@@ -341,8 +345,18 @@ With the offsets computated we next extract the cases of interest. These are as 
     }
 }
 ```
+**transcripts_and_reads**  
+Each transcript_id has one or several reads assigned to it. Same read can be assigned to multiple transcript_ids. To compute reads and locations first a dictionary of transcript_ids and read_ids is created:
+```python
+{
+  'transcript_id': { 'set of read_ids' }
+}
+```
 
-**CASE: reads_and_locations**
+**Note:** An assumption is made that one read is assigned to one transcript_id no more than once. 
+
+
+**reads_and_locations**  
 For computing the indels in given locations for each read, we finally need a list of reads and related information. Each read can be aligned to multiple transcripts. We again use a dictionary of dictionaries:
 ```python
 {
@@ -366,25 +380,42 @@ After extraction and processing, the computated results for insertions and delet
     ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': '<int>'}
 }
 ```
+These are output to the stdout.  
 
-As each given offset can have a positive or negative value as defined in the secion [offsets](#offsets), this means that for every offset in given range we have $2^4 = 16$ possible key combinations. These results are shown in the stdout and images are drawn from each key-value pair. In the stdout the results are shown as $n$-values, and in the images the results are normalized with the following reasoning:
+
+As each given offset can have a positive or negative value as defined in the secion [offsets](#offsets), this means that for every offset in given range we have $2^4 = 16$ possible key combinations. These results are shown in the stdout and images are drawn from each key-value pair. In the stdout the results are shown as $n$-values. In the images the results are normalized with the following reasoning:
 
 - transcript_ids are input into a set from the `matching_cases_dictionary` 
 - for each transcript_id in the set reads assigned to the given transcript_id are extracted from the IsoQuant `model_reads.tsv` - output file. 
-- a dictionary `reads_and_locations` is created in which all cases related to a transcript_id that is related to the given read are appended into a list of locations. This means that for a given read if the read is assigned to multiple transcripts, the same location can be in the list of locations multiple times.  
+- a dictionary `reads_and_locations` is created in which all cases related to a transcript_id that is related to the given read are appended into a list of locations. This means that for a given read if the read is assigned to multiple transcripts, the same location can be in the list of locations multiple times. 
+- reads are then imported from the BAM-file using pysam-library and for each imported read each stored location is processed (see section [extracting information](#extracting-information) for details) and number of errors (indels) in each read are counted 
 
-## Output 
+After this the normalization is performed by computing the portion of values for each amount of errors:
+
+```python
+normalized_values = {key: value / sum(value.values()) for key, value in original_values_as_dict.values()}
+```
+
+**Remarks:**
+- each read can contain both insertions and deletions. 
+- if read contains multiple deletions, the given output sums separate deletions together. For instance CIGAR-string 2D3M3D would give output five deletions. 
+- for each normalized result the total number of cases is the total number of interesting locations assigned to various reads. 
+
+## compAna output files 
 [Back to top](#general-information)  
 
-**Writer's notes:**
-- Add img-output information
-- Add log output information
+compAna outputs log-files and images. User can also option to output additional log-files for debugging. By default the output files are created into directory `<root>/logs/<datetime>/` 
 
 
-### Images
-TBA 
+As a default the following files are created:
+- fasta_overview.md: contains basic information computed from the imported FASTA-file (work in progress). 
+- stdout written to a file (note: content of this file is appended)
+- a normalized graph for each combination of indel-type, strand, exon-location (left/right side intron location) and offset. 
 
-### Log-information
+By opting to have extended debugging on, the additional files will be created. See section [data structures](#data-structures) for details:
+- offset-results.log
+- reads_and_location.log
+- dict_of_transcripts_and_reads.log
 
 
 Indel error lengths are stored in a dictionary:
