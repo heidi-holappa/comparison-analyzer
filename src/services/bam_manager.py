@@ -110,7 +110,7 @@ class BamManager:
             title = str(key[0]) + ".strand-" + str(key[1]) + ".exon-loc-" + \
                 str(key[2]) + ".offset-(" + str(key[3]) + ")"
             output_manager.output_line({
-                "line": f"in/del: {key[0]}, strand: {key[1]}, : {key[2]}, offset: {key[3]}",
+                "line": f"in/del: {key[0]}, strand: {key[1]}, : {key[2]}, offset: {key[3]}: {value}",
                 "is_info": True
             })
             graph_manager.construct_bar_chart_from_dict(
