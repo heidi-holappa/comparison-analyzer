@@ -1,5 +1,18 @@
 # General information
 
+- [Offsets](#offsets)
+  - [Defining offset](#defining-offset)
+  - [Computing offset](#computing-offset)
+  - [Pseudocode](#pseudocode)
+  - [Offset output](#offset-output)
+- [Extracting information](#extracting-information)
+  - [Processing imported BAM-file](#processing-the-imported-bam-file)
+  - [Processing CIGAR-string](#processing-a-cigar-string)
+  - [Extracting CIGAR-codes](#extracting-cigar-codes-from-the-window-next-to-aligned-location)
+- [Data structures](#data-structures)
+- [Output](#output)
+
+
 The purpose of this application is to study what happens in the locations, where the transcript provided by IsoQuant differs from the reference data.  
 
 The application uses the following libraries to process information: [pysam](https://pysam.readthedocs.io/en/latest/), [gffutils](http://daler.github.io/gffutils/) and [pyfaidx](https://github.com/mdshw5/pyfaidx/)
@@ -19,7 +32,8 @@ With optional arguments user can adjust debugging, creating simple additional st
 
 ## Offsets
 
-### Defining offset
+### Defining offset  
+[Back to top](#general-information)  
 
 GTF-file `gffcompare` outputs contains class codes for transcripts. These class codes provide information on the quality of the alignment. One interesting aspect in the case of misalignments is the amount of the offset in the misalignment. This section provides a definition for offset and details how offset is calculated in this application. 
 
@@ -41,6 +55,7 @@ $$ t_{e_i,x_j} =  \mid a_{e_i} - a_{x_j} \mid + \mid b_{e_i} - b_{x_j} \mid $$
 2. There is no other exon $e_k\in E$ for which condition one applies with $x_j$ and $t_{e_k,x_j} < t_{e_i, x_j}$. 
 
 ### Computing offset
+[Back to top](#general-information)  
 
 The basic idea in computing the offset is to have the lists of tuples $E$ and $X$ in ascending order. The list $E$ is then iterated over to find the optimal matches from list $X$ for the exons. At each index, if possible, the items in the next index are also considered for an optimal match.  
 
@@ -65,6 +80,7 @@ Each of these cases needs to be considered. In case of $e_{i+1}$ being an elemen
 In cases 2 and 3 we notice that an exon from either the reference data or the aligned data is left without a pair. These instances will need to be noted in the data. In case 4 $e_i$ is paired with $x_j$ even though for $e_{i+1}$ $x_j$ the offset $t_{e_{i+1}, x_j}$ was smaller, as $x_{j+1}$ was a more suitable pair for $e_{i+1}$
 
 ### Pseudocode
+[Back to top](#general-information)  
 
 The following pseudocode computes the offsets following the rules given in definition two:
 
@@ -119,6 +135,7 @@ Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of refer
 
 
 ### Offset output
+[Back to top](#general-information)  
 
 1. In case of a match the offset is expressed from the point of view of the analyzed transcript in the form of a tuple of two integers $(a, b),\\,a,b\in\mathbb{Z}$. A negative integer indicates that the exon $e_i$ from the analyzed data has a smaller value than the matching reference exon $x_j$ and similarily a positive value indicates that the exon $e_i$ has a higher value
 2. A tuple $(\inf, \inf)$ indicates that no optimal match for an exon in analyzed data was found (i.e. there's possibly an exon in the analyzed data that is not present in the reference data)
@@ -126,6 +143,7 @@ Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of refer
 
 
 ## Extracting information 
+[Back to top](#general-information)  
 Once the offsets for each transcript are calculated, we can extract cases matching our interests. The offset results are iterated and for cases matching the pre-defined interesting case (range of offsets), results are extracted. 
 
 ```python
@@ -157,6 +175,7 @@ The values are stored as a dictionary. The key is concatenated from the transcri
 The stored value is the location of the start or end of an exon in the IsoQuant transcript. The motivation behind this is that we want to look at what happens after the start or before the end of an exon in a pre-defined window. 
 
 ### Processing the imported BAM-file
+[Back to top](#general-information)  
 Next the reads are fetched from a given BAM-file with pysam-libary. Reads are iterated through and for primary and secondary reads insertions and deletions are counted. 
 
 ```python
@@ -183,6 +202,7 @@ function process_bam_file(reads_and_locations: dict):
 ```
 
 ### Processing a CIGAR-string
+[Back to top](#general-information)  
 With [pysam](https://pysam.readthedocs.io/en/latest/) the cigar string for a read can be imported as a list of tuples using the `cigartuples` method. With knowing the location of the interesting event, we can now compute what cigar-codes are in the predefined window next to the location the interesting event. To achieve this, we use the POS-information from the BAM file.  
 
 The CIGAR-parsing begins by computing the relative position: `relative_position = location - reference_start`. This gives the distance to the location of the interesting event in the reference genome from the `start_location`, which is stored within the read. At the end we are interested in the position in the CIGAR-string matching the location of the interesting event in the reference. To compute this we need to keep track of the reference position (`ref_position`) and simultaneously calculate an aligned position.  
@@ -241,6 +261,7 @@ function extract_location_from_cigar_string(self, cigar_tuples: list, reference_
 ```
 
 ## Extracting CIGAR-codes from the window next to aligned location
+[Back to top](#general-information)  
 
 The method [cigartuples()](https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.cigartuples) from pysam-library returns a list of tuples with CIGAR-codes and number of operations for each code. 
 
@@ -288,6 +309,7 @@ We iterate the CIGAR-tuples until we find the first event in which the sum of th
 **Note:** At this time only deletions and insertions are counted, but the code can be easily adapted to collect information on all CIGAR-codes. 
 
 ## Data structures
+[Back to top](#general-information)  
 
 After some benchmarking with python data structures `tuple`, `namedtuple` and `dict`, it appears that for this application and it's use casesthe differences in efficiency are not very significant, at least without some level of refactoring. For easier readibility and expandability dictionaries are for now used for data structures. 
 
@@ -333,6 +355,18 @@ For computing the indels in given locations for each read, we finally need a lis
 ```
 
 ## Output 
+[Back to top](#general-information)  
+
+**Writer's notes:**
+- Add img-output information
+- Add log output information
+
+
+### Images
+
+
+### Log-information
+
 
 Indel error lengths are stored in a dictionary:
 
