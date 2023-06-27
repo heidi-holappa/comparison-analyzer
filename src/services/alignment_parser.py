@@ -129,7 +129,17 @@ class AlignmentParser:
     def process_bam_file(self, reads_and_locations: dict):
         count = 0
         errors = []
+        set_of_processed_reads = set()
         for read in self.samfile.fetch():
+            if read.query_name not in set_of_processed_reads:
+                set_of_processed_reads.add(read.query_name)
+            else:
+                output_manager.output_line({
+                    "line": "Error: read " + str(read.query_name) + "already processed",
+                    "is_error": True
+                })
+                continue
+
             if read.is_supplementary:
                 continue
             if read.query_name in reads_and_locations:
