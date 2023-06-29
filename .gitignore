@@ -12,3 +12,4 @@ pylint.log
 offsets.txt
 htmlcov/
 logs/
+dx1-logs/
