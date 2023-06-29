@@ -74,6 +74,15 @@ class TestFastaExtractor(TestCase):
         print(extractor.matching_cases_dict)
         self.assertTrue(result)
 
+    def test_extracting_nucleotides_returns_correct_values(self):
+        extractor = FastaExtractor(self.fasta_config)
+        extractor.initialize_fasta()
+        coordinates = ("chr1", 100, 116)
+        nucleotides = extractor.extract_characters_at_given_coordinates(
+            coordinates)
+        expected_result = 'TTGTTATCTTCCTGGG'
+        self.assertEqual(nucleotides, expected_result)
+
     def test_finding_closest_canonicals_returns_correct_values_when_both_matches_are_found(self):
         extractor = FastaExtractor(self.fasta_config)
         dict_entry = 'transcript1.chr1.nnic.exon_4.start'
