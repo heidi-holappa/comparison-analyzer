@@ -17,6 +17,7 @@ class FastaExtractor:
             'matching_cases_dict', {})
         self.window_size = int(fasta_config.get(
             'window_size', DEFAULT_WINDOW_SIZE))
+        self.closest_canonicals_overview = {"left": {}, "right": {}}
 
     def initialize_fasta(self):
         if self.fasta_path:
@@ -26,6 +27,7 @@ class FastaExtractor:
         if self.fasta:
             chromosome, start, end = coordinates
             return self.fasta[chromosome][start:end]
+        return -1
 
     def output_section_header(self):
         output_manager.output_line({
@@ -183,7 +185,28 @@ class FastaExtractor:
         if 'right' not in closest_canonicals:
             closest_canonicals['right'] = (
                 aligned_splice_site_nucleotides, aligned_splice_site_nucleotides)
-        self.matching_cases_dict[dict_key]['closest_canonicals'] = closest_canonicals
+        self.matching_cases_dict[dict_key]["closest_canonicals"] = closest_canonicals
+
+        left_result = self.matching_cases_dict[dict_key]["closest_canonical"]["left"]
+        right_result = self.matching_cases_dict[dict_key]["closest_canonical"]["right"]
+        if left_result not in self.closest_canonicals_overview["left"]:
+            self.closest_canonicals_overview["left"][left_result] = 0
+        self.closest_canonicals_overview["left"][left_result] += 1
+        if right_result not in self.closest_canonicals_overview["right"]:
+            self.closest_canonicals_overview["right"][right_result] = 0
+        self.closest_canonicals_overview["right"][right_result] += 1
+
+    def iterate_matching_cases(self):
+        for key, value in self.matching_cases_dict.items():
+            coordinates = (key.split('.')[
+                           1], value["location"] - self.window_size, value["location"] + self.window_size)
+            nucleotides = self.extract_characters_at_given_coordinates(
+                coordinates)
+            if value["location_type"] == "start":
+                canonicals = ["AG", "AC"]
+            else:
+                canonicals = ["GT", "GC", "AT"]
+            self.find_closest_canonicals(str(nucleotides), key, canonicals)
 
     def execute_fasta_extraction(self):
         self.output_section_header()
