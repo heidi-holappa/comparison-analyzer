@@ -192,7 +192,7 @@ function process_bam_file(reads_and_locations: dict):
       for location, type in reads_and_locations[read.query_name]:
         make correction to location (by -1)
         # validate: 
-        # location is in in read, 
+        # location is in read, 
         # read has a cigar string, 
         # read has an end location        
 
