@@ -166,6 +166,25 @@ class FastaExtractor:
             self.matching_cases_dict[key]['position_sequence'] = str(
                 nucleotides)
 
+    def find_closest_canonicals(self, nucleotides: str, dict_key: str, canonicals: list):
+        nucleotides_middle = int(len(nucleotides) / 2)
+        closest_canonicals = {}
+        aligned_splice_site_nucleotides = nucleotides[nucleotides_middle:nucleotides_middle + 2]
+        for i in range(1, nucleotides_middle):
+            if nucleotides[nucleotides_middle - i:nucleotides_middle - i + 2] in canonicals and 'left' not in closest_canonicals:
+                closest_canonicals['left'] = (
+                    nucleotides[nucleotides_middle - i:nucleotides_middle - i + 2], aligned_splice_site_nucleotides)
+            if nucleotides[nucleotides_middle + i:nucleotides_middle + i + 2] in canonicals and 'right' not in closest_canonicals:
+                closest_canonicals['right'] = (
+                    nucleotides[nucleotides_middle + i:nucleotides_middle + i + 2], aligned_splice_site_nucleotides)
+        if 'left' not in closest_canonicals:
+            closest_canonicals['left'] = (
+                aligned_splice_site_nucleotides, aligned_splice_site_nucleotides)
+        if 'right' not in closest_canonicals:
+            closest_canonicals['right'] = (
+                aligned_splice_site_nucleotides, aligned_splice_site_nucleotides)
+        self.matching_cases_dict[dict_key]['closest_canonicals'] = closest_canonicals
+
     def execute_fasta_extraction(self):
         self.output_section_header()
         self.initialize_fasta()
