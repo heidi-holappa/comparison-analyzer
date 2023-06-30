@@ -24,6 +24,29 @@ class LogManager:
                 if count not in indel_results[key]:
                     indel_results[key][count] = 0
                 indel_results[key][count] += 1
+        return indel_results
+
+    def generate_graphs(self):
+        indel_results = self.compute_indel_results()
+        output_manager.output_line({
+            "line": "Insertions and deletions found at given locations",
+            "is_info": True
+        })
+        for key, value in indel_results.items():
+            title = f"Type: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}"
+            filename = str(key[0]) + ".strand_" + str(key[1]) + ".exon-loc-" + \
+                str(key[2]) + ".offset-(" + str(key[3]) + ")"
+            output_manager.output_line({
+                "line": f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}",
+                "is_info": True
+            })
+            graph_manager.construct_bar_chart_from_dict(
+                graph_values=value,
+                filename=filename,
+                title=title,
+                x_label=f"Number of errors (n of cases: {sum(value.values())})",
+                y_label="Portion of reads",
+            )
 
     def compute_json_overview_dict_for_closest_canonicals(self):
         count = {
@@ -83,7 +106,7 @@ class LogManager:
             file.write("Specified offset: " +
                        str(parser_args.offset) + "\n")
             file.write("Class codes: " +
-                       str(parser_args.class_codes) + "\n")
+                       str(parser_args.class_code) + "\n")
             file.write("```\n")
             file.write("**Results in JSON-format:**  \n")
             file.write("```json\n")
@@ -131,6 +154,8 @@ class LogManager:
         self.matching_cases_dict = matching_cases_dict
 
         self.write_closest_canonicals_log_to_file(parser_args)
+        self.generate_graphs()
+
         if parser_args.extended_debug:
             self.write_debug_files()
 
