@@ -13,20 +13,32 @@ class LogManager:
         self.debug_logs = {}
         pass
 
+    def compute_indel_results(self):
+        indel_results = {}
+        for matching_case in self.matching_cases_dict.values():
+            for type, count in matching_case['indel_errors'].items():
+                key = (
+                    type, matching_case['strand'], matching_case['location_type'], matching_case['offset'])
+                if key not in indel_results:
+                    indel_results[key] = {}
+                if count not in indel_results[key]:
+                    indel_results[key][count] = 0
+                indel_results[key][count] += 1
+
     def compute_json_overview_dict_for_closest_canonicals(self):
         count = {
-            'indel_errors': 0,
-            'indel_errors_not_found': 0,
+            'cases_with_indel_errors': 0,
+            'cases_with_indel_errors_not_found': 0,
         }
         json_overview = {}
         for value in self.matching_cases_dict.values():
             strand, location_type = value['strand'], value['location_type']
             offset = value['offset']
             if 'indel_errors' not in value:
-                count['indel_errors_not_found'] += 1
+                count['cases_with_indel_errors_not_found'] += 1
                 continue
             for indel_errors_key in value['indel_errors']:
-                count['indel_errors'] += 1
+                count['cases_with_indel_errors'] += 1
                 json_key = (indel_errors_key, strand, location_type, offset)
                 for canonicals_key, canonicals_value in value['closest_canonical'].items():
                     if json_key not in json_overview:
@@ -67,7 +79,7 @@ class LogManager:
             file.write("Reference GTF-file:\n" +
                        parser_args.reference_gtf + "\n\n")
             file.write("Reference FASTA-file:\n" +
-                       parser_args.fasta_path + "\n\n")
+                       parser_args.reference_fasta + "\n\n")
             file.write("Specified offset: " +
                        str(parser_args.offset) + "\n")
             file.write("Class codes: " +
@@ -109,11 +121,14 @@ class LogManager:
                 for entry_key, entry_values in log_values.items():
                     file.write(f"{entry_key}\t{entry_values}\n")
 
-    def execute_log_file_creation(self, parser_args):
+    def execute_log_file_creation(self, matching_cases_dict: dict, parser_args):
+
         output_manager.output_line({
             "line": "Creating log-files",
             "is_info": True
         })
+
+        self.matching_cases_dict = matching_cases_dict
 
         self.write_closest_canonicals_log_to_file(parser_args)
         if parser_args.extended_debug:
