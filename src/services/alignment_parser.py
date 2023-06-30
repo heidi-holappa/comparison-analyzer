@@ -71,6 +71,10 @@ class AlignmentParser:
         insertions = 0
         debug_list = []
         location = 0
+        result = {
+            'deletions': 0,
+            'insertions': 0
+        }
 
         cigar_code_list = []
 
@@ -114,11 +118,14 @@ class AlignmentParser:
             self.case_count["insertions"][strand][insertions] = 0
         self.case_count["insertions"][strand][insertions] += 1
 
+        result['deletions'] = deletions
+        result['insertions'] = insertions
+
         if deletions >= self.window_size or insertions >= self.window_size:
             debug_list.append(
                 f"deletions: {deletions}, insertions: {insertions}")
-            return True, debug_list
-        return False, debug_list
+            return True, debug_list, result
+        return False, debug_list, result
 
     def write_alignment_errors_to_file(self, errors: list):
         with open(self.error_file_output_dir, "w") as file:
@@ -126,7 +133,9 @@ class AlignmentParser:
                 "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\tlist of alignments\n")
             file.writelines(errors)
 
-    def process_bam_file(self, reads_and_locations: dict):
+    def process_bam_file(self,
+                         reads_and_references: dict,
+                         matching_cases_dict: dict):
         count = 0
         errors = []
         set_of_processed_reads = set()
@@ -135,7 +144,7 @@ class AlignmentParser:
 
             if read.is_supplementary:
                 continue
-            if read.query_name in reads_and_locations:
+            if read.query_name in reads_and_references:
                 if read.query_name not in set_of_processed_reads:
                     set_of_processed_reads.add(read.query_name)
                 else:
@@ -149,10 +158,11 @@ class AlignmentParser:
                         "is_info": True,
                         "save_to_log": False
                     })
-                for dict_item in reads_and_locations[read.query_name]:
-                    location, loc_type = dict_item["location"], dict_item["location_type"]
-                    strand = dict_item["strand"]
-                    offset = dict_item["offset"]
+                for matching_case_key in reads_and_references[read.query_name]:
+                    location, loc_type = matching_cases_dict[matching_case_key][
+                        "location"], matching_cases_dict[matching_case_key]["location_type"]
+                    strand = matching_cases_dict[matching_case_key]["strand"]
+                    offset = matching_cases_dict[matching_case_key]["offset"]
                     idx_corrected_location = location - 1
 
                     if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
@@ -172,12 +182,13 @@ class AlignmentParser:
                         idx_corrected_location
                     )
 
-                    response, debug_list = self.count_indels_from_cigar_codes_in_given_window(
+                    response, debug_list, result = self.count_indels_from_cigar_codes_in_given_window(
                         read.cigartuples,
                         aligned_location,
                         loc_type,
                         strand,
                         offset)
+                    matching_cases_dict[matching_case_key]['indel_errors'] = response
 
                     if response:
                         errors.append(
@@ -197,8 +208,12 @@ class AlignmentParser:
         })
 
     # TODO: remove transcripts and reads. It is here for debugging
-    def execute(self, filename: str, window_size: int,
-                reads_and_locations: dict, transcripts_and_reads: dict):
+    def execute(self,
+                filename: str,
+                window_size: int,
+                reads_and_references: dict,
+                matching_cases_dict: dict,
+                transcripts_and_reads: dict):
         """
         Initialize AlignmentFile and execute the alignment parser.
 
@@ -216,7 +231,7 @@ class AlignmentParser:
                 self.reads_and_transcripts[read].add(key)
 
         self.initialize_file(filename)
-        self.process_bam_file(reads_and_locations)
+        self.process_bam_file(reads_and_references, matching_cases_dict)
 
 
 default_alignment_parser = AlignmentParser()
