@@ -1,7 +1,8 @@
-import os
 import pysam
+
 from services.output_manager import default_output_manager as output_manager
-from config import DEFAULT_WINDOW_SIZE, LOG_FILE_DIR
+from services.log_manager import default_log_manager as log_manager
+from config import DEFAULT_WINDOW_SIZE
 
 
 class AlignmentParser:
@@ -18,26 +19,22 @@ class AlignmentParser:
     def __init__(self):
         """
             Parse a BAM-file and count the number of insertions and deletions at a given location.
-            Follows the singleton pattern. Total case count for all processed BAM-files
-            is stored in self.case_count.
+            Follows the singleton pattern. 
         """
 
         self.reads_and_transcripts = {}
-        self.case_count = {
-            "insertions": {'+': {}, '-': {}},
-            "deletions": {'+': {}, '-': {}},
-        }
-        self.updated_case_count = {}
         # TODO: add to configuration or to user arguments (window size)
         self.window_size = int(DEFAULT_WINDOW_SIZE)
-        self.error_file_output_dir = os.path.join(
-            LOG_FILE_DIR, "alignment_errors.log")
 
     def initialize_file(self, filename: str):
         # pylint: disable=no-member
         self.samfile = pysam.AlignmentFile(filename, "rb")
 
-    def extract_location_from_cigar_string(self, cigar_tuples: list, reference_start: int, reference_end: int, location: int):
+    def extract_location_from_cigar_string(self,
+                                           cigar_tuples: list,
+                                           reference_start: int,
+                                           reference_end: int,
+                                           location: int):
         relative_position = location - reference_start
         alignment_position = 0
         ref_position = 0
@@ -67,16 +64,18 @@ class AlignmentParser:
             aligned_location (int): aligned location
             loc_type (str): type of location (start or end)
         """
-        deletions = 0
-        insertions = 0
-        debug_list = []
-        location = 0
         result = {
             'deletions': 0,
             'insertions': 0
         }
 
+        deletions = 0
+        insertions = 0
+
         cigar_code_list = []
+        location = 0
+
+        debug_list = []
 
         if loc_type == "end":
             aligned_location = aligned_location - self.window_size + 1
@@ -98,26 +97,6 @@ class AlignmentParser:
             if cigar_code == 1:
                 insertions += 1
 
-        del_key = ("deletions", strand, loc_type, offset)
-        if del_key not in self.updated_case_count:
-            self.updated_case_count[del_key] = {}
-        if deletions not in self.updated_case_count[del_key]:
-            self.updated_case_count[del_key][deletions] = 0
-        self.updated_case_count[del_key][deletions] += 1
-        if deletions not in self.case_count["deletions"][strand]:
-            self.case_count["deletions"][strand][deletions] = 0
-        self.case_count["deletions"][strand][deletions] += 1
-
-        ins_key = ("insertions", strand, loc_type, offset)
-        if ins_key not in self.updated_case_count:
-            self.updated_case_count[ins_key] = {}
-        if insertions not in self.updated_case_count[ins_key]:
-            self.updated_case_count[ins_key][insertions] = 0
-        self.updated_case_count[ins_key][insertions] += 1
-        if insertions not in self.case_count["insertions"][strand]:
-            self.case_count["insertions"][strand][insertions] = 0
-        self.case_count["insertions"][strand][insertions] += 1
-
         result['deletions'] = deletions
         result['insertions'] = insertions
 
@@ -127,19 +106,13 @@ class AlignmentParser:
             return True, debug_list, result
         return False, debug_list, result
 
-    def write_alignment_errors_to_file(self, errors: list):
-        with open(self.error_file_output_dir, "w") as file:
-            file.write(
-                "qname\ttranscripts\tlocation\talign_location\ttype\tread.reference_start\tread.reference_end\tlist of alignments\n")
-            file.writelines(errors)
-
     def process_bam_file(self,
                          reads_and_references: dict,
                          matching_cases_dict: dict):
         count = 0
         errors = []
         set_of_processed_reads = set()
-        read_counter = 0
+        prev_processed_reads_counter = 0
         for read in self.samfile.fetch():
 
             if read.is_supplementary:
@@ -148,7 +121,7 @@ class AlignmentParser:
                 if read.query_name not in set_of_processed_reads:
                     set_of_processed_reads.add(read.query_name)
                 else:
-                    read_counter += 1
+                    prev_processed_reads_counter += 1
                     continue
                 count += 1
                 if count % 1000 == 0:
@@ -159,10 +132,11 @@ class AlignmentParser:
                         "save_to_log": False
                     })
                 for matching_case_key in reads_and_references[read.query_name]:
-                    location, loc_type = matching_cases_dict[matching_case_key][
-                        "location"], matching_cases_dict[matching_case_key]["location_type"]
+                    location = matching_cases_dict[matching_case_key]["location"]
+                    loc_type = matching_cases_dict[matching_case_key]["location_type"]
                     strand = matching_cases_dict[matching_case_key]["strand"]
                     offset = matching_cases_dict[matching_case_key]["offset"]
+
                     idx_corrected_location = location - 1
 
                     if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
@@ -191,14 +165,15 @@ class AlignmentParser:
                     matching_cases_dict[matching_case_key]['indel_errors'] = result
 
                     if response:
-                        errors.append(
-                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t{idx_corrected_location}\t{aligned_location}\t{loc_type}\t{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
-        if errors:
-            self.write_alignment_errors_to_file(errors)
+                        log_manager.alignment_erros.append(
+                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t" +
+                            f"{idx_corrected_location}\t{aligned_location}\t{loc_type}\t" +
+                            f"{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
 
-        if read_counter:
+        if prev_processed_reads_counter:
             output_manager.output_line({
-                "line": str(read_counter) + " iterations extracted a already processed read from the BAM-file",
+                "line": str(prev_processed_reads_counter) +
+                " iterations extracted an already processed read from the BAM-file",
                 "is_error": True,
             })
 
