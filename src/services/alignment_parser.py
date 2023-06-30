@@ -188,7 +188,7 @@ class AlignmentParser:
                         loc_type,
                         strand,
                         offset)
-                    matching_cases_dict[matching_case_key]['indel_errors'] = response
+                    matching_cases_dict[matching_case_key]['indel_errors'] = result
 
                     if response:
                         errors.append(
