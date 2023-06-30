@@ -158,4 +158,4 @@ class BamManager:
             dict_of_transcripts_and_reads
         )
 
-        self.output_results(alignment_parser)
+        # self.output_results(alignment_parser)
