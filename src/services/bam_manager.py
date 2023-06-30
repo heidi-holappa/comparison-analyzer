@@ -4,6 +4,7 @@ from services.read_management import create_dict_of_transcripts_and_reads
 from services.output_manager import default_output_manager as output_manager
 from services.alignment_parser import default_alignment_parser as alignment_parser
 from services.graph_manager import default_graph_manager as graph_manager
+from services.log_manager import default_log_manager as log_manager
 
 from config import LOG_FILE_DIR
 
@@ -54,6 +55,17 @@ class BamManager:
                 reads_and_locations[read].append(location_and_type)
         return reads_and_locations
 
+    def generate_reads_and_references(self, dict_of_transcripts_and_reads: dict):
+        reads_and_references = {}
+        for matching_case_key, matching_case_values in self.matching_cases_dict.items():
+            if not matching_case_values['transcript_id'] in dict_of_transcripts_and_reads:
+                continue
+            for read in dict_of_transcripts_and_reads[matching_case_values['transcript_id']]:
+                if read not in reads_and_references:
+                    reads_and_references[read] = set()
+                reads_and_references[read].add(matching_case_key)
+        return reads_and_references
+
     def output_heading_information(self):
         output_manager.output_line({
             "line": "PROCESSING BAM-FILE",
@@ -76,13 +88,19 @@ class BamManager:
         reads_and_locations = self.generate_reads_and_locations(
             dict_of_transcripts_and_reads)
 
-        if self.extended_debugging:
-            self.write_debug_logs(
-                dict_of_transcripts_and_reads, reads_and_locations)
-            output_manager.output_line({
-                "line": "Dictionaries 'transcripts and reads' and 'reads and location' created.",
-                "is_info": True
-            })
+        reads_and_references = self.generate_reads_and_references(
+            dict_of_transcripts_and_reads)
+
+        log_manager.debug_logs['transcripts_and_reads'] = dict_of_transcripts_and_reads
+        log_manager.debug_logs['reads_and_references'] = reads_and_references
+
+        # if self.extended_debugging:
+        #     self.write_debug_logs(
+        #         dict_of_transcripts_and_reads, reads_and_locations)
+        #     output_manager.output_line({
+        #         "line": "Dictionaries 'transcripts and reads' and 'reads and location' created.",
+        #         "is_info": True
+        #     })
 
         output_manager.output_line({
             "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
@@ -99,7 +117,7 @@ class BamManager:
             "is_info": True
         })
 
-        return reads_and_locations, dict_of_transcripts_and_reads
+        return reads_and_references, dict_of_transcripts_and_reads
 
     def output_results(self, alignment_parser):
         output_manager.output_line({
@@ -130,12 +148,13 @@ class BamManager:
 
         self.output_heading_information()
 
-        reads_and_locations, dict_of_transcripts_and_reads = self.generate_dictionaries()
+        reads_and_references, dict_of_transcripts_and_reads = self.generate_dictionaries()
 
         alignment_parser.execute(
             self.bam_path,
             window_size,
-            reads_and_locations,
+            reads_and_references,
+            self.matching_cases_dict,
             dict_of_transcripts_and_reads
         )
 
