@@ -11,7 +11,18 @@ class LogManager:
     def __init__(self):
         self.matching_cases_dict = {}
         self.debug_logs = {}
-        pass
+        self.alignment_erros = []
+        self.error_file_output_dir = os.path.join(
+            LOG_FILE_DIR, "alignment_errors.log")
+
+    def write_alignment_errors_to_file(self):
+
+        with open(self.error_file_output_dir, "w") as file:
+            file.write(
+                "qname\ttranscripts\tlocation\talign_location\t" +
+                "type\tread.reference_start\tread.reference_end\t" +
+                "list of alignments\n")
+            file.writelines(self.alignment_erros)
 
     def compute_indel_results(self):
         indel_results = {}
@@ -19,6 +30,7 @@ class LogManager:
         for matching_case in self.matching_cases_dict.values():
             if 'indel_errors' not in matching_case:
                 count_no_indel_errors += 1
+                self.alignment_erros.append(str(matching_case))
                 continue
             for type, count in matching_case['indel_errors'].items():
                 key = (
@@ -146,6 +158,9 @@ class LogManager:
         })
 
     def write_debug_files(self):
+        if self.alignment_erros:
+            self.write_alignment_errors_to_file()
+
         for log_name, log_values in self.debug_logs.items():
             filepath = os.path.join(LOG_FILE_DIR, 'debug_' + log_name + '.log')
             with open(filepath, "w") as file:
