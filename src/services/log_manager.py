@@ -14,11 +14,19 @@ class LogManager:
         pass
 
     def compute_json_overview_dict_for_closest_canonicals(self):
+        count = {
+            'indel_errors': 0,
+            'indel_errors_not_found': 0,
+        }
         json_overview = {}
         for value in self.matching_cases_dict.values():
             strand, location_type = value['strand'], value['location_type']
             offset = value['offset']
+            if 'indel_errors' not in value:
+                count['indel_errors_not_found'] += 1
+                continue
             for indel_errors_key in value['indel_errors']:
+                count['indel_errors'] += 1
                 json_key = (indel_errors_key, strand, location_type, offset)
                 for canonicals_key, canonicals_value in value['closest_canonical'].items():
                     if json_key not in json_overview:
@@ -39,6 +47,7 @@ class LogManager:
                         reverse=True
                     )
                 )
+        print(count)
         return json_overview
 
     def write_closest_canonicals_log_to_file(self, parser_args):
