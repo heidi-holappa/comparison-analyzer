@@ -48,46 +48,44 @@ class LogManager:
                 y_label="Portion of reads",
             )
 
-    def compute_json_overview_dict_for_closest_canonicals(self):
-        count = {
-            'cases_with_indel_errors': 0,
-            'cases_with_indel_errors_not_found': 0,
-        }
-        json_overview = {}
+    def compute_closest_canonicals_dict(self):
+        closest_canonicals_dict = {}
         for value in self.matching_cases_dict.values():
             strand, location_type = value['strand'], value['location_type']
             offset = value['offset']
-            if 'indel_errors' not in value:
-                count['cases_with_indel_errors_not_found'] += 1
-                continue
-            for indel_errors_key in value['indel_errors']:
-                count['cases_with_indel_errors'] += 1
-                json_key = str(
-                    (indel_errors_key, strand, location_type, offset))
-                for canonicals_key, canonicals_value in value['closest_canonical'].items():
-                    if json_key not in json_overview:
-                        json_overview[json_key] = {}
-                    if canonicals_key not in json_overview[json_key]:
-                        json_overview[json_key][canonicals_key] = {}
-                    for canonical_pair in canonicals_key:
-                        if canonical_pair not in json_overview[json_key][canonicals_key]:
-                            json_overview[json_key][canonicals_key][canonical_pair] = 0
-                        json_overview[json_key][canonicals_key][canonical_pair] += 1
+            for canonicals_key, canonicals_value in value['closest_canonical'].items():
+                dict_key = (strand, location_type, offset, canonicals_key)
+                canonicals_value_as_str = canonicals_value
+                if dict_key not in closest_canonicals_dict:
+                    closest_canonicals_dict[dict_key] = {}
+                if canonicals_value_as_str not in closest_canonicals_dict[dict_key]:
+                    closest_canonicals_dict[dict_key][canonicals_value_as_str] = 0
+                closest_canonicals_dict[dict_key][canonicals_value_as_str] += 1
 
-        for site_locations in json_overview.values():
-            for results in site_locations.values():
-                results = dict(
-                    sorted(
-                        results.items(),
-                        key=lambda item: item[1],
-                        reverse=True
-                    )
-                )
-        print(count)
+        # for site_locations in closest_canonicals_dict.values():
+        #     for results in site_locations.values():
+        #         results = dict(
+        #             sorted(
+        #                 results.items(),
+        #                 key=lambda item: item[1],
+        #                 reverse=True
+        #             )
+        #         )
+
+        return closest_canonicals_dict
+
+    def generate_json_overview_dict_for_closest_canonicals(self):
+        closest_canonicals_dict = self.compute_closest_canonicals_dict()
+        json_overview = {}
+        for key, canonical_values in closest_canonicals_dict.items():
+            json_overview[str(key)] = {}
+            for item in canonical_values:
+                json_overview[str(key)][str(item)] = str(
+                    canonical_values[item])
         return json_overview
 
     def write_closest_canonicals_log_to_file(self, parser_args):
-        json_overview = self.compute_json_overview_dict_for_closest_canonicals()
+        json_overview = self.generate_json_overview_dict_for_closest_canonicals()
 
         with open(FASTA_OVERVIEW_FILE, "w", encoding="utf-8") as file:
             file.write("# Overview\n")
@@ -111,6 +109,7 @@ class LogManager:
             file.write("```\n")
             file.write("**Results in JSON-format:**  \n")
             file.write("```json\n")
+
             file.write(json.dumps(json_overview, indent=4))
             file.write("\n```\n")
             file.write("\n\n## Results in table-format \n")
