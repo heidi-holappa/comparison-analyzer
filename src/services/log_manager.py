@@ -15,7 +15,11 @@ class LogManager:
 
     def compute_indel_results(self):
         indel_results = {}
+        count_no_indel_errors = 0
         for matching_case in self.matching_cases_dict.values():
+            if 'indel_errors' not in matching_case:
+                count_no_indel_errors += 1
+                continue
             for type, count in matching_case['indel_errors'].items():
                 key = (
                     type, matching_case['strand'], matching_case['location_type'], matching_case['offset'])
@@ -24,6 +28,10 @@ class LogManager:
                 if count not in indel_results[key]:
                     indel_results[key][count] = 0
                 indel_results[key][count] += 1
+        output_manager.output_line({
+            "line": f"Number of cases without indel errors: {count_no_indel_errors}",
+            "is_error": True
+        })
         return indel_results
 
     def generate_graphs(self):
