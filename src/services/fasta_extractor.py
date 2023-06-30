@@ -185,7 +185,7 @@ class FastaExtractor:
         if 'right' not in closest_canonicals:
             closest_canonicals['right'] = (
                 aligned_splice_site_nucleotides, aligned_splice_site_nucleotides)
-        self.matching_cases_dict[dict_key]["closest_canonicals"] = closest_canonicals
+        self.matching_cases_dict[dict_key]["closest_canonical"] = closest_canonicals
 
         left_result = self.matching_cases_dict[dict_key]["closest_canonical"]["left"]
         right_result = self.matching_cases_dict[dict_key]["closest_canonical"]["right"]
@@ -215,9 +215,13 @@ class FastaExtractor:
             return
 
         output_manager.output_line({
-            "line": f"Closed offset range: {self.offset}",
+            "line": f"Searching closest possible canonical sites for provided offset range: {self.offset}",
             "is_info": True
         })
 
-        self.extract_splice_cite_sequence()
-        self.extract_window_nucleotides()
+        self.iterate_matching_cases()
+
+        output_manager.output_line({
+            "line": "Phase finished.",
+            "is_info": True
+        })
