@@ -1,3 +1,4 @@
+import os
 from unittest import TestCase
 
 from services.log_manager import default_log_manager as log_manager
@@ -77,3 +78,14 @@ class TestLogManager(TestCase):
         }
         self.assertEqual(
             log_manager.compute_closest_canonicals_dict(), expected_result)
+
+    def test_errors_are_written_to_file(self):
+        if os.path.exists(log_manager.error_file_output_dir):
+            os.remove(log_manager.error_file_output_dir)
+        log_manager.alignment_erros.append("test_error")
+        log_manager.write_alignment_errors_to_file()
+        self.assertTrue(os.path.exists(log_manager.error_file_output_dir))
+
+    def tearDown(self):
+        if os.path.exists(log_manager.error_file_output_dir):
+            os.remove(log_manager.error_file_output_dir)
