@@ -6,10 +6,9 @@ from config import LOG_FILE_DIR, FASTA_OVERVIEW_FILE
 
 class LogManager:
 
-    def __init__(self, matching_cases_dict: dict, parser_args):
-        self.matching_cases_dict = matching_cases_dict
-        self.parser_args = parser_args
-
+    def __init__(self):
+        self.matching_cases_dict = {}
+        self.debug_logs = {}
         pass
 
     def compute_json_overview_dict_for_closest_canonicals(self):
@@ -40,7 +39,7 @@ class LogManager:
                 )
         return json_overview
 
-    def write_closest_canonicals_log_to_file(self):
+    def write_closest_canonicals_log_to_file(self, parser_args):
         json_overview = self.compute_json_overview_dict_for_closest_canonicals()
 
         with open(FASTA_OVERVIEW_FILE, "w", encoding="utf-8") as file:
@@ -53,15 +52,15 @@ class LogManager:
             file.write("**Arguments provided by the user:**\n")
             file.write("```\n")
             file.write("gffcompare GTF-file:\n" +
-                       self.parser_args.gffcompare_gtf + "\n\n")
+                       parser_args.gffcompare_gtf + "\n\n")
             file.write("Reference GTF-file:\n" +
-                       self.parser_args.reference_gtf + "\n\n")
+                       parser_args.reference_gtf + "\n\n")
             file.write("Reference FASTA-file:\n" +
-                       self.parser_args.fasta_path + "\n\n")
+                       parser_args.fasta_path + "\n\n")
             file.write("Specified offset: " +
-                       str(self.parser_args.offset) + "\n")
+                       str(parser_args.offset) + "\n")
             file.write("Class codes: " +
-                       str(self.parser_args.class_codes) + "\n")
+                       str(parser_args.class_codes) + "\n")
             file.write("```\n")
             file.write("**Results in JSON-format:**  \n")
             file.write("```json\n")
@@ -92,11 +91,15 @@ class LogManager:
             "is_info": True
         })
 
-    def execute_log_file_creation(self):
+    def execute_log_file_creation(self, parser_args):
         output_manager.output_line({
             "line": "Creating log-files",
             "is_info": True
         })
-        self.write_closest_canonicals_log_to_file()
+
+        self.write_closest_canonicals_log_to_file(parser_args)
 
         pass
+
+
+default_log_manager = LogManager()
