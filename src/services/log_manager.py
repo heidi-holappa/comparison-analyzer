@@ -1,4 +1,6 @@
+import os
 import json
+
 from services.output_manager import default_output_manager as output_manager
 from services.graph_manager import default_graph_manager as graph_manager
 from config import LOG_FILE_DIR, FASTA_OVERVIEW_FILE
@@ -91,6 +93,13 @@ class LogManager:
             "is_info": True
         })
 
+    def write_debug_files(self):
+        for log_name, log_values in self.debug_logs.items():
+            filepath = os.path.join(LOG_FILE_DIR, 'debug_' + log_name + '.log')
+            with open(filepath, "w") as file:
+                for entry_key, entry_values in log_values.items():
+                    file.write(f"{entry_key}\t{entry_values}\n")
+
     def execute_log_file_creation(self, parser_args):
         output_manager.output_line({
             "line": "Creating log-files",
@@ -98,6 +107,11 @@ class LogManager:
         })
 
         self.write_closest_canonicals_log_to_file(parser_args)
+        if parser_args.extended_debug:
+            self.write_debug_files()
+
+        output_manager.output_footer()
+        output_manager.write_log_file()
 
         pass
 
