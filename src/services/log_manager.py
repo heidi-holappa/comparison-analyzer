@@ -62,7 +62,8 @@ class LogManager:
                 continue
             for indel_errors_key in value['indel_errors']:
                 count['cases_with_indel_errors'] += 1
-                json_key = (indel_errors_key, strand, location_type, offset)
+                json_key = str(
+                    (indel_errors_key, strand, location_type, offset))
                 for canonicals_key, canonicals_value in value['closest_canonical'].items():
                     if json_key not in json_overview:
                         json_overview[json_key] = {}
@@ -98,11 +99,11 @@ class LogManager:
             file.write("**Arguments provided by the user:**\n")
             file.write("```\n")
             file.write("gffcompare GTF-file:\n" +
-                       parser_args.gffcompare_gtf + "\n\n")
+                       str(parser_args.gffcompare_gtf) + "\n\n")
             file.write("Reference GTF-file:\n" +
-                       parser_args.reference_gtf + "\n\n")
+                       str(parser_args.reference_gtf) + "\n\n")
             file.write("Reference FASTA-file:\n" +
-                       parser_args.reference_fasta + "\n\n")
+                       str(parser_args.reference_fasta) + "\n\n")
             file.write("Specified offset: " +
                        str(parser_args.offset) + "\n")
             file.write("Class codes: " +
