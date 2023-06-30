@@ -70,7 +70,7 @@ class TestFastaExtractor(TestCase):
         extractor = FastaExtractor(self.fasta_config)
         extractor.execute_fasta_extraction()
         result = bool(
-            'splice_cite_sequence' in extractor.matching_cases_dict['transcript1.chr1.nnic.exon_4.start'])
+            'closest_canonical' in extractor.matching_cases_dict['transcript1.chr1.nnic.exon_4.start'])
         print(extractor.matching_cases_dict)
         self.assertTrue(result)
 
@@ -90,8 +90,8 @@ class TestFastaExtractor(TestCase):
         canonicals = ['GT', 'GC', 'AT']
         extractor.find_closest_canonicals(
             nucleotides, dict_entry, canonicals)
-        left = extractor.matching_cases_dict[dict_entry]['closest_canonicals']['left']
-        right = extractor.matching_cases_dict[dict_entry]['closest_canonicals']['right']
+        left = extractor.matching_cases_dict[dict_entry]['closest_canonical']['left']
+        right = extractor.matching_cases_dict[dict_entry]['closest_canonical']['right']
         self.assertEqual(left, ("GC", "GT"))
         self.assertEqual(right, ("AT", "GT"))
 
@@ -102,8 +102,8 @@ class TestFastaExtractor(TestCase):
         canonicals = ['GT', 'GC', 'AT']
         extractor.find_closest_canonicals(
             nucleotides, dict_entry, canonicals)
-        left = extractor.matching_cases_dict[dict_entry]['closest_canonicals']['left']
-        right = extractor.matching_cases_dict[dict_entry]['closest_canonicals']['right']
+        left = extractor.matching_cases_dict[dict_entry]['closest_canonical']['left']
+        right = extractor.matching_cases_dict[dict_entry]['closest_canonical']['right']
         self.assertEqual(left, ("GT", "GT"))
         self.assertEqual(right, ("AT", "GT"))
 
@@ -114,7 +114,7 @@ class TestFastaExtractor(TestCase):
         canonicals = ['GT', 'GC', 'AT']
         extractor.find_closest_canonicals(
             nucleotides, dict_entry, canonicals)
-        left = extractor.matching_cases_dict[dict_entry]['closest_canonicals']['left']
-        right = extractor.matching_cases_dict[dict_entry]['closest_canonicals']['right']
+        left = extractor.matching_cases_dict[dict_entry]['closest_canonical']['left']
+        right = extractor.matching_cases_dict[dict_entry]['closest_canonical']['right']
         self.assertEqual(left, ("GC", "GT"))
         self.assertEqual(right, ("GT", "GT"))
