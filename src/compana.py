@@ -53,8 +53,7 @@ def run_pipeline(parser_args):
         )
         bam_manager.execute(parser_args.window_size)
 
-    log_manager.matching_cases_dict = matching_cases_dict
-    log_manager.execute_log_file_creation(parser_args)
+    log_manager.execute_log_file_creation(matching_cases_dict, parser_args)
 
 
 def main():
