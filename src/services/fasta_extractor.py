@@ -95,7 +95,7 @@ class FastaExtractor:
             if value["location_type"] == "start":
                 splice_cite_location = value["location"] - 2
             else:
-                splice_cite_location = value["location"] + 2
+                splice_cite_location = value["location"] + 1
             coordinates = (key.split('.')[
                            1], splice_cite_location - self.window_size, splice_cite_location + self.window_size)
             nucleotides = self.extract_characters_at_given_coordinates(
