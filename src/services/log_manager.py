@@ -177,10 +177,14 @@ class LogManager:
         })
 
     def write_debug_files(self):
+        output_manager.output_line({
+            "line": "CREATING DEBUG LOGS",
+            "is_title": True
+        })
         self.write_offset_results_to_file()
 
         output_manager.output_line({
-            "line": f"Offset results written to: {OFFSET_LOG}",
+            "line": f"offset results written to: {OFFSET_LOG}",
             "is_info": True
         })
 
@@ -188,7 +192,7 @@ class LogManager:
             self.write_alignment_errors_to_file()
 
         output_manager.output_line({
-            "line": f"Alignment errors written to: {self.alignment_error_log_filepath}",
+            "line": f"alignment errors written to: {self.alignment_error_log_filepath}",
             "is_info": True
         })
 
@@ -198,7 +202,7 @@ class LogManager:
                 for entry_key, entry_values in log_values.items():
                     file.write(f"{entry_key}\t{entry_values}\n")
             output_manager.output_line({
-                "line": f"Debug log for {log_name} written to: {filepath}",
+                "line": f"{log_name} written to: {filepath}",
                 "is_info": True
             })
 

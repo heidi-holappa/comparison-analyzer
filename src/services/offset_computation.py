@@ -79,10 +79,10 @@ def fetch_exons(transcript, class_code, gffcompare_db, reference_db):
 def execute_offset_computation(class_code: str, gffcompare_db, reference_db, extended_debug: bool) -> dict:
     output_manager.output_line({
         "line": "ANNOTATION COMPARISON",
-        "is_info": True
+        "is_title": True
     })
     output_manager.output_line({
-        "line": "Counting class code instances for: " + class_code,
+        "line": "Counting offsets for class code instances for: " + class_code,
         "is_info": True
     })
 
