@@ -1,6 +1,5 @@
 from services.output_manager import default_output_manager as output_manager
-
-from config import OFFSET_LOG
+from services.log_manager import default_log_manager as log_manager
 
 
 def calculate_total_offset(exon_1, exon_2):
@@ -77,14 +76,6 @@ def fetch_exons(transcript, class_code, gffcompare_db, reference_db):
     return aligned_exons, reference_exons
 
 
-def write_to_output_file(offset_results: dict):
-    with open(OFFSET_LOG, 'w', encoding="utf-8") as file:
-        file.write("transcript_id\treference_id\tclass_code\tstrand\toffsets\n")
-        for key, value in offset_results.items():
-            file.write(
-                f"{key}\t{value['reference_id']}\t{value['class_code']}\t{value['strand']}\t{value['offsets']}\n")
-
-
 def execute_offset_computation(class_code: str, gffcompare_db, reference_db, extended_debug: bool) -> dict:
     output_manager.output_line({
         "line": "ANNOTATION COMPARISON",
@@ -115,11 +106,8 @@ def execute_offset_computation(class_code: str, gffcompare_db, reference_db, ext
                 }
 
     if extended_debug:
-        write_to_output_file(offset_results_as_dict)
-        output_manager.output_line({
-            "line": f"Offset results written to: {OFFSET_LOG}",
-            "is_info": True
-        })
+        log_manager.offset_results = offset_results_as_dict
+
     else:
         output_manager.output_line({
             "line": "offset computation finished. Hint: to output results into a file, enable extended debug.",
