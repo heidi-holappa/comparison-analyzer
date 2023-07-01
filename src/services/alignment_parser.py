@@ -158,7 +158,7 @@ class AlignmentParser:
                         idx_corrected_location
                     )
 
-                    response, debug_list, result = self.count_indels_from_cigar_codes_in_given_window(
+                    error, debug_list, result = self.count_indels_from_cigar_codes_in_given_window(
                         read.cigartuples,
                         aligned_location,
                         loc_type,
@@ -166,7 +166,7 @@ class AlignmentParser:
                         offset)
                     matching_cases_dict[matching_case_key]['indel_errors'] = result
 
-                    if response:
+                    if error:
                         log_manager.alignment_erros.append(
                             f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t" +
                             f"{idx_corrected_location}\t{aligned_location}\t{loc_type}\t" +
