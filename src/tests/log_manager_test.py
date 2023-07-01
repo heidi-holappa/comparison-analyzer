@@ -80,12 +80,13 @@ class TestLogManager(TestCase):
             log_manager.compute_closest_canonicals_dict(), expected_result)
 
     def test_errors_are_written_to_file(self):
-        if os.path.exists(log_manager.error_file_output_dir):
-            os.remove(log_manager.error_file_output_dir)
+        if os.path.exists(log_manager.alignment_error_log_filepath):
+            os.remove(log_manager.alignment_error_log_filepath)
         log_manager.alignment_erros.append("test_error")
         log_manager.write_alignment_errors_to_file()
-        self.assertTrue(os.path.exists(log_manager.error_file_output_dir))
+        self.assertTrue(os.path.exists(
+            log_manager.alignment_error_log_filepath))
 
     def tearDown(self):
-        if os.path.exists(log_manager.error_file_output_dir):
-            os.remove(log_manager.error_file_output_dir)
+        if os.path.exists(log_manager.alignment_error_log_filepath):
+            os.remove(log_manager.alignment_error_log_filepath)
