@@ -18,6 +18,7 @@ class FastaExtractor:
         self.window_size = int(fasta_config.get(
             'window_size', DEFAULT_WINDOW_SIZE))
         self.closest_canonicals_overview = {"left": {}, "right": {}}
+        self.index_correction = -1
 
     def initialize_fasta(self):
         if self.fasta_path:
@@ -26,7 +27,7 @@ class FastaExtractor:
     def extract_characters_at_given_coordinates(self, coordinates: tuple):
         if self.fasta:
             chromosome, start, end = coordinates
-            return self.fasta[chromosome][start:end]
+            return self.fasta[chromosome][start + self.index_correction:end + self.index_correction]
         return -1
 
     def output_section_header(self):
