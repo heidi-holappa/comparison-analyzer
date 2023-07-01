@@ -39,7 +39,7 @@ class LogManager:
         for matching_case in self.matching_cases_dict.values():
             if 'indel_errors' not in matching_case:
                 count_no_indel_errors += 1
-                self.alignment_erros.append(str(matching_case))
+                self.alignment_erros.append(str(matching_case) + "\n")
                 continue
             for type, count in matching_case['indel_errors'].items():
                 key = (
