@@ -61,6 +61,7 @@ class LogManager:
             "line": "Insertions and deletions found at given locations",
             "is_info": True
         })
+        total_reads_in_indel_results = 0
         for key, value in indel_results.items():
             title = f"Type: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}"
             filename = str(key[0]) + ".strand_" + str(key[1]) + ".exon-loc-" + \
@@ -69,6 +70,7 @@ class LogManager:
                 "line": f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}",
                 "is_info": True
             })
+            total_reads_in_indel_results += sum(value.values())
             graph_manager.construct_bar_chart_from_dict(
                 graph_values=value,
                 filename=filename,
@@ -76,6 +78,14 @@ class LogManager:
                 x_label=f"Number of errors (n of cases: {sum(value.values())})",
                 y_label="Portion of reads",
             )
+        output_manager.output_line({
+            "line": f"Total number of reads in indel results: {total_reads_in_indel_results}",
+            "is_info": True
+        })
+        output_manager.output_line({
+            "line": f"Graphs for {len(indel_results)} cases created.",
+            "is_info": True
+        })
 
     def compute_closest_canonicals_dict(self):
         closest_canonicals_dict = {}
