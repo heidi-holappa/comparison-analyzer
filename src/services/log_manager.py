@@ -3,7 +3,7 @@ import json
 
 from services.output_manager import default_output_manager as output_manager
 from services.graph_manager import default_graph_manager as graph_manager
-from config import LOG_FILE_DIR, FASTA_OVERVIEW_FILE
+from config import LOG_FILE_DIR, FASTA_OVERVIEW_FILE, OFFSET_LOG
 
 
 class LogManager:
@@ -12,12 +12,21 @@ class LogManager:
         self.matching_cases_dict = {}
         self.debug_logs = {}
         self.alignment_erros = []
-        self.error_file_output_dir = os.path.join(
-            LOG_FILE_DIR, "alignment_errors.log")
+        self.alignment_error_log_filepath = os.path.join(
+            LOG_FILE_DIR, "debug_alignment_errors.log")
+        self.offset_results = {}
+
+    def write_offset_results_to_file(self):
+        with open(OFFSET_LOG, 'w', encoding="utf-8") as file:
+            file.write(
+                "transcript_id\treference_id\tclass_code\tstrand\toffsets\n")
+            for key, value in self.offset_results.items():
+                file.write(
+                    f"{key}\t{value['reference_id']}\t{value['class_code']}\t{value['strand']}\t{value['offsets']}\n")
 
     def write_alignment_errors_to_file(self):
 
-        with open(self.error_file_output_dir, "w") as file:
+        with open(self.alignment_error_log_filepath, "w") as file:
             file.write(
                 "qname\ttranscripts\tlocation\talign_location\t" +
                 "type\tread.reference_start\tread.reference_end\t" +
@@ -158,14 +167,30 @@ class LogManager:
         })
 
     def write_debug_files(self):
+        self.write_offset_results_to_file()
+
+        output_manager.output_line({
+            "line": f"Offset results written to: {OFFSET_LOG}",
+            "is_info": True
+        })
+
         if self.alignment_erros:
             self.write_alignment_errors_to_file()
+
+        output_manager.output_line({
+            "line": f"Alignment errors written to: {self.alignment_error_log_filepath}",
+            "is_info": True
+        })
 
         for log_name, log_values in self.debug_logs.items():
             filepath = os.path.join(LOG_FILE_DIR, 'debug_' + log_name + '.log')
             with open(filepath, "w") as file:
                 for entry_key, entry_values in log_values.items():
                     file.write(f"{entry_key}\t{entry_values}\n")
+            output_manager.output_line({
+                "line": f"Debug log for {log_name} written to: {filepath}",
+                "is_info": True
+            })
 
     def execute_log_file_creation(self, matching_cases_dict: dict, parser_args):
 
@@ -181,6 +206,7 @@ class LogManager:
 
         if parser_args.extended_debug:
             self.write_debug_files()
+            self.debug_logs["matching_cases_dict"] = self.matching_cases_dict
 
         output_manager.output_footer()
         output_manager.write_log_file()
