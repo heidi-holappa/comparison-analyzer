@@ -92,8 +92,12 @@ class FastaExtractor:
 
     def iterate_matching_cases(self):
         for key, value in self.matching_cases_dict.items():
+            if value["location_type"] == "start":
+                splice_cite_location = value["location"] - 2
+            else:
+                splice_cite_location = value["location"] + 2
             coordinates = (key.split('.')[
-                           1], value["location"] - self.window_size, value["location"] + self.window_size)
+                           1], splice_cite_location - self.window_size, splice_cite_location + self.window_size)
             nucleotides = self.extract_characters_at_given_coordinates(
                 coordinates)
             if value["location_type"] == "start":
