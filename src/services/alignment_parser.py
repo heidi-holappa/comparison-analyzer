@@ -140,6 +140,8 @@ class AlignmentParser:
                     idx_corrected_location = location - 1
 
                     if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
+                        errors.append(
+                            f"Non-matching location: {read.query_name}, {matching_case_key}\t")
                         continue
 
                     if not read.cigartuples:
