@@ -219,8 +219,8 @@ class LogManager:
         self.generate_graphs()
 
         if parser_args.extended_debug:
-            self.write_debug_files()
             self.debug_logs["matching_cases_dict"] = self.matching_cases_dict
+            self.write_debug_files()
 
         output_manager.output_footer()
         output_manager.write_log_file()
