@@ -2,6 +2,7 @@ import os
 from unittest import TestCase
 
 from services.log_manager import default_log_manager as log_manager
+from config import OFFSET_LOG
 
 
 class TestLogManager(TestCase):
@@ -90,3 +91,47 @@ class TestLogManager(TestCase):
     def tearDown(self):
         if os.path.exists(log_manager.alignment_error_log_filepath):
             os.remove(log_manager.alignment_error_log_filepath)
+
+
+class TestOffsetComputationFileManagement(TestCase):
+
+    def test_a_test_file_is_initialized(self):
+        log_manager.write_offset_results_to_file()
+        self.assertTrue(os.path.exists(OFFSET_LOG))
+
+    def test_initialized_log_file_only_has_header(self):
+        log_manager.write_offset_results_to_file()
+        with open(OFFSET_LOG, 'r') as f:
+            lines = f.readlines()
+            self.assertEqual(len(lines), 1)
+
+    def test_lines_are_written_to_log_file(self):
+        log_manager.offset_results = {
+            "transcript_1": {
+                "reference_id": "ref_1",
+                "strand": "+",
+                "class_code": "j",
+                "offsets": [(1, 2), (3, 4)],
+            },
+            "transcript_2": {
+                "reference_id": "ref_2",
+                "strand": "-",
+                "class_code": "j",
+                "offsets": [(1, 2), (3, 4)],
+            },
+            "transcript_3": {
+                "reference_id": "ref_3",
+                "strand": "+",
+                "class_code": "x",
+                "offsets": [(1, 2), (3, 4)],
+            },
+        }
+
+        log_manager.write_offset_results_to_file()
+        with open(OFFSET_LOG, 'r') as f:
+            lines = f.readlines()
+            self.assertEqual(len(lines), 4)
+
+    def tearDown(self) -> None:
+        if os.path.exists(OFFSET_LOG):
+            os.remove(OFFSET_LOG)

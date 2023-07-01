@@ -1,7 +1,6 @@
 import os
 from unittest import TestCase
 from services.offset_computation import compute_offsets
-from services.offset_computation import write_to_output_file
 from services.offset_computation import execute_offset_computation
 from config import OFFSET_LOG, TEST_FILE_DIR
 from tests.sample_file_management import default_test_file_manager
@@ -83,55 +82,6 @@ class TestOffsetComputation(TestCase):
         result = compute_offsets(aligned, ref)
         self.assertEqual(
             result, [(-5, -3), (float('-inf'), float('-inf')), (-1, -1), (float('inf'), float('inf'))])
-
-
-class TestOffsetComputationFileManagement(TestCase):
-
-    def test_a_test_file_is_initialized(self):
-        self.tearDown()
-        write_to_output_file({})
-        self.assertTrue(os.path.exists(OFFSET_LOG))
-
-    def test_initialized_log_file_only_has_header(self):
-        self.tearDown()
-        write_to_output_file({})
-        with open(OFFSET_LOG, 'r') as f:
-            lines = f.readlines()
-            self.assertEqual(len(lines), 1)
-
-    def test_lines_are_written_to_log_file(self):
-        self.tearDown()
-        write_to_output_file({})
-        class_code = "j"
-        offset_results_dict = {
-            "transcript_1": {
-                "reference_id": "ref_1",
-                "strand": "+",
-                "class_code": "j",
-                "offsets": [(1, 2), (3, 4)],
-            },
-            "transcript_2": {
-                "reference_id": "ref_2",
-                "strand": "-",
-                "class_code": "j",
-                "offsets": [(1, 2), (3, 4)],
-            },
-            "transcript_3": {
-                "reference_id": "ref_3",
-                "strand": "+",
-                "class_code": "x",
-                "offsets": [(1, 2), (3, 4)],
-            },
-        }
-
-        write_to_output_file(offset_results_dict)
-        with open(OFFSET_LOG, 'r') as f:
-            lines = f.readlines()
-            self.assertEqual(len(lines), 4)
-
-    def tearDown(self) -> None:
-        if os.path.exists(OFFSET_LOG):
-            os.remove(OFFSET_LOG)
 
 
 class TestOffsetComputationExecution(TestCase):

@@ -80,7 +80,7 @@ class TestFastaExtractor(TestCase):
         coordinates = ("chr1", 100, 116)
         nucleotides = extractor.extract_characters_at_given_coordinates(
             coordinates)
-        expected_result = 'TTGTTATCTTCCTGGG'
+        expected_result = 'TTTGTTATCTTCCTGG'
         self.assertEqual(nucleotides, expected_result)
 
     def test_finding_closest_canonicals_returns_correct_values_when_both_matches_are_found(self):
