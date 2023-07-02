@@ -137,6 +137,12 @@ class AlignmentParser:
                     strand = matching_cases_dict[matching_case_key]["strand"]
                     offset = matching_cases_dict[matching_case_key]["offset"]
 
+                    if 'indel_errors' not in matching_cases_dict[matching_case_key]:
+                        matching_cases_dict[matching_case_key]['indel_errors'] = {
+                            'insertions': {},
+                            'deletions': {}
+                        }
+
                     idx_corrected_location = location - 1
 
                     if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
@@ -164,13 +170,10 @@ class AlignmentParser:
                         loc_type,
                         strand,
                         offset)
-                    if 'indel_errors' not in matching_cases_dict[matching_case_key]:
-                        matching_cases_dict[matching_case_key]['indel_errors'] = result
-                    else:
-                        for key in result:
-                            if key not in matching_cases_dict[matching_case_key]['indel_errors']:
-                                matching_cases_dict[matching_case_key]['indel_errors'][key] = 0
-                            matching_cases_dict[matching_case_key]['indel_errors'][key] += result[key]
+                    for key, value in result.items():
+                        if value not in matching_cases_dict[matching_case_key]['indel_errors'][key]:
+                            matching_cases_dict[matching_case_key]['indel_errors'][key][value] = 0
+                        matching_cases_dict[matching_case_key]['indel_errors'][key][value] += 1
 
                     if error:
                         log_manager.alignment_erros.append(
