@@ -120,17 +120,18 @@ class LogManager:
 
     def generate_json_overview_dict_for_closest_canonicals(self):
         closest_canonicals_dict = self.compute_closest_canonicals_dict()
-
+        total_cases = sum({sum(k.values())
+                           for k in closest_canonicals_dict.values()})
         json_overview = {}
         for key, canonical_values in closest_canonicals_dict.items():
             json_overview[str(key)] = {}
             for item in canonical_values:
                 json_overview[str(key)][str(item)] = str(
                     canonical_values[item])
-        return json_overview
+        return json_overview, total_cases
 
     def write_closest_canonicals_log_to_file(self, parser_args):
-        json_overview = self.generate_json_overview_dict_for_closest_canonicals()
+        json_overview, total_cases = self.generate_json_overview_dict_for_closest_canonicals()
 
         with open(FASTA_OVERVIEW_FILE, "w", encoding="utf-8") as file:
             file.write("# Overview\n")
@@ -165,6 +166,8 @@ class LogManager:
             file.write("```json\n")
 
             file.write(json.dumps(json_overview, indent=4))
+
+            file.write("\n Total number of cases: " + str(total_cases))
             file.write("\n```\n")
 
             if parser_args.extended_debug:
