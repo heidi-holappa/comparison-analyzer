@@ -46,6 +46,9 @@ class LogManager:
                     indel_type, matching_case['strand'], matching_case['location_type'], matching_case['offset'])
                 if key not in indel_results:
                     indel_results[key] = {}
+                # TODO: A more pythonic way but harder to read?
+                # indel_results[key] = {k: indel_results[key].get(k, 0) + indel_dict.get(k, 0)
+                #                       for k in set(list(indel_results[key].keys()) + list(indel_dict.keys()))}
                 for indel_dict_key, indel_event_count in indel_dict.items():
                     if indel_dict_key not in indel_results[key]:
                         indel_results[key][indel_dict_key] = 0
@@ -91,16 +94,17 @@ class LogManager:
     def compute_closest_canonicals_dict(self):
         closest_canonicals_dict = {}
         for value in self.matching_cases_dict.values():
-            strand, location_type = value['strand'], value['location_type']
+            strand = value['strand']
+            location_type = value['location_type']
             offset = value['offset']
+
             for canonicals_key, canonicals_value in value['closest_canonical'].items():
                 dict_key = (strand, location_type, offset, canonicals_key)
-                canonicals_value_as_str = canonicals_value
                 if dict_key not in closest_canonicals_dict:
                     closest_canonicals_dict[dict_key] = {}
-                if canonicals_value_as_str not in closest_canonicals_dict[dict_key]:
-                    closest_canonicals_dict[dict_key][canonicals_value_as_str] = 0
-                closest_canonicals_dict[dict_key][canonicals_value_as_str] += 1
+                if canonicals_value not in closest_canonicals_dict[dict_key]:
+                    closest_canonicals_dict[dict_key][canonicals_value] = 0
+                closest_canonicals_dict[dict_key][canonicals_value] += 1
 
         # for site_locations in closest_canonicals_dict.values():
         #     for results in site_locations.values():
@@ -116,6 +120,7 @@ class LogManager:
 
     def generate_json_overview_dict_for_closest_canonicals(self):
         closest_canonicals_dict = self.compute_closest_canonicals_dict()
+
         json_overview = {}
         for key, canonical_values in closest_canonicals_dict.items():
             json_overview[str(key)] = {}
@@ -147,29 +152,44 @@ class LogManager:
             file.write("Class codes: " +
                        str(parser_args.class_code) + "\n")
             file.write("```\n")
-            file.write("**Results in JSON-format:**  \n")
+            file.write("## Results in JSON-format: \n")
+            file.write("This section contains the results in JSON-format.  \n")
+            file.write(
+                "The first element in tuple is the closest canonical match. ")
+            file.write("The second element are the current nucleotides at the ")
+            file.write("start or end of the intron at splice site. ")
+            file.write(
+                "If the first and second items are equal, either there is no canonical pair ")
+            file.write(
+                "or the closest canonical pair is the same as the current nucleotides.  \n")
             file.write("```json\n")
 
             file.write(json.dumps(json_overview, indent=4))
             file.write("\n```\n")
-            file.write("\n\n## Results in table-format \n")
-            file.write("This section contains the results in table-format.  \n")
-            current_chromosome = "chr1"
-            file.write(f'\n### {current_chromosome}\n')
-            file.write(
-                "| transcript | read_id | strand | exon | nucleotides |\n")
-            file.write("| --- | --- | --- | --- | --- |\n")
-            for key, value in self.matching_cases_dict.items():
-                chromosome = value['transcript_id'].split('.')[1]
-                if current_chromosome != chromosome:
-                    file.write(f'\n### {chromosome}\n')
-                    file.write(
-                        "| transcript | strand | exon | nucleotides |\n")
-                    file.write("| --- | --- | --- | --- | --- |\n")
-                    current_chromosome = chromosome
-                file.write("| " + str(value['transcript_id']) + " | " +
-                           " | " + str(value['strand']) + " | " + str(value['exon_number']) +
-                           " | " + str(value['closest_canonical']) + " |\n")
+
+            if parser_args.extended_debug:
+                file.write(
+                    "\n\n## Extended debug: All results in table-format\n")
+                file.write(
+                    "This section contains the results in table-format. ")
+                file.write(
+                    "To disable this section, set extended debug 'false' in provided arguments.  \n")
+                current_chromosome = "chr1"
+                file.write(f'\n### {current_chromosome}\n')
+                file.write(
+                    "| transcript | read_id | strand | exon | nucleotides |\n")
+                file.write("| --- | --- | --- | --- | --- |\n")
+                for key, value in self.matching_cases_dict.items():
+                    chromosome = value['transcript_id'].split('.')[1]
+                    if current_chromosome != chromosome:
+                        file.write(f'\n### {chromosome}\n')
+                        file.write(
+                            "| transcript | strand | exon | nucleotides |\n")
+                        file.write("| --- | --- | --- | --- | --- |\n")
+                        current_chromosome = chromosome
+                    file.write("| " + str(value['transcript_id']) + " | " +
+                               " | " + str(value['strand']) + " | " + str(value['exon_number']) +
+                               " | " + str(value['closest_canonical']) + " |\n")
             file.close()
 
         output_manager.output_line({
