@@ -41,14 +41,15 @@ class LogManager:
                 count_no_indel_errors += 1
                 self.alignment_erros.append(str(matching_case) + "\n")
                 continue
-            for type, count in matching_case['indel_errors'].items():
+            for indel_type, indel_dict in matching_case['indel_errors'].items():
                 key = (
-                    type, matching_case['strand'], matching_case['location_type'], matching_case['offset'])
+                    indel_type, matching_case['strand'], matching_case['location_type'], matching_case['offset'])
                 if key not in indel_results:
                     indel_results[key] = {}
-                if count not in indel_results[key]:
-                    indel_results[key][count] = 0
-                indel_results[key][count] += 1
+                for indel_dict_key, indel_event_count in indel_dict.items():
+                    if indel_dict_key not in indel_results[key]:
+                        indel_results[key][indel_dict_key] = 0
+                    indel_results[key][indel_dict_key] += indel_event_count
         output_manager.output_line({
             "line": f"Number of cases without indel errors: {count_no_indel_errors}",
             "is_error": True
