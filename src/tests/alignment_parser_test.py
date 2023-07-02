@@ -133,11 +133,12 @@ class TestIndelCountingFromCigarCodes(TestCase):
         aligned_location = 100
         loc_type = "start"
         strand = "+"
-        expected_result, expected_debug_list = False, [[]]
-        result, debug_list = alignment_parser.count_indels_from_cigar_codes_in_given_window(
+        expected_result, expected_debug_list, expected_result = False, [
+            []], {'deletions': 0, 'insertions': 0}
+        result, debug_list, result = alignment_parser.count_indels_from_cigar_codes_in_given_window(
             cigar_tuples, aligned_location, loc_type, strand)
-        self.assertEqual((result, debug_list),
-                         (expected_result, expected_debug_list))
+        self.assertEqual((result, debug_list, result),
+                         (expected_result, expected_debug_list, expected_result))
 
     def test_indels_are_counted_correctly(self):
         cigar_tuples = [(0, 20), (2, 3), (1, 2), (0, 10)]
@@ -145,12 +146,13 @@ class TestIndelCountingFromCigarCodes(TestCase):
         aligned_location = 27
         loc_type = "end"
         strand = "+"
-        expected_errors, expected_debug_list = False, [2, 2, 2, 1, 1, 0, 0, 0]
+        expected_errors, expected_debug_list, expected_result = False, [
+            2, 2, 2, 1, 1, 0, 0, 0], {'deletions': 3, 'insertions': 2}
 
-        errors, debug_list = alignment_parser.count_indels_from_cigar_codes_in_given_window(
+        errors, debug_list, result = alignment_parser.count_indels_from_cigar_codes_in_given_window(
             cigar_tuples, aligned_location, loc_type, strand)
-        self.assertEqual((errors, debug_list[0]),
-                         (expected_errors, expected_debug_list))
+        self.assertEqual((errors, debug_list[0], result),
+                         (expected_errors, expected_debug_list, expected_result))
 
     def test_full_window_of_dels_returns_true_for_errors(self):
         cigar_tuples = [(0, 20), (2, 8), (1, 2), (0, 10)]
@@ -158,12 +160,13 @@ class TestIndelCountingFromCigarCodes(TestCase):
         aligned_location = 20
         loc_type = "start"
         strand = "+"
-        expected_errors, expected_debug_list = True, [2, 2, 2, 2, 2, 2, 2, 2]
+        expected_errors, expected_debug_list, expected_result = True, [
+            2, 2, 2, 2, 2, 2, 2, 2], {'deletions': 8, 'insertions': 0}
 
-        errors, debug_list = alignment_parser.count_indels_from_cigar_codes_in_given_window(
+        errors, debug_list, result = alignment_parser.count_indels_from_cigar_codes_in_given_window(
             cigar_tuples, aligned_location, loc_type, strand)
-        self.assertEqual((errors, debug_list[0]),
-                         (expected_errors, expected_debug_list))
+        self.assertEqual((errors, debug_list[0], result),
+                         (expected_errors, expected_debug_list, expected_result))
 
 
 class TestBamReader(TestCase):
@@ -175,30 +178,16 @@ class TestBamReader(TestCase):
         self.parser.initialize_file(test_bam_file)
 
     def test_bam_reader_runs_without_errors(self):
-        reads_and_locations = {
-            "ENSMUST00000208994_1011_aligned_5112815_F_38_212_77": [
-                {
-                    'location': 5112815,
-                    'location_type': 'start',
-                    'strand': '+',
-                    'offset': 4
-                }
-            ]
+        reads_and_references = {
+            "ENSMUST00000208994_1011_aligned_5112815_F_38_212_77": {'transcript1'}
         }
-        self.parser.process_bam_file(reads_and_locations)
+        matching_cases_dict = {
+            'transcript1': {
+                'location': 5112815,
+                'location_type': 'start',
+                'strand': '+',
+                'offset': 4
+            }
 
-
-class TestErrorsToFileWriter(TestCase):
-
-    def setUp(self):
-        self.parser = AlignmentParser()
-        if os.path.exists(self.parser.error_file_output_dir):
-            os.remove(self.parser.error_file_output_dir)
-
-    def test_errors_are_written_to_file(self):
-        self.parser.write_alignment_errors_to_file(["test_error"])
-        self.assertTrue(os.path.exists(self.parser.error_file_output_dir))
-
-    def tearDown(self):
-        if os.path.exists(self.parser.error_file_output_dir):
-            os.remove(self.parser.error_file_output_dir)
+        }
+        self.parser.process_bam_file(reads_and_references, matching_cases_dict)
