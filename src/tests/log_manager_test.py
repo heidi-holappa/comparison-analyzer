@@ -17,8 +17,8 @@ class TestLogManager(TestCase):
                 "offset": 1,
                 "location_type": "start",
                 "indel_errors": {
-                    "insertions": 2,
-                    "deletions": 1
+                    "insertions": {2: 1, 3: 1},
+                    "deletions": {1: 2}
                 }
             },
             "case2": {
@@ -26,14 +26,14 @@ class TestLogManager(TestCase):
                 "offset": 1,
                 "location_type": "start",
                 "indel_errors": {
-                    "insertions": 3,
-                    "deletions": 1
+                    "insertions": {3: 1, 4: 2},
+                    "deletions": {1: 2, 2: 1}
                 }
             },
         }
         expected_result = {
-            ("insertions", "+", "start", 1): {2: 1, 3: 1},
-            ("deletions", "+", "start", 1): {1: 2},
+            ("insertions", "+", "start", 1): {2: 1, 3: 2, 4: 2},
+            ("deletions", "+", "start", 1): {1: 4, 2: 1},
         }
 
         self.assertEqual(log_manager.compute_indel_results(), expected_result)
