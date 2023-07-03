@@ -8,12 +8,14 @@
   - [Pseudocode](#pseudocode)
   - [Offset output](#offset-output)
 - [Extracting information](#extracting-information)
+  - [Extracting closest canonicals](#extracting-closet-canonicals)
   - [Processing imported BAM-file](#processing-the-imported-bam-file)
   - [Processing CIGAR-string](#processing-a-cigar-string)
   - [Extracting CIGAR-codes](#extracting-cigar-codes-from-the-window-next-to-aligned-location)
 - [Data structures](#data-structures)
   - [Normalizing results](#normalizing-results)
 - [Output](#compana-output-files)
+- [Pipeline](#pipeline)
 
 
 The purpose of this application is to study what happens in the locations, where the transcript provided by IsoQuant differs from the reference data.  
@@ -319,7 +321,7 @@ function extract_location_from_cigar_string(self, cigar_tuples: list, reference_
     return -1
 ```
 
-## Extracting CIGAR-codes from the window next to aligned location
+### Extracting CIGAR-codes from the window next to aligned location
 [Back to top](#general-information)  
 
 The method [cigartuples()](https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.cigartuples) from pysam-library returns a list of tuples with CIGAR-codes and number of operations for each code. 
