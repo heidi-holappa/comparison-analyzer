@@ -503,10 +503,10 @@ The pipeline gives a rough overview of the functionality of compAna-tool:
 - **Initialize databases:** First library gffutils is used to create databases from the GTF-files produced by IsoQuant and gffcompare
 - **Compute offset:** using the databases offsets are computed for the specified class codes (see section data structures, offsets results)
 - **Extract cases:** Based on the offset results, cases within the given offset range are extracted (see section data structures, matching cases dictionary)
+- **Closest canonicals:** Once a key for storing error information has been formed, the same key is used to store information on closest possible splice site. The closest possible splice site is searched from the reference fasta. 
 - **Compute reads and locations:** Using the model\_reads.tsv produced by IsoQuant read ids are extracted (see section data structures, reads and locations). 
 - **Iterate reads:** Using pysam-library the reads in the provided BAM-file are iterated through and matching reads are processed. 
 - **Compute errors:** From matching reads the 'insertions' and 'deletions' are counted and results are stored. 
-- **Closest possible splice site:** Once a key for storing error information has been formed, the same key is used to store information on closest possible splice site. The closest possible splice site is searched from the reference fasta. 
 - **Output logs and graphs:** Finally the log-files and graphs are output.
 
 ![pipeline](img/pipeline.png)
