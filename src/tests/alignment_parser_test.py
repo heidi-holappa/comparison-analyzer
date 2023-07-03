@@ -136,7 +136,7 @@ class TestIndelCountingFromCigarCodes(TestCase):
         expected_result, expected_debug_list, expected_result = False, [
             []], {'deletions': 0, 'insertions': 0}
         result, debug_list, result = alignment_parser.count_indels_from_cigar_codes_in_given_window(
-            cigar_tuples, aligned_location, loc_type, strand)
+            cigar_tuples, aligned_location, loc_type)
         self.assertEqual((result, debug_list, result),
                          (expected_result, expected_debug_list, expected_result))
 
@@ -150,7 +150,7 @@ class TestIndelCountingFromCigarCodes(TestCase):
             2, 2, 2, 1, 1, 0, 0, 0], {'deletions': 3, 'insertions': 2}
 
         errors, debug_list, result = alignment_parser.count_indels_from_cigar_codes_in_given_window(
-            cigar_tuples, aligned_location, loc_type, strand)
+            cigar_tuples, aligned_location, loc_type)
         self.assertEqual((errors, debug_list[0], result),
                          (expected_errors, expected_debug_list, expected_result))
 
@@ -164,7 +164,7 @@ class TestIndelCountingFromCigarCodes(TestCase):
             2, 2, 2, 2, 2, 2, 2, 2], {'deletions': 8, 'insertions': 0}
 
         errors, debug_list, result = alignment_parser.count_indels_from_cigar_codes_in_given_window(
-            cigar_tuples, aligned_location, loc_type, strand)
+            cigar_tuples, aligned_location, loc_type)
         self.assertEqual((errors, debug_list[0], result),
                          (expected_errors, expected_debug_list, expected_result))
 

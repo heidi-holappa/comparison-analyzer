@@ -53,9 +53,7 @@ class AlignmentParser:
     def count_indels_from_cigar_codes_in_given_window(self,
                                                       cigar_tuples: list,
                                                       aligned_location: int,
-                                                      loc_type: str,
-                                                      strand: str,
-                                                      offset: int = 0):
+                                                      loc_type: str):
         """
         Get cigar codes in a given window.
 
@@ -167,9 +165,7 @@ class AlignmentParser:
                     error, debug_list, result = self.count_indels_from_cigar_codes_in_given_window(
                         read.cigartuples,
                         aligned_location,
-                        loc_type,
-                        strand,
-                        offset)
+                        loc_type)
                     for key, value in result.items():
                         if value not in matching_cases_dict[matching_case_key]['indel_errors'][key]:
                             matching_cases_dict[matching_case_key]['indel_errors'][key][value] = 0
