@@ -7,5 +7,6 @@
     "offset": [4, 4],
     "class_code": "j c k",
     "force": false,
-    "stats": true
+    "stats": true,
+    "extended_debug": true
 }
