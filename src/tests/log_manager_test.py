@@ -1,11 +1,17 @@
 import os
+import pytest
 from unittest import TestCase
 
+from services.log_manager import LogManager
 from services.log_manager import default_log_manager as log_manager
 from config import OFFSET_LOG
 
 
 class TestLogManager(TestCase):
+
+    @pytest.fixture(autouse=True)
+    def capsys(self, capsys):
+        self.capsys = capsys
 
     def setUp(self):
         pass
@@ -37,6 +43,31 @@ class TestLogManager(TestCase):
         }
 
         self.assertEqual(log_manager.compute_indel_results(), expected_result)
+
+    def test_dictionary_entries_with_no_indel_errrs_are_correctly_computated(self):
+        log_manager.matching_cases_dict = {
+            "case1": {
+                "strand": "+",
+                "offset": 1,
+                "location_type": "start",
+                "closest_canonical": {
+                    "left": ("AT", "GT"),
+                    "right": ("GC", "GT")
+                }
+            },
+            "case2": {
+                "strand": "+",
+                "offset": 1,
+                "location_type": "start",
+                "closest_canonical": {
+                    "left": ("AT", "GT"),
+                    "right": ("GT", "GT")
+                }
+            },
+        }
+        log_manager.compute_indel_results()
+        captured = self.capsys.readouterr()
+        assert "2" in captured.out
 
     def test_closest_canonicals_are_correctly_computated(self):
         log_manager.matching_cases_dict = {
@@ -95,18 +126,24 @@ class TestLogManager(TestCase):
 
 class TestOffsetComputationFileManagement(TestCase):
 
+    def setUp(self) -> None:
+        if os.path.exists(OFFSET_LOG):
+            os.remove(OFFSET_LOG)
+        self.log_manager = LogManager()
+
     def test_a_test_file_is_initialized(self):
-        log_manager.write_offset_results_to_file()
+        self.log_manager.write_offset_results_to_file()
         self.assertTrue(os.path.exists(OFFSET_LOG))
 
     def test_initialized_log_file_only_has_header(self):
-        log_manager.write_offset_results_to_file()
+        self.log_manager.write_offset_results_to_file()
         with open(OFFSET_LOG, 'r') as f:
             lines = f.readlines()
+            print(lines)
             self.assertEqual(len(lines), 1)
 
     def test_lines_are_written_to_log_file(self):
-        log_manager.offset_results = {
+        self.log_manager.offset_results = {
             "transcript_1": {
                 "reference_id": "ref_1",
                 "strand": "+",
@@ -127,7 +164,7 @@ class TestOffsetComputationFileManagement(TestCase):
             },
         }
 
-        log_manager.write_offset_results_to_file()
+        self.log_manager.write_offset_results_to_file()
         with open(OFFSET_LOG, 'r') as f:
             lines = f.readlines()
             self.assertEqual(len(lines), 4)
