@@ -1,16 +1,11 @@
-import unittest
-import pytest
 import sys
+import unittest
 import json
 
 from services.argument_parser import init_argparser
 
 
 class TestParser(unittest.TestCase):
-
-    @pytest.fixture(autouse=True)
-    def capsys(self, capsys):
-        self.capsys = capsys
 
     def test_parser_reads_short_arguments_correctly(self):
         sys.argv = [
