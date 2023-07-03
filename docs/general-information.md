@@ -177,24 +177,73 @@ The values are stored as a dictionary. The key is concatenated from the transcri
 
 The stored value is the location of the start or end of an exon in the IsoQuant transcript. The motivation behind this is that we want to look at what happens after the start or before the end of an exon in a pre-defined window. 
 
+
+### Extracting closet canonicals
+[Back to top](#general-information)  
+
+`pyfaidx` library provides efficient tools for extracting subsequences from a FASTA file. With these tools a window of size two times the size of the provided (or default) window is extracted from the reference FASTA file at each location stored into the matching_cases_dictionary. If the given location is marks the 'start of the exon' we look for acceptor site canonicals. If the given location marks the 'end of the exon', we look for 'donor site canonicals':
+
+```python
+def iterate_matching_cases(self):
+  for key, value in self.matching_cases_dict.items():
+    if value["location_type"] == "start":
+      splice_cite_location = value["location"] - 2
+    else:
+      splice_cite_location = value["location"] + 1
+    coordinates = (
+      key.split('.')[1], 
+      splice_cite_location - self.window_size, 
+      splice_cite_location + self.window_size
+    )
+    nucleotides = self.extract_characters_at_given_coordinates(coordinates)
+    if value["location_type"] == "start":
+        canonicals = ["AG", "AC"]
+    else:
+        canonicals = ["GT", "GC", "AT"]
+    self.find_closest_canonicals(str(nucleotides), key, canonicals)
+```
+
+Method `extract_character_at_given_coordinates` calls pydaidx to extract a substring of nucelotides from the FASTA-file. The closest canonicals are then sought for:
+
+```python
+    def find_closest_canonicals(self, 
+      nucleotides: str, 
+      dict_key: str, 
+      canonicals: list):
+      nucleotides_middle = int(len(nucleotides) / 2)
+      closest_canonicals = {}
+      aligned_nucleotides = nucleotides[nucleotides_middle:nucleotides_middle + 2]
+      for i in range(1, nucleotides_middle):
+        left_window = nucleotides[nucleotides_middle - i:nucleotides_middle - i + 2]
+        right_window = nucleotides[nucleotides_middle + i:nucleotides_middle + i + 2]
+        if left_window in canonicals and 'left' not in closest_canonicals:
+            closest_canonicals['left'] = (left_window, aligned_nucleotides)
+        if right_window in canonicals and 'right' not in closest_canonicals:
+            closest_canonicals['right'] = (right_window, aligned_nucleotides)
+      if left or right is missing:
+        store value (aligned, nucleotides, aligned_nucleotides) to each missing key
+      store results to closest_canonicals
+```
+
 ### Processing the imported BAM-file
 [Back to top](#general-information)  
 
 Next the reads are fetched from a given BAM-file with pysam-libary. Reads are iterated through and for primary and secondary reads insertions and deletions are counted. 
 
 ```python
-function process_bam_file(reads_and_locations: dict):
+function process_bam_file(reads_and_references: dict, matching_cases: dict):
   for read in samfile.fetch():
     if read.is_supplementary:
         continue
-    if read.query_name in reads_and_locations:
-      # validate that read has not yet been processed 
-      for location, type in reads_and_locations[read.query_name]:
+    if read.query_name in reads_and_references:
+      # validate that read has not yet been processed and read is not supplementary
+      for matching_case in reads_and_references[read.query_name]:
         make correction to location (by -1)
         # validate: 
         # location is in read, 
         # read has a cigar string, 
-        # read has an end location        
+        # read has an end location
+        # if required, add indel_errors to matching_case
 
         aligned_location = extract_location_from_cigar_string(
           read.cigartuples,
@@ -207,6 +256,7 @@ function process_bam_file(reads_and_locations: dict):
             aligned_location,
             location_type,
             strand)
+        add indels to matching_case
 ```
 
 ### Processing a CIGAR-string
@@ -337,7 +387,8 @@ The offset results will be returned in a dictionary of dictionaries with the fol
 ```
 
 **matching_cases_dictionary**  
-With the offsets computated we next extract the cases of interest. These are as well stored in a dictionary of dictionaries. The key consists of the transcript_id, exon number and location to guarantee the key to be unique:
+With the offsets computated nextthe cases of interest are extracted. These are stored in a dictionary of dictionaries. The key consists of the transcript_id, exon number and location to guarantee the key to be unique.   
+
 ```python
 {
     'transcript_id.exon_<number>.loc_type.offset_number': {
@@ -350,6 +401,23 @@ With the offsets computated we next extract the cases of interest. These are as 
     }
 }
 ```
+
+In later phases indel_errors and closest_canonicals are included in the matching_cases_dictionary values. 
+```python
+{
+  'indel_errors': {
+    'insertions': {'keys: count of insertion errors. values: count of reads'}
+    'deletions': {'keys: count of deletion errors. values: count of reads'}
+  }
+  'closest_canonicals':{
+    'left': ('closest canonical pair', 'pair in given location'),
+    'right': ('closest canonical pair', 'pair in given location')
+  }
+}
+```
+For closest canonicals left and right indicate the closest pair at the given direction. If the closest pair equals to the pair in the given location, it can either mean that there is no canonical pair in the window at the given direction, or that the closest pair has the same nucleotides. 
+
+
 **transcripts_and_reads**  
 Each transcript_id has one or several reads assigned to it. Same read can be assigned to multiple transcript_ids. To compute reads and locations first a dictionary of transcript_ids and read_ids is created:
 ```python
@@ -361,18 +429,11 @@ Each transcript_id has one or several reads assigned to it. Same read can be ass
 **Note:** An assumption is made that one read is assigned to one transcript_id no more than once. 
 
 
-**reads_and_locations**  
-For computing the indels in given locations for each read, we finally need a list of reads and related information. Each read can be aligned to multiple transcripts. We again use a dictionary of dictionaries:
+**reads_and_references**  
+For computing the indels in given locations for each read, we finally need a list of reads and related information. Each read can be aligned to multiple transcripts. 
 ```python
 {
-    'read_id': [
-      {
-        'location': '<int>',
-        'location_type': '<str>',
-        'strand': '<string>',
-        'offset': '<int>'
-      }
-    ]
+    'read_id': {'set of matching_cases_dictionar keys'}
 }
 ```
 
