@@ -8,12 +8,14 @@
   - [Pseudocode](#pseudocode)
   - [Offset output](#offset-output)
 - [Extracting information](#extracting-information)
+  - [Extracting closest canonicals](#extracting-closet-canonicals)
   - [Processing imported BAM-file](#processing-the-imported-bam-file)
   - [Processing CIGAR-string](#processing-a-cigar-string)
   - [Extracting CIGAR-codes](#extracting-cigar-codes-from-the-window-next-to-aligned-location)
 - [Data structures](#data-structures)
   - [Normalizing results](#normalizing-results)
 - [Output](#compana-output-files)
+- [Pipeline](#pipeline)
 
 
 The purpose of this application is to study what happens in the locations, where the transcript provided by IsoQuant differs from the reference data.  
@@ -319,7 +321,7 @@ function extract_location_from_cigar_string(self, cigar_tuples: list, reference_
     return -1
 ```
 
-## Extracting CIGAR-codes from the window next to aligned location
+### Extracting CIGAR-codes from the window next to aligned location
 [Back to top](#general-information)  
 
 The method [cigartuples()](https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.cigartuples) from pysam-library returns a list of tuples with CIGAR-codes and number of operations for each code. 
@@ -474,8 +476,8 @@ compAna outputs log-files and images. User can also option to output additional 
 
 
 As a default the following files are created:
-- fasta_overview.md: contains basic information computed from the imported FASTA-file (work in progress). 
-- stdout written to a file (note: content of this file is appended)
+- fasta_overview.md: contains information on the closest canonicals
+- stdout written to a file
 - a normalized graph for each combination of indel-type, strand, exon-location (left/right side intron location) and offset. 
 
 By opting to have extended debugging on, the additional files will be created. See section [data structures](#data-structures) for details:
@@ -484,13 +486,23 @@ By opting to have extended debugging on, the additional files will be created. S
 - dict_of_transcripts_and_reads.log
 
 
-Indel error lengths are stored in a dictionary:
+Indel error lengths are stored in a dictionary and can be found in the stdout.log file:
 
 ```python
 {
     ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': '<int>'}
 }
 ```
+
+Closest canonicals are stored in a dictionary data structure: 
+
+```python
+{
+  ('strand', 'exon location (start/end)', 'offset: int', 'location (left/right)'): {'key: (closest canonical, aligned pair), value: count of instances'}
+}
+```
+
+
 For each key-value pair a histogram is generated. 
 
 ## Pipeline
@@ -501,10 +513,10 @@ The pipeline gives a rough overview of the functionality of compAna-tool:
 - **Initialize databases:** First library gffutils is used to create databases from the GTF-files produced by IsoQuant and gffcompare
 - **Compute offset:** using the databases offsets are computed for the specified class codes (see section data structures, offsets results)
 - **Extract cases:** Based on the offset results, cases within the given offset range are extracted (see section data structures, matching cases dictionary)
+- **Closest canonicals:** Once a key for storing error information has been formed, the same key is used to store information on closest possible splice site. The closest possible splice site is searched from the reference fasta. 
 - **Compute reads and locations:** Using the model\_reads.tsv produced by IsoQuant read ids are extracted (see section data structures, reads and locations). 
 - **Iterate reads:** Using pysam-library the reads in the provided BAM-file are iterated through and matching reads are processed. 
 - **Compute errors:** From matching reads the 'insertions' and 'deletions' are counted and results are stored. 
-- **Closest possible splice site:** Once a key for storing error information has been formed, the same key is used to store information on closest possible splice site. The closest possible splice site is searched from the reference fasta. 
 - **Output logs and graphs:** Finally the log-files and graphs are output.
 
 ![pipeline](img/pipeline.png)
