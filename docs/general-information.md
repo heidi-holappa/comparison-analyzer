@@ -21,15 +21,15 @@ The purpose of this application is to study what happens in the locations, where
 The application uses the following libraries to process information: [pysam](https://pysam.readthedocs.io/en/latest/), [gffutils](http://daler.github.io/gffutils/) and [pyfaidx](https://github.com/mdshw5/pyfaidx/)
 
 The application expects the user to provide the following files:
-1. A GTF-file produced by gffcompare. The gffcompare should be run with the GTF-file produced by IsoQuant and a reference GTF-file. 
-2. The reference GTF-file
-3. BAM-file containing the reads
-4. (Optional and currently unnecessary) reference FASTA-file. 
-5. A TSV-file produced by IsoQuant ending in 'model_reads.tsv'
+1. a GTF-file produced by gffcompare. The gffcompare should be run with the GTF-file produced by IsoQuant and a reference GTF-file. 
+2. the reference GTF-file
+3. reference FASTA-file. 
+4. BAM-file containing the reads
+5. a TSV-file produced by IsoQuant ending in 'model_reads.tsv'
 
 User should provide additional arguments to define
 - the gffcompare class-codes to select transcripts for processing
-- the offset -case that will be looked into
+- the range of offset cases that will be looked into
 
 With optional arguments user can adjust debugging, creating simple additional statistics or to force recreating the sqlite3-databases created by gffutils. For more information see [instruction manual](instruction-manual.md)
 
