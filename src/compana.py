@@ -7,6 +7,7 @@ from services.class_code_stats import ClassCodeStats
 from services.extract_matching_cases import MatchingCasesExtractor
 from services.fasta_extractor import FastaExtractor
 from services.output_manager import default_output_manager as output_manager
+from services.log_manager import default_log_manager as log_manager
 
 
 def run_pipeline(parser_args):
@@ -30,7 +31,7 @@ def run_pipeline(parser_args):
         reference_db)
     matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
 
-    if matching_cases_dict and parser_args.reference_fasta:
+    if parser_args.reference_fasta:
         fasta_config = {
             "fasta_path": parser_args.reference_fasta,
             "offset": parser_args.offset,
@@ -43,7 +44,7 @@ def run_pipeline(parser_args):
         reference_fasta_extractor = FastaExtractor(fasta_config)
         reference_fasta_extractor.execute_fasta_extraction()
 
-    if matching_cases_dict and parser_args.reads_tsv and parser_args.reads_bam:
+    if parser_args.reads_tsv and parser_args.reads_bam:
         bam_manager = BamManager(
             parser_args.reads_bam,
             parser_args.reads_tsv,
@@ -51,8 +52,8 @@ def run_pipeline(parser_args):
             parser_args.extended_debug
         )
         bam_manager.execute(parser_args.window_size)
-    output_manager.output_footer()
-    output_manager.write_log_file()
+
+    log_manager.execute_log_file_creation(matching_cases_dict, parser_args)
 
 
 def main():
