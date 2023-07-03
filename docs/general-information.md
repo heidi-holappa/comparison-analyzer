@@ -476,8 +476,8 @@ compAna outputs log-files and images. User can also option to output additional 
 
 
 As a default the following files are created:
-- fasta_overview.md: contains basic information computed from the imported FASTA-file (work in progress). 
-- stdout written to a file (note: content of this file is appended)
+- fasta_overview.md: contains information on the closest canonicals
+- stdout written to a file
 - a normalized graph for each combination of indel-type, strand, exon-location (left/right side intron location) and offset. 
 
 By opting to have extended debugging on, the additional files will be created. See section [data structures](#data-structures) for details:
@@ -486,13 +486,23 @@ By opting to have extended debugging on, the additional files will be created. S
 - dict_of_transcripts_and_reads.log
 
 
-Indel error lengths are stored in a dictionary:
+Indel error lengths are stored in a dictionary and can be found in the stdout.log file:
 
 ```python
 {
     ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': '<int>'}
 }
 ```
+
+Closest canonicals are stored in a dictionary data structure: 
+
+```python
+{
+  ('strand', 'exon location (start/end)', 'offset: int', 'location (left/right)'): {'key: (closest canonical, aligned pair), value: count of instances'}
+}
+```
+
+
 For each key-value pair a histogram is generated. 
 
 ## Pipeline
