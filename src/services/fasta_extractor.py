@@ -67,18 +67,20 @@ class FastaExtractor:
         closest_canonicals = {}
         aligned_splice_site_nucleotides = nucleotides[nucleotides_middle:nucleotides_middle + 2]
         for i in range(1, nucleotides_middle):
-            if nucleotides[nucleotides_middle - i:nucleotides_middle - i + 2] in canonicals and 'left' not in closest_canonicals:
+            left_position = nucleotides[nucleotides_middle -
+                                        i:nucleotides_middle - i + 2]
+            right_position = nucleotides[nucleotides_middle +
+                                         i:nucleotides_middle + i + 2]
+            if left_position in canonicals and 'left' not in closest_canonicals:
                 closest_canonicals['left'] = (
-                    nucleotides[nucleotides_middle - i:nucleotides_middle - i + 2], aligned_splice_site_nucleotides)
-            if nucleotides[nucleotides_middle + i:nucleotides_middle + i + 2] in canonicals and 'right' not in closest_canonicals:
+                    left_position, aligned_splice_site_nucleotides, i)
+            if right_position in canonicals and 'right' not in closest_canonicals:
                 closest_canonicals['right'] = (
-                    nucleotides[nucleotides_middle + i:nucleotides_middle + i + 2], aligned_splice_site_nucleotides)
-        if 'left' not in closest_canonicals:
-            closest_canonicals['left'] = (
-                aligned_splice_site_nucleotides, aligned_splice_site_nucleotides)
-        if 'right' not in closest_canonicals:
-            closest_canonicals['right'] = (
-                aligned_splice_site_nucleotides, aligned_splice_site_nucleotides)
+                    right_position, aligned_splice_site_nucleotides, i)
+        for item in ['left', 'right']:
+            if item not in closest_canonicals:
+                closest_canonicals[item] = (
+                    aligned_splice_site_nucleotides, aligned_splice_site_nucleotides, 0)
         self.matching_cases_dict[dict_key]["closest_canonical"] = closest_canonicals
 
         left_result = self.matching_cases_dict[dict_key]["closest_canonical"]["left"]

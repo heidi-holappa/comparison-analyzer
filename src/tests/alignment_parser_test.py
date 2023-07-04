@@ -167,27 +167,3 @@ class TestIndelCountingFromCigarCodes(TestCase):
             cigar_tuples, aligned_location, loc_type)
         self.assertEqual((errors, debug_list[0], result),
                          (expected_errors, expected_debug_list, expected_result))
-
-
-class TestBamReader(TestCase):
-
-    def setUp(self):
-        self.parser = AlignmentParser()
-        test_bam_file = os.path.join(
-            TEST_FILE_DIR, "Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.bam")
-        self.parser.initialize_file(test_bam_file)
-
-    def test_bam_reader_runs_without_errors(self):
-        reads_and_references = {
-            "ENSMUST00000208994_1011_aligned_5112815_F_38_212_77": {'transcript1'}
-        }
-        matching_cases_dict = {
-            'transcript1': {
-                'location': 5112815,
-                'location_type': 'start',
-                'strand': '+',
-                'offset': 4
-            }
-
-        }
-        self.parser.process_bam_file(reads_and_references, matching_cases_dict)

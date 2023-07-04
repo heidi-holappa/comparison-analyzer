@@ -59,7 +59,38 @@ class LogManager:
         })
         return indel_results
 
-    def generate_graphs(self):
+    def generate_closest_canonicals_graphs(self, dict_of_canonicals: dict):
+        output_manager.output_line({
+            "line": "Creating graphs for closest canonicals",
+            "is_info": True
+        })
+        minimum_case_count = 100
+
+        for key, nucleotides in dict_of_canonicals.items():
+            for nucleotide_pair, cases in nucleotides.items():
+                case_count = sum(cases.values())
+                if case_count < minimum_case_count:
+                    continue
+                title = f"{nucleotide_pair}: strand: {key[0]}, exon location: {key[1]}, offset: {key[2]}, direction of pair: {key[3]}, n of cases: {case_count}"
+                filename = "closest-canonicals." + ".strand_" + str(key[0]) + ".exon-loc-" + \
+                    str(key[1]) + ".offset-(" + str(key[2]) + ")" + \
+                    ".direction-" + \
+                    str(key[3]) + "." + str(nucleotide_pair[0]) + \
+                    str(nucleotide_pair[1])
+
+                graph_manager.construct_bar_chart_from_dict(
+                    graph_values=cases,
+                    filename=filename,
+                    title=title,
+                    x_label=f"Number of errors (n of cases: {case_count})",
+                    y_label="Portion of reads",
+                )
+        output_manager.output_line({
+            "line": f"Graphs for closest canonicals created.",
+            "is_info": True
+        })
+
+    def generate_indel_graphs(self):
         indel_results = self.compute_indel_results()
         output_manager.output_line({
             "line": "Insertions and deletions found at given locations",
@@ -68,7 +99,7 @@ class LogManager:
         total_reads_in_indel_results = 0
         for key, value in indel_results.items():
             title = f"Type: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}"
-            filename = str(key[0]) + ".strand_" + str(key[1]) + ".exon-loc-" + \
+            filename = "indel." + str(key[0]) + ".strand_" + str(key[1]) + ".exon-loc-" + \
                 str(key[2]) + ".offset-(" + str(key[3]) + ")"
             output_manager.output_line({
                 "line": f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}",
@@ -102,36 +133,30 @@ class LogManager:
                 dict_key = (strand, location_type, offset, canonicals_key)
                 if dict_key not in closest_canonicals_dict:
                     closest_canonicals_dict[dict_key] = {}
-                if canonicals_value not in closest_canonicals_dict[dict_key]:
-                    closest_canonicals_dict[dict_key][canonicals_value] = 0
-                closest_canonicals_dict[dict_key][canonicals_value] += 1
-
-        # for site_locations in closest_canonicals_dict.values():
-        #     for results in site_locations.values():
-        #         results = dict(
-        #             sorted(
-        #                 results.items(),
-        #                 key=lambda item: item[1],
-        #                 reverse=True
-        #             )
-        #         )
+                nucleotides, distance = (
+                    canonicals_value[0], canonicals_value[1]), canonicals_value[2]
+                if nucleotides not in closest_canonicals_dict[dict_key]:
+                    closest_canonicals_dict[dict_key][nucleotides] = {}
+                if distance not in closest_canonicals_dict[dict_key][nucleotides]:
+                    closest_canonicals_dict[dict_key][nucleotides][distance] = 0
+                closest_canonicals_dict[dict_key][nucleotides][distance] += 1
 
         return closest_canonicals_dict
 
     def generate_json_overview_dict_for_closest_canonicals(self):
         closest_canonicals_dict = self.compute_closest_canonicals_dict()
-        total_cases = sum({sum(k.values())
-                           for k in closest_canonicals_dict.values()})
+        self.generate_closest_canonicals_graphs(closest_canonicals_dict)
+
         json_overview = {}
         for key, canonical_values in closest_canonicals_dict.items():
             json_overview[str(key)] = {}
             for item in canonical_values:
                 json_overview[str(key)][str(item)] = str(
                     canonical_values[item])
-        return json_overview, total_cases
+        return json_overview
 
     def write_closest_canonicals_log_to_file(self, parser_args):
-        json_overview, total_cases = self.generate_json_overview_dict_for_closest_canonicals()
+        json_overview = self.generate_json_overview_dict_for_closest_canonicals()
 
         with open(FASTA_OVERVIEW_FILE, "w", encoding="utf-8") as file:
             file.write("# Overview\n")
@@ -166,8 +191,6 @@ class LogManager:
             file.write("```json\n")
 
             file.write(json.dumps(json_overview, indent=4))
-
-            file.write("\n Total number of cases: " + str(total_cases))
             file.write("\n```\n")
 
             if parser_args.extended_debug:
@@ -240,7 +263,7 @@ class LogManager:
         self.matching_cases_dict = matching_cases_dict
 
         self.write_closest_canonicals_log_to_file(parser_args)
-        self.generate_graphs()
+        self.generate_indel_graphs()
 
         if parser_args.extended_debug:
             self.debug_logs["matching_cases_dict"] = self.matching_cases_dict
