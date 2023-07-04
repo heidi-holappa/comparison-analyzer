@@ -490,7 +490,7 @@ Indel error lengths are stored in a dictionary and can be found in the stdout.lo
 
 ```python
 {
-    ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': '<int>'}
+    ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': 'count <int>'}
 }
 ```
 
@@ -498,7 +498,10 @@ Closest canonicals are stored in a dictionary data structure:
 
 ```python
 {
-  ('strand', 'exon location (start/end)', 'offset: int', 'location (left/right)'): {'key: (closest canonical, aligned pair), value: count of instances'}
+  ('strand', 'exon location (start/end)', 'offset: int', 'location (left/right)'): 
+    {
+      'key: (closest canonical, aligned pair)': {'distance <int>': 'count <int>'}
+    }
 }
 ```
 
