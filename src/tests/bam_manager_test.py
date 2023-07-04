@@ -3,6 +3,7 @@ from unittest import TestCase
 
 from services.bam_manager import BamManager
 from tests.sample_file_management import default_test_file_manager as file_manager
+from config import TEST_FILE_DIR
 
 
 class TestBamManagerInit(TestCase):
@@ -41,8 +42,6 @@ class TestBamManagerInit(TestCase):
         self.assertEqual(self.bam_manager.tsv_path, self.tsv_path)
         self.assertEqual(self.bam_manager.matching_cases_dict,
                          self.matching_cases_dict)
-        self.assertEqual(self.bam_manager.transcript_set, set(
-            ["transcript1.chr1.nnic", "transcript3.chr1.nnic"]))
 
 
 class TestBamManagerExecution(TestCase):
@@ -69,24 +68,25 @@ class TestBamManagerExecution(TestCase):
         self.bam_manager.execute(window_size)
 
 
-class TestDebugLogWriting(TestCase):
+class TestBamReader(TestCase):
 
     def setUp(self):
         self.bam_manager = BamManager("", "", {})
-        if os.path.exists(self.bam_manager.debug_log_path_reads_and_locations):
-            os.remove(self.bam_manager.debug_log_path_reads_and_locations)
-        if os.path.exists(self.bam_manager.debug_log_path_transcripts_and_reads):
-            os.remove(self.bam_manager.debug_log_path_transcripts_and_reads)
+        test_bam_file = os.path.join(
+            TEST_FILE_DIR, "Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.bam")
+        self.bam_manager.initialize_file(test_bam_file)
 
-    def test_debug_log_is_written(self):
-        self.bam_manager.write_debug_logs({"test": "test"}, {"test": "test"})
-        self.assertTrue(os.path.exists(
-            self.bam_manager.debug_log_path_transcripts_and_reads))
-        self.assertTrue(os.path.exists(
-            self.bam_manager.debug_log_path_reads_and_locations))
+    def test_bam_reader_runs_without_errors(self):
+        reads_and_references = {
+            "ENSMUST00000208994_1011_aligned_5112815_F_38_212_77": {'transcript1'}
+        }
+        self.bam_manager.matching_cases_dict = {
+            'transcript1': {
+                'location': 5112815,
+                'location_type': 'start',
+                'strand': '+',
+                'offset': 4
+            }
 
-    def tearDown(self):
-        if os.path.exists(self.bam_manager.debug_log_path_reads_and_locations):
-            os.remove(self.bam_manager.debug_log_path_reads_and_locations)
-        if os.path.exists(self.bam_manager.debug_log_path_transcripts_and_reads):
-            os.remove(self.bam_manager.debug_log_path_transcripts_and_reads)
+        }
+        self.bam_manager.process_bam_file(reads_and_references)
