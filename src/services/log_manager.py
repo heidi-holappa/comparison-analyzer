@@ -102,9 +102,13 @@ class LogManager:
                 dict_key = (strand, location_type, offset, canonicals_key)
                 if dict_key not in closest_canonicals_dict:
                     closest_canonicals_dict[dict_key] = {}
-                if canonicals_value not in closest_canonicals_dict[dict_key]:
-                    closest_canonicals_dict[dict_key][canonicals_value] = 0
-                closest_canonicals_dict[dict_key][canonicals_value] += 1
+                nucleotides, distance = (
+                    canonicals_value[0], canonicals_value[1]), canonicals_value[2]
+                if nucleotides not in closest_canonicals_dict[dict_key]:
+                    closest_canonicals_dict[dict_key][nucleotides] = {}
+                if distance not in closest_canonicals_dict[dict_key][nucleotides]:
+                    closest_canonicals_dict[dict_key][nucleotides][distance] = 0
+                closest_canonicals_dict[dict_key][nucleotides][distance] += 1
 
         # for site_locations in closest_canonicals_dict.values():
         #     for results in site_locations.values():
@@ -120,18 +124,17 @@ class LogManager:
 
     def generate_json_overview_dict_for_closest_canonicals(self):
         closest_canonicals_dict = self.compute_closest_canonicals_dict()
-        total_cases = sum({sum(k.values())
-                           for k in closest_canonicals_dict.values()})
+
         json_overview = {}
         for key, canonical_values in closest_canonicals_dict.items():
             json_overview[str(key)] = {}
             for item in canonical_values:
                 json_overview[str(key)][str(item)] = str(
                     canonical_values[item])
-        return json_overview, total_cases
+        return json_overview
 
     def write_closest_canonicals_log_to_file(self, parser_args):
-        json_overview, total_cases = self.generate_json_overview_dict_for_closest_canonicals()
+        json_overview = self.generate_json_overview_dict_for_closest_canonicals()
 
         with open(FASTA_OVERVIEW_FILE, "w", encoding="utf-8") as file:
             file.write("# Overview\n")
@@ -166,8 +169,6 @@ class LogManager:
             file.write("```json\n")
 
             file.write(json.dumps(json_overview, indent=4))
-
-            file.write("\n Total number of cases: " + str(total_cases))
             file.write("\n```\n")
 
             if parser_args.extended_debug:
