@@ -28,7 +28,7 @@ class GraphManagement:
         plt.bar(x_values, height=y_values, tick_label=x_values)
         plt.xlabel(x_label)
         plt.ylabel(y_label)
-        plt.title(title)
+        plt.title(title, wrap=True)
         plt.savefig(os.path.join(self.graph_dir, filename + ".png"))
         plt.cla()
         plt.clf()
