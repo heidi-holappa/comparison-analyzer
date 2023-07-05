@@ -15,9 +15,9 @@ class MatchingCasesExtractor:
 
     def extract_candidates_matching_selected_offset(self) -> dict:
         extracted_candidates = {}
-        for key, value in self.offset_results.items():
+        for transcript_id, value in self.offset_results.items():
             strand, offsets = value["strand"], value["offsets"]
-            reference_id, transcript_id = value["reference_id"], key
+            reference_id = value["reference_id"]
             if strand == "-":
                 offsets.reverse()
             for offset_exon_idx in range(1, len(offsets)-1):
