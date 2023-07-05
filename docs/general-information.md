@@ -205,7 +205,7 @@ def iterate_matching_cases(self):
     self.find_closest_canonicals(str(nucleotides), key, canonicals)
 ```
 
-Method `extract_character_at_given_coordinates` calls pydaidx to extract a substring of nucelotides from the FASTA-file. The closest canonicals are then sought for:
+Method `extract_character_at_given_coordinates` calls pyfaidx to extract a substring of nucelotides from the FASTA-file. The closest canonicals are then sought for:
 
 ```python
     def find_closest_canonicals(self, 
@@ -242,9 +242,9 @@ function process_bam_file(reads_and_references: dict, matching_cases: dict):
       for matching_case in reads_and_references[read.query_name]:
         make correction to location (by -1)
         # validate: 
-        # location is in read, 
-        # read has a cigar string, 
-        # read has an end location
+        #   location is in read, 
+        #   read has a cigar string, 
+        #   read has an end location
         # if required, add indel_errors to matching_case
 
         aligned_location = extract_location_from_cigar_string(
@@ -298,10 +298,10 @@ $$a + n - (r_{\text{ref}} - r_{\text{rela}})$$
 Some considerations: 
 
 - reads are validated before calling the method, but some validation is still done. If the given CIGAR-string does not consume any reference, $-1$ is returned to indicate an error has occured
-- if the `ref_position` is points to the location of the `reference_end`, return the result even if `ref_position` is less than or equal to relative\_position. 
+- if `ref_position` points to the location of the `reference_end`, return the result even if `ref_position` is (less than or) equal to `relative\_position`. 
 
 
-And so we get the final pseudo code:
+Pseudocode:
 
 ```python
 function extract_location_from_cigar_string(self, cigar_tuples: list, reference_start: int, reference_end: int, location: int):
@@ -373,7 +373,7 @@ We iterate the CIGAR-tuples until we find the first event in which the sum of th
 ## Data structures
 [Back to top](#general-information)  
 
-After some benchmarking with python data structures `tuple`, `namedtuple` and `dict`, it appears that for this application and it's use casesthe differences in efficiency are not very significant, at least without some level of refactoring. For easier readibility and expandability dictionaries are for now used for data structures. 
+After some benchmarking with python data structures `tuple`, `namedtuple` and `dict`, it appears that for the current implementation and the current use cases the differences in efficiency are not very significant, at least without some level of refactoring. For easier readibility and expandability dictionaries are for now used for data structures. 
 
 **offset_results**  
 The offset results will be returned in a dictionary of dictionaries with the following structure:
@@ -448,10 +448,8 @@ After extraction and processing, the computated results for insertions and delet
     ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': '<int>'}
 }
 ```
-These are output to the stdout.  
 
-
-As each given offset can have a positive or negative value as defined in the secion [offsets](#offsets), this means that for every offset in given range we have $2^4 = 16$ possible key combinations. These results are shown in the stdout and images are drawn from each key-value pair. In the stdout the results are shown as $n$-values. In the images the results are normalized with the following reasoning:
+As each given offset can have a positive or negative value as defined in the secion [offsets](#offsets), this means that for every offset in given range there can be a maximum of $2^4 = 16$ key combinations. These results are shown in the stdout and images are drawn from each key-value pair. In the stdout the results are shown as $n$-values. In the images the results are normalized with the following reasoning:
 
 - transcript_ids are input into a set from the `matching_cases_dictionary` 
 - for each transcript_id in the set reads assigned to the given transcript_id are extracted from the IsoQuant `model_reads.tsv` - output file. 
@@ -478,7 +476,8 @@ compAna outputs log-files and images. User can also option to output additional 
 As a default the following files are created:
 - fasta_overview.md: contains information on the closest canonicals
 - stdout written to a file
-- a normalized graph for each combination of indel-type, strand, exon-location (left/right side intron location) and offset. 
+- a normalized graph of indel-errors for each combination of indel-type, strand, exon-location (left/right side intron location) and offset. 
+- a normalized graph of closest canonicals for each nucleotide pair with distinct strand, exon location, offset and closest canonical-location.  
 
 By opting to have extended debugging on, the additional files will be created. See section [data structures](#data-structures) for details:
 - offset-results.log
