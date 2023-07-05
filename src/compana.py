@@ -48,9 +48,7 @@ def run_pipeline(parser_args):
         bam_manager = BamManager(
             parser_args.reads_bam,
             parser_args.reads_tsv,
-            matching_cases_dict,
-            parser_args.extended_debug
-        )
+            matching_cases_dict)
         bam_manager.execute(parser_args.window_size)
 
     log_manager.execute_log_file_creation(matching_cases_dict, parser_args)

@@ -92,8 +92,8 @@ class TestFastaExtractor(TestCase):
             nucleotides, dict_entry, canonicals)
         left = extractor.matching_cases_dict[dict_entry]['closest_canonical']['left']
         right = extractor.matching_cases_dict[dict_entry]['closest_canonical']['right']
-        self.assertEqual(left, ("GC", "GT"))
-        self.assertEqual(right, ("AT", "GT"))
+        self.assertEqual(left, ("GC", "GT", 4))
+        self.assertEqual(right, ("AT", "GT", 2))
 
     def test_finding_closest_canonicals_returns_correct_values_when_only_right_match_is_found(self):
         extractor = FastaExtractor(self.fasta_config)
@@ -104,8 +104,8 @@ class TestFastaExtractor(TestCase):
             nucleotides, dict_entry, canonicals)
         left = extractor.matching_cases_dict[dict_entry]['closest_canonical']['left']
         right = extractor.matching_cases_dict[dict_entry]['closest_canonical']['right']
-        self.assertEqual(left, ("GT", "GT"))
-        self.assertEqual(right, ("AT", "GT"))
+        self.assertEqual(left, ("GT", "GT", 0))
+        self.assertEqual(right, ("AT", "GT", 2))
 
     def test_finding_closest_canonicals_returns_correct_values_when_only_left_match_is_found(self):
         extractor = FastaExtractor(self.fasta_config)
@@ -116,5 +116,5 @@ class TestFastaExtractor(TestCase):
             nucleotides, dict_entry, canonicals)
         left = extractor.matching_cases_dict[dict_entry]['closest_canonical']['left']
         right = extractor.matching_cases_dict[dict_entry]['closest_canonical']['right']
-        self.assertEqual(left, ("GC", "GT"))
-        self.assertEqual(right, ("GT", "GT"))
+        self.assertEqual(left, ("GC", "GT", 4))
+        self.assertEqual(right, ("GT", "GT", 0))

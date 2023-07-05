@@ -7,28 +7,14 @@ from config import DEFAULT_WINDOW_SIZE
 
 class AlignmentParser:
 
-    def __new__(cls):
-        """
-            Singleton pattern.
-        """
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(AlignmentParser, cls).__new__(cls)
-        return cls.instance
-
-    # TODO: remove reads and transcripts. It is for debugging purposes.
     def __init__(self):
         """
             Parse a BAM-file and count the number of insertions and deletions at a given location.
             Follows the singleton pattern. 
         """
 
-        self.reads_and_transcripts = {}
         # TODO: add to configuration or to user arguments (window size)
         self.window_size = int(DEFAULT_WINDOW_SIZE)
-
-    def initialize_file(self, filename: str):
-        # pylint: disable=no-member
-        self.samfile = pysam.AlignmentFile(filename, "rb")
 
     def extract_location_from_cigar_string(self,
                                            cigar_tuples: list,
@@ -103,117 +89,6 @@ class AlignmentParser:
                 f"deletions: {deletions}, insertions: {insertions}")
             return True, debug_list, result
         return False, debug_list, result
-
-    def process_bam_file(self,
-                         reads_and_references: dict,
-                         matching_cases_dict: dict):
-        count = 0
-        errors = []
-        set_of_processed_reads = set()
-        prev_processed_reads_counter = 0
-        for read in self.samfile.fetch():
-
-            if read.is_supplementary:
-                continue
-            if read.query_name in reads_and_references:
-                if read.query_name not in set_of_processed_reads:
-                    set_of_processed_reads.add(read.query_name)
-                else:
-                    prev_processed_reads_counter += 1
-                    continue
-                count += 1
-                if count % 1000 == 0:
-                    output_manager.output_line({
-                        "line": "Processed " + str(count) + " reads",
-                        "end_line": "\r",
-                        "is_info": True,
-                        "save_to_log": False
-                    })
-                for matching_case_key in reads_and_references[read.query_name]:
-                    location = matching_cases_dict[matching_case_key]["location"]
-                    loc_type = matching_cases_dict[matching_case_key]["location_type"]
-                    strand = matching_cases_dict[matching_case_key]["strand"]
-                    offset = matching_cases_dict[matching_case_key]["offset"]
-
-                    if 'indel_errors' not in matching_cases_dict[matching_case_key]:
-                        matching_cases_dict[matching_case_key]['indel_errors'] = {
-                            'insertions': {},
-                            'deletions': {}
-                        }
-
-                    idx_corrected_location = location - 1
-
-                    if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
-                        errors.append(
-                            f"Non-matching location: {read.query_name}, {matching_case_key}\t")
-                        continue
-
-                    if not read.cigartuples:
-                        continue
-
-                    if not read.reference_end:
-                        errors.append(f"{read.query_name}\tno reference end\n")
-                        continue
-
-                    aligned_location = self.extract_location_from_cigar_string(
-                        read.cigartuples,
-                        read.reference_start,
-                        read.reference_end,
-                        idx_corrected_location
-                    )
-
-                    error, debug_list, result = self.count_indels_from_cigar_codes_in_given_window(
-                        read.cigartuples,
-                        aligned_location,
-                        loc_type)
-                    for key, value in result.items():
-                        if value not in matching_cases_dict[matching_case_key]['indel_errors'][key]:
-                            matching_cases_dict[matching_case_key]['indel_errors'][key][value] = 0
-                        matching_cases_dict[matching_case_key]['indel_errors'][key][value] += 1
-
-                    if error:
-                        log_manager.alignment_erros.append(
-                            f"{read.query_name}\t{self.reads_and_transcripts[read.query_name]}\t" +
-                            f"{idx_corrected_location}\t{aligned_location}\t{loc_type}\t" +
-                            f"{read.reference_start}\t{read.reference_end}\t{debug_list}\n")
-
-        if prev_processed_reads_counter:
-            output_manager.output_line({
-                "line": str(prev_processed_reads_counter) +
-                " iterations extracted an already processed read from the BAM-file",
-                "is_error": True,
-            })
-
-        output_manager.output_line({
-            "line": "\nFinished",
-            "is_info": True
-        })
-
-    # TODO: remove transcripts and reads. It is here for debugging
-    def execute(self,
-                filename: str,
-                window_size: int,
-                reads_and_references: dict,
-                matching_cases_dict: dict,
-                transcripts_and_reads: dict):
-        """
-        Initialize AlignmentFile and execute the alignment parser.
-
-        Args:
-            filename (str): path of BAM-file to iterate
-            location (int): coordinate of the interesting event
-        """
-
-        self.window_size = int(window_size)
-
-        for key, value in transcripts_and_reads.items():
-            for read in value:
-                if read not in self.reads_and_transcripts:
-                    self.reads_and_transcripts[read] = set()
-                self.reads_and_transcripts[read].add(key)
-
-        self.initialize_file(filename)
-        self.process_bam_file(reads_and_references, matching_cases_dict)
 
 
 default_alignment_parser = AlignmentParser()

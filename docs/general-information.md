@@ -8,7 +8,7 @@
   - [Pseudocode](#pseudocode)
   - [Offset output](#offset-output)
 - [Extracting information](#extracting-information)
-  - [Extracting closest canonicals](#extracting-closet-canonicals)
+  - [Extracting closest canonicals](#extracting-closest-canonicals)
   - [Processing imported BAM-file](#processing-the-imported-bam-file)
   - [Processing CIGAR-string](#processing-a-cigar-string)
   - [Extracting CIGAR-codes](#extracting-cigar-codes-from-the-window-next-to-aligned-location)
@@ -23,30 +23,30 @@ The purpose of this application is to study what happens in the locations, where
 The application uses the following libraries to process information: [pysam](https://pysam.readthedocs.io/en/latest/), [gffutils](http://daler.github.io/gffutils/) and [pyfaidx](https://github.com/mdshw5/pyfaidx/)
 
 The application expects the user to provide the following files:
-1. A GTF-file produced by gffcompare. The gffcompare should be run with the GTF-file produced by IsoQuant and a reference GTF-file. 
-2. The reference GTF-file
-3. BAM-file containing the reads
-4. (Optional and currently unnecessary) reference FASTA-file. 
-5. A TSV-file produced by IsoQuant ending in 'model_reads.tsv'
+1. a GTF-file produced by gffcompare. The gffcompare should be run with the GTF-file produced by IsoQuant and a reference GTF-file. 
+2. the reference GTF-file
+3. reference FASTA-file. 
+4. BAM-file containing the reads
+5. a TSV-file produced by IsoQuant ending in 'model_reads.tsv'
 
 User should provide additional arguments to define
 - the gffcompare class-codes to select transcripts for processing
-- the offset -case that will be looked into
+- the range of offset cases that will be looked into
 
 With optional arguments user can adjust debugging, creating simple additional statistics or to force recreating the sqlite3-databases created by gffutils. For more information see [instruction manual](instruction-manual.md)
 
 ## Offsets
 
+GTF-file `gffcompare` outputs contains class codes for transcripts. These class codes provide information on the quality of the alignment. One interesting aspect in the case of misalignments is the amount of the offset in the misalignment. This section provides a definition for offset and details how offset is calculated in this application. 
+
 ### Defining offset  
 [Back to top](#general-information)  
 
-GTF-file `gffcompare` outputs contains class codes for transcripts. These class codes provide information on the quality of the alignment. One interesting aspect in the case of misalignments is the amount of the offset in the misalignment. This section provides a definition for offset and details how offset is calculated in this application. 
+Let $S$ be  a transcript from a `transcript_model.gtf` produced by IsoQuant and assume that $S$ has one or more exons as children. Let the set of these exons be $E = \\{e_1, \ldots , e_n\\},\\,n\in\mathbb{N},\\,\mid E\mid \ge 1$. Let $R$ be a transcript from the reference GTF-file to which $S$ is being compared to. Let exon "children" in $R$ be $X = \\{x_1, \ldots, x_m\\}$. 
 
-Let $S$ be  a transcript from an analyzed read and assume that $S$ has one or more exons as children. Let the set of these exons be $E = \\{e_1, \ldots , e_n\\},\\,n\in\mathbb{N},\\,\mid E\mid \ge 1$. Let $R$ be a reference transcript to which $S$ is being compared to. Let exon "children" in $R$ be $X = \\{x_1, \ldots, x_m\\}$. 
+Each exon are given as a tuple with a start index and an end index $(a, b)\\, a,b\in\mathbb{N},\\,a < b$. Let $e_i\in E$ and $x_j\in X$ be an arbitrary exons and let $e_i = (a_{e_i}, b_{e_j})$ and $x_j = (a_{x_i}, b_{x_j})$.  
 
-Each exon is given as a tuple with a start index and end index $(a, b)\\, a,b\in\mathbb{N},\\,a < b$. Let $e_i\in E$ and $x_j\in X$ be an arbitrary exons and let $e_i = (a_{e_i}, b_{e_j})$ and $x_j = (a_{x_i}, b_{x_j})$.  
-
-We assume that for a selected transcript, the exon children do not overlap. That is, for arbitrary two exons $e_i = (a_{e_i}, b_{e_i}) $ and $e_k = (a_{e_k}, b_{e_k})$ ($e_i, e_k \in E$) it always holds that either $b_{e_i} < a_{e_k}$ or $b_{e_k} < a_{e_i}$
+**Assumption:** for a selected transcript, the exon children do not overlap. That is, for arbitrary two exons $e_i = (a_{e_i}, b_{e_i}) $ and $e_k = (a_{e_k}, b_{e_k})$ ($e_i, e_k \in E$) it always holds that either $b_{e_i} < a_{e_k}$ or $b_{e_k} < a_{e_i}$
 
 **Definition 1.** For arbitrary $e_i$ and $x_j$ The distance $a_{e_i} - a_{x_j}$ is the offset at the start index and the distance $b_{e_i} - b_{x_j}$ is the offset at the end index. Notice that if the offset is 'to the left', the output value is negative and similarily if the offset is 'to the right', the output value is positive.   
 
@@ -54,7 +54,7 @@ The total offset $t_{e_i,x_j}$ for $e_i$ and $x_j$ is the sum of the absolute va
 
 $$ t_{e_i,x_j} =  \mid a_{e_i} - a_{x_j} \mid + \mid b_{e_i} - b_{x_j} \mid $$
 
-**Definition 2.** For any $e_i$ we call the optimal match in $X$ to be the exon $x_j$ that satisfies the following conditions: 
+**Definition 2.** For any $e_i$ the optimal match in $X$ to be the exon $x_j$ that satisfies the following conditions: 
 
 1. The offset for $e_i$ compared to $x_j$ is the smallest possible. That is for $e_i$ and $X=[x_1, \ldots x_m]$ $\min \\{t_{e_i,x_1}, t_{e_i,x_2}, \ldots, t_{e_i,x_m} \\} = t_{e_i,x_j}$. 
 2. There is no other exon $e_k\in E$ for which condition one applies with $x_j$ and $t_{e_k,x_j} < t_{e_i, x_j}$. 
@@ -66,8 +66,8 @@ The basic idea in computing the offset is to have the lists of tuples $E$ and $X
 
 Let $e_i\in E$ and $x_j\in X$ be arbitrary elements and assume $j< \text{len}(X) - 1$ and $i< \text{len}(E) - 1$. Additionally assume that $e_i$ and $x_j$ are the first exons, for which offset is not yet computed. Four possible scenarios can happen when iterating the offset pairs in set $E$:  
 
-1. for exons $e_1,\ldots, e_i$ and exons $x_1,\ldots x_{j}$ it holds that $e_i$ and $x_j$ are an optimal match
-2. for exons $e_1,\ldots, e_i$ and exons $x_1,\ldots x_{j+1}$ exons $e_{i}$ and $x_{j+1}$ are an optimal match
+1. for exons $e_1,\ldots, e_{i+1}$ and exons $x_1,\ldots x_{j+1}$ it holds that $e_i$ and $x_j$ are an optimal match
+2. for exons $e_1,\ldots, e_{i+1}$ and exons $x_1,\ldots x_{j+1}$ exons $e_{i}$ and $x_{j+1}$ are an optimal match
 3. for exons $e_1,\ldots, e_{i+1}$ and exons $x_1,\ldots, x_{j+1}$ exon $e_{i+1}$ and $x_{j}$ are an  optimal match
 4. for exons $e_1,\ldots, e_{i+1}$ and exons $x_1,\ldots, x_{j+1}$ exons $e_{i+1}$ and $x_{j+1}$ are  an optimal match
 
@@ -82,12 +82,12 @@ Let $e_i\in E$ and $x_j\in X$ be arbitrary elements and assume $j< \text{len}(X)
 
 Each of these cases needs to be considered. In case of $e_{i+1}$ being an element in the optimal match, $e_{i+2}$ needs to be considered on the next iteration as for it the match could be even more optimal.  
 
-In cases 2 and 3 we notice that an exon from either the reference data or the aligned data is left without a pair. These instances will need to be noted in the data. In case 4 $e_i$ is paired with $x_j$ even though for $e_{i+1}$ $x_j$ the offset $t_{e_{i+1}, x_j}$ was smaller, as $x_{j+1}$ was a more suitable pair for $e_{i+1}$
+In cases 2 and 3 an exon from either the reference data or the aligned data is left without a pair. These instances will need to be noted in the data. In case 4 $e_i$ is paired with $x_j$ even though for $e_{i+1}$ $x_j$ the offset $t_{e_{i+1}, x_j}$ was smaller, as $x_{j+1}$ was a more suitable pair for $e_{i+1}$
 
 ### Pseudocode
 [Back to top](#general-information)  
 
-The following pseudocode computes the offsets following the rules given in definition two:
+The following pseudocode computes the offsets adhering to the rules given in definition two:
 
 ```python
 function compute_offset(list E, list X)
@@ -131,18 +131,18 @@ function compute_offset(list E, list X)
 
 Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of reference exons $X=[x_1, \ldots , x_m]$. The algorithm starts from $e_1$ and iterates through the exons. Let us assume that the algorithm is now at an arbitrary index $i$ and processing exon $e_i$. The following steps happen:
 
-1. set result to $(\inf, \inf)$
-2. iterate through reference exons starting from the current x_start_index to the end of the reference exons. 
-3. Let us remind ourselves that $t_{e_i, x_j}$ is the total total offset between $e_i$ and arbitrary $x_j$. If $t_{e_{i}, x_{j}} > t_{e_{i+1}, x_{j}}$, $e_i$ must be $(\inf, \inf)$. Append list and break the inner loop
-4. if instead $t_{e_{i}, x_{j+1}}  < t_{e_{i}, x_{j}}$, then if $t_{e_{i+1}, x_{j+1}} > t_{e_{i}, x_{j+1}}$, then $x_{j}$ must be $(-\inf, -\inf)$. In that case append $(-\inf, -\inf)$ to the list and continue iterating through the inner loop. If the latter condition does not apply, append the offset $t_{e_{i}, x_{j}}$ to the list and break the inner loop. 
-5. Finally once aligned exons are iterated through if there are reference exons left, append (-inf, -inf) for each remaining reference exon to the list of results
-6. once all reference exons are iterated over or the inner loop breaks, append result to the list of results. 
+1. Set result to $(\inf, \inf)$.
+2. Iterate through reference exons starting from the current x_start_index to the end of the reference exons. 
+3. Let us remind ourselves that $t_{e_i, x_j}$ is the total total offset between $e_i$ and arbitrary $x_j$. If $t_{e_{i}, x_{j}} > t_{e_{i+1}, x_{j}}$, $e_i$ must be $(\inf, \inf)$. Append list and break the inner loop.
+4. If instead $t_{e_{i}, x_{j+1}}  < t_{e_{i}, x_{j}}$, then if $t_{e_{i+1}, x_{j+1}} > t_{e_{i}, x_{j+1}}$, then $x_{j}$ must be $(-\inf, -\inf)$. In that case append $(-\inf, -\inf)$ to the list and continue iterating through the inner loop. If the latter condition does not apply, append the offset $t_{e_{i}, x_{j}}$ to the list and break the inner loop. 
+5. Once aligned exons are iterated through if there are reference exons left, append $(-\inf, -\inf)$ for each remaining reference exon to the list of results
+6. Once all reference exons are iterated over or the inner loop breaks, append result to the list of results and return the results. 
 
 
 ### Offset output
 [Back to top](#general-information)  
 
-1. In case of a match the offset is expressed from the point of view of the analyzed transcript in the form of a tuple of two integers $(a, b),\\,a,b\in\mathbb{Z}$. A negative integer indicates that the exon $e_i$ from the analyzed data has a smaller value than the matching reference exon $x_j$ and similarily a positive value indicates that the exon $e_i$ has a higher value
+1. In case of a match the offset is expressed from the point of view of the `transcript_model.gtf` by IsoQuant in the form of a tuple of two integers $(a, b),\\,a,b\in\mathbb{Z}$. A negative integer indicates that a given exon $e_i$ from the IsoQuant `transcript_model.gtf` has a smaller value at the start/end-location than the matching reference exon $x_j$ and similarily a positive value indicates that the exon $e_i$ has a higher value at the start/end-location. 
 2. A tuple $(\inf, \inf)$ indicates that no optimal match for an exon in analyzed data was found (i.e. there's possibly an exon in the analyzed data that is not present in the reference data)
 3. A tuple $(-\inf, -\inf)$ that no optimal match for an exon in the reference data was found (i.e. there's possibly an exon is missing from the analyzed data)
 
@@ -180,7 +180,7 @@ The values are stored as a dictionary. The key is concatenated from the transcri
 The stored value is the location of the start or end of an exon in the IsoQuant transcript. The motivation behind this is that we want to look at what happens after the start or before the end of an exon in a pre-defined window. 
 
 
-### Extracting closet canonicals
+### Extracting closest canonicals
 [Back to top](#general-information)  
 
 `pyfaidx` library provides efficient tools for extracting subsequences from a FASTA file. With these tools a window of size two times the size of the provided (or default) window is extracted from the reference FASTA file at each location stored into the matching_cases_dictionary. If the given location is marks the 'start of the exon' we look for acceptor site canonicals. If the given location marks the 'end of the exon', we look for 'donor site canonicals':
@@ -490,20 +490,21 @@ Indel error lengths are stored in a dictionary and can be found in the stdout.lo
 
 ```python
 {
-    ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': '<int>'}
+    ('insertion/deletion', 'strand', 'start/end', 'offset'): {'error_length <int>': 'count <int>'}
 }
 ```
+For each key-value pair a histogram is generated.  
 
 Closest canonicals are stored in a dictionary data structure: 
 
 ```python
 {
-  ('strand', 'exon location (start/end)', 'offset: int', 'location (left/right)'): {'key: (closest canonical, aligned pair), value: count of instances'}
+  ('strand', 'exon location (start/end)', 'offset: int', 'location (left/right)'): 
+    {
+      'key: (closest canonical, aligned pair)': {'distance <int>': 'count <int>'}
+    }
 }
 ```
-
-
-For each key-value pair a histogram is generated. 
 
 ## Pipeline
 [Back to top](#general-information)  

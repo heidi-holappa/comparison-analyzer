@@ -51,8 +51,8 @@ class TestLogManager(TestCase):
                 "offset": 1,
                 "location_type": "start",
                 "closest_canonical": {
-                    "left": ("AT", "GT"),
-                    "right": ("GC", "GT")
+                    "left": ("AT", "GT", 2),
+                    "right": ("GC", "GT", 4)
                 }
             },
             "case2": {
@@ -60,8 +60,8 @@ class TestLogManager(TestCase):
                 "offset": 1,
                 "location_type": "start",
                 "closest_canonical": {
-                    "left": ("AT", "GT"),
-                    "right": ("GT", "GT")
+                    "left": ("AT", "GT", 2),
+                    "right": ("GT", "GT", 0)
                 }
             },
         }
@@ -80,8 +80,8 @@ class TestLogManager(TestCase):
                     "deletions": 1
                 },
                 "closest_canonical": {
-                    "left": ("AT", "GT"),
-                    "right": ("GC", "GT")
+                    "left": ("AT", "GT", 2),
+                    "right": ("GC", "GT", 4)
                 }
             },
             "case2": {
@@ -93,19 +93,19 @@ class TestLogManager(TestCase):
                     "deletions": 1
                 },
                 "closest_canonical": {
-                    "left": ("AT", "GT"),
-                    "right": ("GT", "GT")
+                    "left": ("AT", "GT", 2),
+                    "right": ("GT", "GT", 0)
                 }
             },
         }
 
         expected_result = {
             ('+', 'start', 1, 'left'): {
-                ("AT", "GT"): 2
+                ("AT", "GT"): {2: 2}
             },
             ('+', 'start', 1, 'right'): {
-                ("GC", "GT"): 1,
-                ("GT", "GT"): 1
+                ("GC", "GT"): {4: 1},
+                ("GT", "GT"): {0: 1}
             }
         }
         self.assertEqual(
