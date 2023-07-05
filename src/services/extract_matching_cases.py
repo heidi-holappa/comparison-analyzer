@@ -28,6 +28,8 @@ class MatchingCasesExtractor:
                         str(offset_exon_number) + ".start" + \
                         '.offset_' + str(offsets[offset_exon_idx][0])
                     for exon in self.reference_db.children(reference_id, featuretype='exon'):
+                        if 'exon_number' not in exon.attributes:
+                            continue
                         if int(exon['exon_number'][0]) == offset_exon_number:
                             extracted_candidates[entry_key] = {
                                 "transcript_id": transcript_id,
@@ -43,6 +45,8 @@ class MatchingCasesExtractor:
                         str(offset_exon_number) + ".end" + \
                         '.offset_' + str(offsets[offset_exon_idx][1])
                     for exon in self.reference_db.children(reference_id, featuretype='exon'):
+                        if 'exon_number' not in exon.attributes:
+                            continue
                         if int(exon['exon_number'][0]) == offset_exon_number:
                             extracted_candidates[entry_key] = {
                                 "transcript_id": transcript_id,
