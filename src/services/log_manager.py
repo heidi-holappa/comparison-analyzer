@@ -59,23 +59,31 @@ class LogManager:
         })
         return indel_results
 
-    def validate_img_should_be_created_for_closest_canonical_dict_entry(self, key: tuple, nucleotide_pair: tuple, cases: dict):
-        if sum(cases.values()) < 100:
+    def validate_img_should_be_created_for_closest_canonical_dict_entry(self, parser_args, key: tuple, nucleotide_pair: tuple, cases: dict):
+        if sum(cases.values()) < int(parser_args.min_reads_for_graph):
             return False
-        pass
+        acceptor_site_canonicals = ["AG", "AC"]
+        donor_site_canonicals = ["GT", "GC", "AT"]
+        if key[1] == 'start' and nucleotide_pair[1] not in acceptor_site_canonicals:
+            return False
+        if key[1] == 'end' and nucleotide_pair[1] not in donor_site_canonicals:
+            return False
+        return True
 
-    def generate_closest_canonicals_graphs(self, dict_of_canonicals: dict):
+    def generate_closest_canonicals_graphs(self, parser_args, dict_of_canonicals: dict):
         output_manager.output_line({
             "line": "Creating graphs for closest canonicals",
             "is_info": True
         })
-        minimum_case_count = 100
 
         for key, nucleotides in dict_of_canonicals.items():
             for nucleotide_pair, cases in nucleotides.items():
-                case_count = sum(cases.values())
-                if case_count < minimum_case_count:
+                if not self.validate_img_should_be_created_for_closest_canonical_dict_entry(
+                    parser_args, key, nucleotide_pair, cases
+                ):
                     continue
+                case_count = sum(cases.values())
+
                 title = f"{nucleotide_pair}: strand: {key[0]}, exon location: {key[1]}, offset: {key[2]}, direction of pair: {key[3]}, n of cases: {case_count}"
                 filename = "closest-canonicals." + ".strand_" + str(key[0]) + ".exon-loc-" + \
                     str(key[1]) + ".offset-(" + str(key[2]) + ")" + \
@@ -148,9 +156,7 @@ class LogManager:
 
         return closest_canonicals_dict
 
-    def generate_json_overview_dict_for_closest_canonicals(self):
-        closest_canonicals_dict = self.compute_closest_canonicals_dict()
-        self.generate_closest_canonicals_graphs(closest_canonicals_dict)
+    def generate_json_overview_dict_for_closest_canonicals(self, closest_canonicals_dict: dict):
 
         json_overview = {}
         for key, canonical_values in closest_canonicals_dict.items():
@@ -160,8 +166,7 @@ class LogManager:
                     canonical_values[item])
         return json_overview
 
-    def write_closest_canonicals_log_to_file(self, parser_args):
-        json_overview = self.generate_json_overview_dict_for_closest_canonicals()
+    def write_closest_canonicals_log_to_file(self, parser_args, json_overview: dict):
 
         with open(FASTA_OVERVIEW_FILE, "w", encoding="utf-8") as file:
             file.write("# Overview\n")
@@ -258,6 +263,15 @@ class LogManager:
                 "is_info": True
             })
 
+    def generate_output_for_closest_canonicals(self, parser_args):
+        closest_canonicals_dict = self.compute_closest_canonicals_dict()
+        closest_canonicals_json_dict = self.generate_json_overview_dict_for_closest_canonicals(
+            closest_canonicals_dict)
+        self.generate_closest_canonicals_graphs(
+            parser_args, closest_canonicals_dict)
+        self.write_closest_canonicals_log_to_file(
+            parser_args, closest_canonicals_json_dict)
+
     def execute_log_file_creation(self, matching_cases_dict: dict, parser_args):
 
         output_manager.output_line({
@@ -267,7 +281,7 @@ class LogManager:
 
         self.matching_cases_dict = matching_cases_dict
 
-        self.write_closest_canonicals_log_to_file(parser_args)
+        self.generate_output_for_closest_canonicals(parser_args)
         self.generate_indel_graphs()
 
         if parser_args.extended_debug:
