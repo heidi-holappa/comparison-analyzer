@@ -1,4 +1,5 @@
 # Instruction manual
+[Back to README.md](../README.md)  
 
 ## Installation
 Clone the project from GitHub. Create and launch a virtual environment for python 
