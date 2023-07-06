@@ -35,10 +35,10 @@ class LogManager:
 
     def compute_indel_results(self):
         indel_results = {}
-        count_no_indel_errors = 0
+        count_indel_errors = 0
         for matching_case in self.matching_cases_dict.values():
             if 'indel_errors' not in matching_case:
-                count_no_indel_errors += 1
+                count_indel_errors += 1
                 self.alignment_erros.append(str(matching_case) + "\n")
                 continue
             for indel_type, indel_dict in matching_case['indel_errors'].items():
@@ -53,10 +53,12 @@ class LogManager:
                     if indel_dict_key not in indel_results[key]:
                         indel_results[key][indel_dict_key] = 0
                     indel_results[key][indel_dict_key] += indel_event_count
-        output_manager.output_line({
-            "line": f"Number of cases without indel errors: {count_no_indel_errors}",
-            "is_error": True
-        })
+
+        if count_indel_errors:
+            output_manager.output_line({
+                "line": f"Number of cases without indel errors: {count_indel_errors}",
+                "is_error": True
+            })
         return indel_results
 
     def validate_img_should_be_created_for_closest_canonical_dict_entry(self, parser_args, key: tuple, nucleotide_pair: tuple, cases: dict):
@@ -106,7 +108,6 @@ class LogManager:
         })
 
     def write_indel_results_to_file(self, indel_results):
-        indel_results = self.compute_indel_results()
         filepath = os.path.join(LOG_FILE_DIR, 'indel_results.log')
         results = []
         total_reads_in_indel_results = 0
