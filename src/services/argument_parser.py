@@ -64,7 +64,7 @@ def init_argparser():
         help='enable extended debug output',
         action='store_true')
     parser.add_argument(
-        '-i', '--img_n_threshold',
+        '-m', '--min_reads_for_graph',
         help='threshold for the n of cases for creating images',
         default=CREATE_IMG_N_TRESHOLD)
 
