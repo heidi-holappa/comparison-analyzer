@@ -86,7 +86,6 @@ def init_argparser():
         parser_dict["offset"] = (0, float('inf'))
     else:
         offset_range = []
-        print(parser_args.offset)
         for element in parser_args.offset:
             if isinstance(element, str) and len(element) == 3:
                 offset_range.append(float('inf'))
