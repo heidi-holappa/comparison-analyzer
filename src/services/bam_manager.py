@@ -99,11 +99,11 @@ class BamManager:
             output_manager.output_line({
                 "line": str(prev_processed_reads_counter) +
                 " iterations extracted an already processed read from the BAM-file",
-                "is_error": True,
+                "is_warning": True,
             })
 
         output_manager.output_line({
-            "line": "\nFinished",
+            "line": "Processing BAM-file finished.",
             "is_info": True
         })
 
