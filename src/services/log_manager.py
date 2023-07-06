@@ -64,9 +64,9 @@ class LogManager:
             return False
         acceptor_site_canonicals = ["AG", "AC"]
         donor_site_canonicals = ["GT", "GC", "AT"]
-        if key[1] == 'start' and nucleotide_pair[1] not in acceptor_site_canonicals:
+        if key[1] == 'start' and str(nucleotide_pair[1]).upper() not in acceptor_site_canonicals:
             return False
-        if key[1] == 'end' and nucleotide_pair[1] not in donor_site_canonicals:
+        if key[1] == 'end' and str(nucleotide_pair[1]).upper() not in donor_site_canonicals:
             return False
         return True
 
