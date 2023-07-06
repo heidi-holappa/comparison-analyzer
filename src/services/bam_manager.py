@@ -158,7 +158,7 @@ class BamManager:
         log_manager.debug_logs['reads_and_references'] = reads_and_references
 
         cases_line = f"Number of matching cases: {len(self.matching_cases_dict)}, " + \
-            f"number of reads: {len(reads_and_references)}\n"
+            f"number of reads: {len(reads_and_references)}"
 
         output_manager.output_line({
             "line": cases_line,
