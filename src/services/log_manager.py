@@ -56,7 +56,7 @@ class LogManager:
 
         if count_indel_errors:
             output_manager.output_line({
-                "line": f"Number of cases without indel errors: {count_indel_errors}",
+                "line": f"Indel results: number of cases without indel errors: {count_indel_errors}",
                 "is_error": True
             })
         return indel_results
@@ -74,7 +74,7 @@ class LogManager:
 
     def generate_closest_canonicals_graphs(self, parser_args, dict_of_canonicals: dict):
         output_manager.output_line({
-            "line": "Creating graphs for closest canonicals",
+            "line": "Closest canonicals: creating graphs.",
             "is_info": True
         })
         graphs_created = 0
@@ -103,7 +103,7 @@ class LogManager:
                 )
                 graphs_created += 1
         output_manager.output_line({
-            "line": f"Done. A total of {graphs_created} graphs created for closest canonicals.",
+            "line": f"Closest canonicals: done. A total of {graphs_created} graphs created for closest canonicals.",
             "is_info": True
         })
 
@@ -119,9 +119,9 @@ class LogManager:
         with open(filepath, "w", encoding="utf-8") as file:
             file.writelines(results)
             file.write(
-                f"Total number of reads in indel results: {total_reads_in_indel_results}\n")
+                f"Indel results: Total number of reads in indel results: {total_reads_in_indel_results}\n")
         output_manager.output_line({
-            "line": f"Done. Indel-results written to: {filepath}",
+            "line": f"Indel results: done. Results written to: {filepath}",
             "is_info": True
         })
 
@@ -132,7 +132,7 @@ class LogManager:
 
     def generate_indel_graphs(self, parser_args, indel_results):
         output_manager.output_line({
-            "line": "Generating graphs for insertions and deletions found at given locations",
+            "line": "Indel results: generating graphs for insertions and deletions found at given locations",
             "is_info": True
         })
         total_reads_in_indel_results = 0
@@ -153,11 +153,11 @@ class LogManager:
             )
             graphs_created += 1
         output_manager.output_line({
-            "line": f"Total number of reads in indel results: {total_reads_in_indel_results}",
+            "line": f"Indel results: total number of reads in indel results: {total_reads_in_indel_results}",
             "is_info": True
         })
         output_manager.output_line({
-            "line": f"Graphs for {graphs_created} cases created.",
+            "line": f"Indel results: graphs for {graphs_created} cases created.",
             "is_info": True
         })
 
@@ -255,7 +255,7 @@ class LogManager:
             file.close()
 
         output_manager.output_line({
-            "line": "Results written to file: " + FASTA_OVERVIEW_FILE,
+            "line": "Closest canonicals: results written to file: " + FASTA_OVERVIEW_FILE,
             "is_info": True
         })
 
@@ -306,7 +306,7 @@ class LogManager:
     def execute_log_file_creation(self, matching_cases_dict: dict, parser_args):
 
         output_manager.output_line({
-            "line": "Creating log-files",
+            "line": "CREATING LOG-FILES",
             "is_title": True
         })
 
