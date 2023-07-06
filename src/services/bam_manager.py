@@ -27,6 +27,10 @@ class BamManager:
         self.samfile = pysam.AlignmentFile(filename, "rb")
 
     def process_bam_file(self, reads_and_references: dict):
+        output_manager.output_line({
+            "line": "Iterating reads and counting indels. This may take a while.",
+            "is_info": True
+        })
         count = 0
         errors = []
         set_of_processed_reads = set()
@@ -156,18 +160,16 @@ class BamManager:
         log_manager.debug_logs['transcripts_and_reads'] = transcripts_and_reads
         log_manager.debug_logs['reads_and_references'] = reads_and_references
 
+        cases_line = f"Number of matching cases: {len(self.matching_cases_dict)}, " + \
+            f"number of reads: {len(reads_and_references)}\n"
+
         output_manager.output_line({
-            "line": "Number of matching cases:" + str(len(self.matching_cases_dict)),
+            "line": cases_line,
             "is_info": True
         })
 
         output_manager.output_line({
-            "line": "Number of reads: " + str(len(reads_and_references)),
-            "is_info": True
-        })
-
-        output_manager.output_line({
-            "line": "Analyzing offset of reads. This may take a while.",
+            "line": "Note: one read may be related to multiple matching cases.",
             "is_info": True
         })
 
