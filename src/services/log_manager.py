@@ -59,6 +59,11 @@ class LogManager:
         })
         return indel_results
 
+    def validate_img_should_be_created_for_closest_canonical_dict_entry(self, key: tuple, nucleotide_pair: tuple, cases: dict):
+        if sum(cases.values()) < 100:
+            return False
+        pass
+
     def generate_closest_canonicals_graphs(self, dict_of_canonicals: dict):
         output_manager.output_line({
             "line": "Creating graphs for closest canonicals",
