@@ -116,12 +116,13 @@ class LogManager:
                 f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}\n")
             total_reads_in_indel_results += sum(value.values())
 
+        summary_line = f"Indel results: Total number of reads in indel results -count: {total_reads_in_indel_results} (Note: one read can be related to multiple matching cases, or be related to multiple transcripts) \n"
+
         with open(filepath, "w", encoding="utf-8") as file:
             file.writelines(results)
-            file.write(
-                f"Indel results: Total number of reads in indel results: {total_reads_in_indel_results}\n")
+            file.write(summary_line)
         output_manager.output_line({
-            "line": f"Indel results: done. Results written to: {filepath}",
+            "line": summary_line,
             "is_info": True
         })
 
