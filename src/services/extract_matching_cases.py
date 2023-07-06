@@ -2,7 +2,8 @@ class MatchingCasesExtractor:
 
     def __init__(self, offset_results: dict, offset_range: tuple, reference_db):
         """
-            Extract candidates matching the selected offset.
+            Extract candidates matching the selected offset. Currently first and last exon are not considered.
+            These are omitted with the magic numbers in the second for loop.
 
         Args:
             offset_results (dict): a dictionary containing the offset results for each transcript
@@ -15,39 +16,37 @@ class MatchingCasesExtractor:
 
     def extract_candidates_matching_selected_offset(self) -> dict:
         extracted_candidates = {}
-        for key, value in self.offset_results.items():
-            strand, offsets = value["strand"], value["offsets"]
-            reference_id, transcript_id = value["reference_id"], key
-            if strand == "-":
-                offsets.reverse()
+        for transcript_id, value in self.offset_results.items():
+            strand, offsets, reference_id = value["strand"], value["offsets"], value["reference_id"]
             for offset_exon_idx in range(1, len(offsets)-1):
-                offset_exon_number = offset_exon_idx + 1
-                if abs(offsets[offset_exon_idx][0]) >= self.offset_range[0] and \
-                        abs(offsets[offset_exon_idx][0]) <= self.offset_range[1]:
+                start_is_in_range = bool(abs(offsets[offset_exon_idx][0]) >= self.offset_range[0] and
+                                         abs(offsets[offset_exon_idx][0]) <= self.offset_range[1])
+                if start_is_in_range:
                     entry_key = transcript_id + ".exon_" + \
-                        str(offset_exon_number) + ".start" + \
+                        str(offset_exon_idx) + ".start" + \
                         '.offset_' + str(offsets[offset_exon_idx][0])
-                    for exon in self.reference_db.children(reference_id, featuretype='exon'):
-                        if int(exon['exon_number'][0]) == offset_exon_number:
+                    for exon_number, exon in enumerate(self.reference_db.children(reference_id, featuretype='exon', order_by='start')):
+                        if exon_number == offset_exon_idx:
                             extracted_candidates[entry_key] = {
                                 "transcript_id": transcript_id,
                                 "strand": strand,
-                                "exon_number": offset_exon_number,
+                                "exon_number": offset_exon_idx,
                                 "location_type": "start",
                                 "location": exon.start + offsets[offset_exon_idx][0],
                                 "offset": offsets[offset_exon_idx][0]
                             }
-                if abs(offsets[offset_exon_idx][1]) >= self.offset_range[0] and \
-                        abs(offsets[offset_exon_idx][1]) <= self.offset_range[1]:
+                end_is_in_range = bool(abs(offsets[offset_exon_idx][1]) >= self.offset_range[0] and
+                                       abs(offsets[offset_exon_idx][1]) <= self.offset_range[1])
+                if end_is_in_range:
                     entry_key = transcript_id + ".exon_" + \
-                        str(offset_exon_number) + ".end" + \
+                        str(offset_exon_idx) + ".end" + \
                         '.offset_' + str(offsets[offset_exon_idx][1])
-                    for exon in self.reference_db.children(reference_id, featuretype='exon'):
-                        if int(exon['exon_number'][0]) == offset_exon_number:
+                    for exon_number, exon in enumerate(self.reference_db.children(reference_id, featuretype='exon', order_by='start')):
+                        if exon_number == offset_exon_idx:
                             extracted_candidates[entry_key] = {
                                 "transcript_id": transcript_id,
                                 "strand": strand,
-                                "exon_number": offset_exon_number,
+                                "exon_number": offset_exon_idx,
                                 "location_type": "end",
                                 "location": exon.end + offsets[offset_exon_idx][1],
                                 "offset": offsets[offset_exon_idx][1]

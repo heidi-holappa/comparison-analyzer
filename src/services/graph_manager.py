@@ -21,6 +21,8 @@ class GraphManagement:
                                       title: str,
                                       x_label: str,
                                       y_label: str):
+        if not len(graph_values):
+            return
         normalized_graph_values = self.normalize_values(graph_values)
         values = sorted(normalized_graph_values.items())
         x_values, y_values = zip(*values)
