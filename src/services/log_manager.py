@@ -128,7 +128,7 @@ class LogManager:
         summary_line = "Indel results: count of reads in indel results: " + \
             f"{total_reads_in_indel_results} " + \
             "(Note: one read can be related to multiple matching cases, " + \
-            "or be related to multiple transcripts). \n"
+            "or be related to multiple transcripts)."
 
         with open(filepath, "w", encoding="utf-8") as file:
             file.writelines(results)
