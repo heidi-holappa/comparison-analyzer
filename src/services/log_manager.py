@@ -126,9 +126,9 @@ class LogManager:
             total_reads_in_indel_results += sum(value.values())
 
         summary_line = "Indel results: count of reads in indel results: " + \
-            f"{total_reads_in_indel_results}" + \
+            f"{total_reads_in_indel_results} " + \
             "(Note: one read can be related to multiple matching cases, " + \
-            "or be related to multiple transcripts) \n"
+            "or be related to multiple transcripts). \n"
 
         with open(filepath, "w", encoding="utf-8") as file:
             file.writelines(results)
@@ -149,7 +149,6 @@ class LogManager:
             "found at given locations",
             "is_info": True
         })
-        total_reads_in_indel_results = 0
         graphs_created = 0
         for key, value in indel_results.items():
             if not self.validate_indel_grahp_should_be_created(parser_args, value):
@@ -158,7 +157,7 @@ class LogManager:
                 f"offset: {key[3]}, n of cases: {sum(value.values())}"
             filename = "indel." + str(key[0]) + ".strand_" + str(key[1]) + ".exon-loc-" + \
                 str(key[2]) + ".offset-(" + str(key[3]) + ")"
-            total_reads_in_indel_results += sum(value.values())
+
             graph_manager.construct_bar_chart_from_dict(
                 graph_values=value,
                 filename=filename,
@@ -167,11 +166,7 @@ class LogManager:
                 y_label="Portion of reads",
             )
             graphs_created += 1
-        output_manager.output_line({
-            "line": "Indel results: total number of reads in indel results: " +
-            f"{total_reads_in_indel_results}",
-            "is_info": True
-        })
+
         output_manager.output_line({
             "line": f"Indel results: graphs for {graphs_created} cases created.",
             "is_info": True
