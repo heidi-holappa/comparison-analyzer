@@ -61,7 +61,11 @@ class LogManager:
             })
         return indel_results
 
-    def validate_img_should_be_created_for_closest_canonical_dict_entry(self, parser_args, key: tuple, nucleotide_pair: tuple, cases: dict):
+    def validate_img_should_be_created_for_closest_canonical_dict_entry(self,
+                                                                        parser_args,
+                                                                        key: tuple,
+                                                                        nucleotide_pair: tuple,
+                                                                        cases: dict):
         if sum(cases.values()) < int(parser_args.min_reads_for_graph):
             return False
         acceptor_site_canonicals = ["AG", "AC"]
@@ -87,7 +91,8 @@ class LogManager:
                     continue
                 case_count = sum(cases.values())
 
-                title = f"{nucleotide_pair}: strand: {key[0]}, exon location: {key[1]}, offset: {key[2]}, direction of pair: {key[3]}, n of cases: {case_count}"
+                title = f"{nucleotide_pair}: strand: {key[0]}, exon location: {key[1]}, offset: {key[2]}, " + \
+                    f"direction of pair: {key[3]}, n of cases: {case_count}"
                 filename = "closest-canonicals." + ".strand_" + str(key[0]) + ".exon-loc-" + \
                     str(key[1]) + ".offset-(" + str(key[2]) + ")" + \
                     ".direction-" + \
@@ -113,10 +118,13 @@ class LogManager:
         total_reads_in_indel_results = 0
         for key, value in indel_results.items():
             results.append(
-                f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}\n")
+                f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, " +
+                f"offset: {key[3]}, n of cases: {sum(value.values())}: {value}\n")
             total_reads_in_indel_results += sum(value.values())
 
-        summary_line = f"Indel results: Total number of reads in indel results -count: {total_reads_in_indel_results} (Note: one read can be related to multiple matching cases, or be related to multiple transcripts) \n"
+        summary_line = f"Indel results: count of reads in indel results: {total_reads_in_indel_results}" + \
+            "(Note: one read can be related to multiple matching cases, " + \
+            "or be related to multiple transcripts) \n"
 
         with open(filepath, "w", encoding="utf-8") as file:
             file.writelines(results)
@@ -141,7 +149,8 @@ class LogManager:
         for key, value in indel_results.items():
             if not self.validate_indel_grahp_should_be_created(parser_args, value):
                 continue
-            title = f"Type: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}"
+            title = f"Type: {key[0]}, strand: {key[1]}, exon location: {key[2]}, " + \
+                f"offset: {key[3]}, n of cases: {sum(value.values())}"
             filename = "indel." + str(key[0]) + ".strand_" + str(key[1]) + ".exon-loc-" + \
                 str(key[2]) + ".offset-(" + str(key[3]) + ")"
             total_reads_in_indel_results += sum(value.values())
