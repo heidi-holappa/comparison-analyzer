@@ -22,7 +22,8 @@ class LogManager:
                 "transcript_id\treference_id\tclass_code\tstrand\toffsets\n")
             for key, value in self.offset_results.items():
                 file.write(
-                    f"{key}\t{value['reference_id']}\t{value['class_code']}\t{value['strand']}\t{value['offsets']}\n")
+                    f"{key}\t{value['reference_id']}\t{value['class_code']}\t" +
+                    f"{value['strand']}\t{value['offsets']}\n")
 
     def write_alignment_errors_to_file(self):
 
@@ -35,43 +36,65 @@ class LogManager:
 
     def compute_indel_results(self):
         indel_results = {}
-        count_no_indel_errors = 0
+        count_indel_errors = 0
         for matching_case in self.matching_cases_dict.values():
             if 'indel_errors' not in matching_case:
-                count_no_indel_errors += 1
+                count_indel_errors += 1
                 self.alignment_erros.append(str(matching_case) + "\n")
                 continue
             for indel_type, indel_dict in matching_case['indel_errors'].items():
                 key = (
-                    indel_type, matching_case['strand'], matching_case['location_type'], matching_case['offset'])
+                    indel_type, matching_case['strand'],
+                    matching_case['location_type'],
+                    matching_case['offset'])
                 if key not in indel_results:
                     indel_results[key] = {}
-                # TODO: A more pythonic way but harder to read?
-                # indel_results[key] = {k: indel_results[key].get(k, 0) + indel_dict.get(k, 0)
-                #                       for k in set(list(indel_results[key].keys()) + list(indel_dict.keys()))}
                 for indel_dict_key, indel_event_count in indel_dict.items():
                     if indel_dict_key not in indel_results[key]:
                         indel_results[key][indel_dict_key] = 0
                     indel_results[key][indel_dict_key] += indel_event_count
-        output_manager.output_line({
-            "line": f"Number of cases without indel errors: {count_no_indel_errors}",
-            "is_error": True
-        })
+
+        if count_indel_errors:
+            output_manager.output_line({
+                "line": "Indel results: number of cases without indel errors: " +
+                f"{count_indel_errors}",
+                "is_error": True
+            })
         return indel_results
 
-    def generate_closest_canonicals_graphs(self, dict_of_canonicals: dict):
+    def validate_img_should_be_created_for_closest_canonical_dict_entry(self,
+                                                                        parser_args,
+                                                                        key: tuple,
+                                                                        nucleotide_pair: tuple,
+                                                                        cases: dict):
+        if sum(cases.values()) < int(parser_args.min_reads_for_graph):
+            return False
+        acceptor_site_canonicals = ["AG", "AC"]
+        donor_site_canonicals = ["GT", "GC", "AT"]
+        if key[1] == 'start' and str(nucleotide_pair[1]).upper() not in acceptor_site_canonicals:
+            return False
+        if key[1] == 'end' and str(nucleotide_pair[1]).upper() not in donor_site_canonicals:
+            return False
+        return True
+
+    def generate_closest_canonicals_graphs(self, parser_args, dict_of_canonicals: dict):
         output_manager.output_line({
-            "line": "Creating graphs for closest canonicals",
+            "line": "Closest canonicals: creating graphs.",
             "is_info": True
         })
-        minimum_case_count = 100
+        graphs_created = 0
 
         for key, nucleotides in dict_of_canonicals.items():
             for nucleotide_pair, cases in nucleotides.items():
-                case_count = sum(cases.values())
-                if case_count < minimum_case_count:
+                if not self.validate_img_should_be_created_for_closest_canonical_dict_entry(
+                    parser_args, key, nucleotide_pair, cases
+                ):
                     continue
-                title = f"{nucleotide_pair}: strand: {key[0]}, exon location: {key[1]}, offset: {key[2]}, direction of pair: {key[3]}, n of cases: {case_count}"
+                case_count = sum(cases.values())
+
+                title = f"{nucleotide_pair}: strand: {key[0]}, exon location: {key[1]}, " + \
+                    f"offset: {key[2]}, " + \
+                    f"direction of pair: {key[3]}, n of cases: {case_count}"
                 filename = "closest-canonicals." + ".strand_" + str(key[0]) + ".exon-loc-" + \
                     str(key[1]) + ".offset-(" + str(key[2]) + ")" + \
                     ".direction-" + \
@@ -85,27 +108,56 @@ class LogManager:
                     x_label=f"Number of errors (n of cases: {case_count})",
                     y_label="Portion of reads",
                 )
+                graphs_created += 1
         output_manager.output_line({
-            "line": f"Graphs for closest canonicals created.",
+            "line": f"Closest canonicals: done. A total of {graphs_created} " +
+            "graphs created for closest canonicals.",
             "is_info": True
         })
 
-    def generate_indel_graphs(self):
-        indel_results = self.compute_indel_results()
-        output_manager.output_line({
-            "line": "Insertions and deletions found at given locations",
-            "is_info": True
-        })
+    def write_indel_results_to_file(self, indel_results):
+        filepath = os.path.join(LOG_FILE_DIR, 'indel_results.log')
+        results = []
         total_reads_in_indel_results = 0
         for key, value in indel_results.items():
-            title = f"Type: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}"
+            results.append(
+                f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, " +
+                f"offset: {key[3]}, n of cases: {sum(value.values())}: {value}\n")
+            total_reads_in_indel_results += sum(value.values())
+
+        summary_line = "Indel results: count of reads in indel results: " + \
+            f"{total_reads_in_indel_results} " + \
+            "(Note: one read can be related to multiple matching cases, " + \
+            "or be related to multiple transcripts)."
+
+        with open(filepath, "w", encoding="utf-8") as file:
+            file.writelines(results)
+            file.write(summary_line)
+        output_manager.output_line({
+            "line": summary_line,
+            "is_info": True
+        })
+
+    def validate_indel_grahp_should_be_created(self, parser_args, cases: dict):
+        if sum(cases.values()) < int(parser_args.min_reads_for_graph):
+            return False
+        return True
+
+    def generate_indel_graphs(self, parser_args, indel_results):
+        output_manager.output_line({
+            "line": "Indel results: generating graphs for insertions and deletions " +
+            "found at given locations",
+            "is_info": True
+        })
+        graphs_created = 0
+        for key, value in indel_results.items():
+            if not self.validate_indel_grahp_should_be_created(parser_args, value):
+                continue
+            title = f"Type: {key[0]}, strand: {key[1]}, exon location: {key[2]}, " + \
+                f"offset: {key[3]}, n of cases: {sum(value.values())}"
             filename = "indel." + str(key[0]) + ".strand_" + str(key[1]) + ".exon-loc-" + \
                 str(key[2]) + ".offset-(" + str(key[3]) + ")"
-            output_manager.output_line({
-                "line": f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}",
-                "is_info": True
-            })
-            total_reads_in_indel_results += sum(value.values())
+
             graph_manager.construct_bar_chart_from_dict(
                 graph_values=value,
                 filename=filename,
@@ -113,12 +165,10 @@ class LogManager:
                 x_label=f"Number of errors (n of cases: {sum(value.values())})",
                 y_label="Portion of reads",
             )
+            graphs_created += 1
+
         output_manager.output_line({
-            "line": f"Total number of reads in indel results: {total_reads_in_indel_results}",
-            "is_info": True
-        })
-        output_manager.output_line({
-            "line": f"Graphs for {len(indel_results)} cases created.",
+            "line": f"Indel results: graphs for {graphs_created} cases created.",
             "is_info": True
         })
 
@@ -143,9 +193,7 @@ class LogManager:
 
         return closest_canonicals_dict
 
-    def generate_json_overview_dict_for_closest_canonicals(self):
-        closest_canonicals_dict = self.compute_closest_canonicals_dict()
-        self.generate_closest_canonicals_graphs(closest_canonicals_dict)
+    def generate_json_overview_dict_for_closest_canonicals(self, closest_canonicals_dict: dict):
 
         json_overview = {}
         for key, canonical_values in closest_canonicals_dict.items():
@@ -155,8 +203,7 @@ class LogManager:
                     canonical_values[item])
         return json_overview
 
-    def write_closest_canonicals_log_to_file(self, parser_args):
-        json_overview = self.generate_json_overview_dict_for_closest_canonicals()
+    def write_closest_canonicals_log_to_file(self, parser_args, json_overview: dict):
 
         with open(FASTA_OVERVIEW_FILE, "w", encoding="utf-8") as file:
             file.write("# Overview\n")
@@ -199,7 +246,8 @@ class LogManager:
                 file.write(
                     "This section contains the results in table-format. ")
                 file.write(
-                    "To disable this section, set extended debug 'false' in provided arguments.  \n")
+                    "To disable this section, set extended debug 'false' " +
+                    "in provided arguments.  \n")
                 current_chromosome = "chr1"
                 file.write(f'\n### {current_chromosome}\n')
                 file.write(
@@ -219,7 +267,7 @@ class LogManager:
             file.close()
 
         output_manager.output_line({
-            "line": "Results written to file: " + FASTA_OVERVIEW_FILE,
+            "line": "Closest canonicals: results written to file: " + FASTA_OVERVIEW_FILE,
             "is_info": True
         })
 
@@ -253,17 +301,31 @@ class LogManager:
                 "is_info": True
             })
 
+    def generate_output_for_closest_canonicals(self, parser_args):
+        closest_canonicals_dict = self.compute_closest_canonicals_dict()
+        closest_canonicals_json_dict = self.generate_json_overview_dict_for_closest_canonicals(
+            closest_canonicals_dict)
+        self.generate_closest_canonicals_graphs(
+            parser_args, closest_canonicals_dict)
+        self.write_closest_canonicals_log_to_file(
+            parser_args, closest_canonicals_json_dict)
+
+    def generate_output_for_indels(self, parser_args):
+        indel_results = self.compute_indel_results()
+        self.generate_indel_graphs(parser_args, indel_results)
+        self.write_indel_results_to_file(indel_results)
+
     def execute_log_file_creation(self, matching_cases_dict: dict, parser_args):
 
         output_manager.output_line({
-            "line": "Creating log-files",
-            "is_info": True
+            "line": "CREATING LOG-FILES AND GRAPHS",
+            "is_title": True
         })
 
         self.matching_cases_dict = matching_cases_dict
 
-        self.write_closest_canonicals_log_to_file(parser_args)
-        self.generate_indel_graphs()
+        self.generate_output_for_closest_canonicals(parser_args)
+        self.generate_output_for_indels(parser_args)
 
         if parser_args.extended_debug:
             self.debug_logs["matching_cases_dict"] = self.matching_cases_dict

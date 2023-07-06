@@ -9,7 +9,8 @@ class OutputManager:
         self.log_output = []
 
     def output_line(self, config: dict):
-        """Outputs given line to console. Can be used to output titles, info, errors and more. A simple custom logger.
+        """Outputs given line to console. Can be used to output titles,
+        info, warnings, errors and more. A simple custom logger.
 
         Args:
             config (dict): Configuration options for the output line.
@@ -21,6 +22,7 @@ class OutputManager:
         additional_line_breaks = config.get('additional_line_breaks', 0)
         is_info = config.get('is_info', False)
         is_error = config.get('is_error', False)
+        is_warning = config.get('is_warning', False)
         title_line_length = config.get('title_line_length', 50)
         save_to_log = config.get('save_to_log', True)
         if is_title:
@@ -29,6 +31,8 @@ class OutputManager:
             line = f"INFO: [{datetime.now().strftime('%Y-%m-%d %H:%M')}]: {line}"
         if is_error:
             line = f"ERROR: [{datetime.now().strftime('%Y-%m-%d %H:%M')}]: {line}"
+        if is_warning:
+            line = f"WARNING: [{datetime.now().strftime('%Y-%m-%d %H:%M')}]: {line}"
         print(line, end=end_line)
         if additional_line_breaks:
             print("\n" * additional_line_breaks, end="")

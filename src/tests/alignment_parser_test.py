@@ -127,6 +127,7 @@ class TestCigarParser(TestCase):
 class TestIndelCountingFromCigarCodes(TestCase):
     def setUp(self):
         self.parser = AlignmentParser()
+        self.window_size = 8
 
     def test_indel_counter_returns_false_and_an_empty_debug_list_for_given_empty_list(self):
         cigar_tuples = []
@@ -136,13 +137,12 @@ class TestIndelCountingFromCigarCodes(TestCase):
         expected_result, expected_debug_list, expected_result = False, [
             []], {'deletions': 0, 'insertions': 0}
         result, debug_list, result = alignment_parser.count_indels_from_cigar_codes_in_given_window(
-            cigar_tuples, aligned_location, loc_type)
+            cigar_tuples, aligned_location, loc_type, self.window_size)
         self.assertEqual((result, debug_list, result),
                          (expected_result, expected_debug_list, expected_result))
 
     def test_indels_are_counted_correctly(self):
         cigar_tuples = [(0, 20), (2, 3), (1, 2), (0, 10)]
-        self.parser.window_size = 8
         aligned_location = 27
         loc_type = "end"
         strand = "+"
@@ -150,13 +150,12 @@ class TestIndelCountingFromCigarCodes(TestCase):
             2, 2, 2, 1, 1, 0, 0, 0], {'deletions': 3, 'insertions': 2}
 
         errors, debug_list, result = alignment_parser.count_indels_from_cigar_codes_in_given_window(
-            cigar_tuples, aligned_location, loc_type)
+            cigar_tuples, aligned_location, loc_type, self.window_size)
         self.assertEqual((errors, debug_list[0], result),
                          (expected_errors, expected_debug_list, expected_result))
 
     def test_full_window_of_dels_returns_true_for_errors(self):
         cigar_tuples = [(0, 20), (2, 8), (1, 2), (0, 10)]
-        self.parser.window_size = 8
         aligned_location = 20
         loc_type = "start"
         strand = "+"
@@ -164,6 +163,6 @@ class TestIndelCountingFromCigarCodes(TestCase):
             2, 2, 2, 2, 2, 2, 2, 2], {'deletions': 8, 'insertions': 0}
 
         errors, debug_list, result = alignment_parser.count_indels_from_cigar_codes_in_given_window(
-            cigar_tuples, aligned_location, loc_type)
+            cigar_tuples, aligned_location, loc_type, self.window_size)
         self.assertEqual((errors, debug_list[0], result),
                          (expected_errors, expected_debug_list, expected_result))

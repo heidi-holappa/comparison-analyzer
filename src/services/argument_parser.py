@@ -2,12 +2,13 @@ import argparse
 import json
 
 from config import DEFAULT_WINDOW_SIZE
+from config import CREATE_IMG_N_TRESHOLD
 
 
 def init_argparser():
     parser = argparse.ArgumentParser(
         description='compAna: a tool for comparing annotations',
-        usage='python3 compAna.py -i <input.gtf> [-f] [-s]'
+        usage='python3 src/compana.py -g <gffcompare_gtf> -r <reference_gtf> -a <reference_fasta> [-o <offset>] [-f] [-s] [-c <class_code>] [-j <json>] [-b <reads_bam>] [-t <reads_tsv>] [-w <window_size>] [-e]'
     )
     parser.add_argument(
         '-g', '--gffcompare_gtf',
@@ -56,11 +57,16 @@ def init_argparser():
     parser.add_argument(
         '-w', '--window_size',
         help='window from which indels and mismatches are to be searched in interesting locations',
-        metavar='')
+        metavar='',
+        default=DEFAULT_WINDOW_SIZE)
     parser.add_argument(
         '-e', '--extended_debug',
         help='enable extended debug output',
         action='store_true')
+    parser.add_argument(
+        '-m', '--min_reads_for_graph',
+        help='threshold for the n of cases for creating images',
+        default=CREATE_IMG_N_TRESHOLD)
 
     parser_args = parser.parse_args()
     parser_dict = vars(parser_args)
@@ -80,7 +86,6 @@ def init_argparser():
         parser_dict["offset"] = (0, float('inf'))
     else:
         offset_range = []
-        print(parser_args.offset)
         for element in parser_args.offset:
             if isinstance(element, str) and len(element) == 3:
                 offset_range.append(float('inf'))
@@ -89,8 +94,5 @@ def init_argparser():
         parser_dict["offset"] = (
             max(0, offset_range[0]), max(0, offset_range[1])
         )
-
-    if not parser_args.window_size:
-        parser_dict["window_size"] = DEFAULT_WINDOW_SIZE
 
     return parser_args

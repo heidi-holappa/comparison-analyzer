@@ -1,12 +1,9 @@
-import os
 import pysam
 
 from services.read_management import create_dict_of_transcripts_and_reads
 from services.output_manager import default_output_manager as output_manager
 from services.alignment_parser import default_alignment_parser as alignment_parser
 from services.log_manager import default_log_manager as log_manager
-
-from config import LOG_FILE_DIR
 
 
 class BamManager:
@@ -15,18 +12,20 @@ class BamManager:
                  bam_path: str,
                  tsv_path: str,
                  matching_cases_dict: dict):
+        # pylint: disable=no-member
 
         self.bam_path = bam_path
         self.tsv_path = tsv_path
+        self.samfile = pysam.AlignmentFile(self.bam_path, "rb")
 
         self.matching_cases_dict = matching_cases_dict
         self.reads_and_transcripts = {}
 
-    def initialize_file(self, filename: str):
-        # pylint: disable=no-member
-        self.samfile = pysam.AlignmentFile(filename, "rb")
-
-    def process_bam_file(self, reads_and_references: dict):
+    def process_bam_file(self, reads_and_references: dict, window_size: int):
+        output_manager.output_line({
+            "line": "Iterating reads and counting indels. This may take a while.",
+            "is_info": True
+        })
         count = 0
         errors = []
         set_of_processed_reads = set()
@@ -61,7 +60,8 @@ class BamManager:
 
                     idx_corrected_location = location - 1
 
-                    if read.reference_start > idx_corrected_location or read.reference_end < idx_corrected_location:
+                    if read.reference_start > idx_corrected_location \
+                            or read.reference_end < idx_corrected_location:
                         errors.append(
                             f"Non-matching location: {read.query_name}, {matching_case_key}\t")
                         continue
@@ -83,7 +83,8 @@ class BamManager:
                     error, debug_list, result = alignment_parser.count_indels_from_cigar_codes_in_given_window(
                         read.cigartuples,
                         aligned_location,
-                        loc_type)
+                        loc_type,
+                        window_size)
                     for key, value in result.items():
                         if value not in self.matching_cases_dict[matching_case_key]['indel_errors'][key]:
                             self.matching_cases_dict[matching_case_key]['indel_errors'][key][value] = 0
@@ -99,17 +100,17 @@ class BamManager:
             output_manager.output_line({
                 "line": str(prev_processed_reads_counter) +
                 " iterations extracted an already processed read from the BAM-file",
-                "is_error": True,
+                "is_warning": True,
             })
 
         output_manager.output_line({
-            "line": "\nFinished",
+            "line": "Processing BAM-file finished.",
             "is_info": True
         })
 
     def output_heading_information(self):
         output_manager.output_line({
-            "line": "PROCESSING BAM-FILE",
+            "line": "ITERATE READS",
             "is_title": True
         })
         output_manager.output_line({
@@ -156,18 +157,16 @@ class BamManager:
         log_manager.debug_logs['transcripts_and_reads'] = transcripts_and_reads
         log_manager.debug_logs['reads_and_references'] = reads_and_references
 
+        cases_line = f"Number of matching cases: {len(self.matching_cases_dict)}, " + \
+            f"number of reads: {len(reads_and_references)}"
+
         output_manager.output_line({
-            "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
+            "line": cases_line,
             "is_info": True
         })
 
         output_manager.output_line({
-            "line": "NUMBER OF READS: " + str(len(reads_and_references)),
-            "is_info": True
-        })
-
-        output_manager.output_line({
-            "line": "Analyzing offset of reads. This may take a while.",
+            "line": "Note: one read may be related to multiple matching cases.",
             "is_info": True
         })
 
@@ -179,5 +178,4 @@ class BamManager:
 
         reads_and_references = self.generate_dictionaries()
 
-        self.initialize_file(self.bam_path)
-        self.process_bam_file(reads_and_references)
+        self.process_bam_file(reads_and_references, window_size)

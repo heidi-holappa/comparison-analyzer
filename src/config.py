@@ -10,7 +10,7 @@ except FileNotFoundError:
     print("Warning! .env file not found.")
 
 temporary_dir_path = os.getenv("TEMPORARY_DIR") or "temporary_files"
-offset_log = os.getenv("OFFSET_LOG") or "offset_log.txt"
+offset_log = os.getenv("OFFSET_LOG_FILE") or "debug_offsets.log"
 test_file_directory = os.getenv(
     "TEST_FILE_DIRECTORY") or "src/tests/files"
 
@@ -30,6 +30,7 @@ FASTA_OVERVIEW_FILE = os.path.join(LOG_FILE_DIR, fasta_overview)
 CIGAR_RESULTS_LOG = os.path.join(LOG_FILE_DIR, cigar_results)
 TITLE_FILE_LENGTH = os.getenv("TITLE_FILE_LENGTH") or 50
 DEFAULT_WINDOW_SIZE = os.getenv("DEFAULT_WINDOW_SIZE") or 8
+CREATE_IMG_N_TRESHOLD = os.getenv("CREATE_IMG_N_TRESHOLD") or 100
 
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
