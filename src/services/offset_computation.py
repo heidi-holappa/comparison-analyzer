@@ -76,7 +76,11 @@ def fetch_exons(transcript, class_code, gffcompare_db, reference_db):
     return aligned_exons, reference_exons
 
 
-def execute_offset_computation(class_code: str, gffcompare_db, reference_db, extended_debug: bool) -> dict:
+def execute_offset_computation(
+        class_code: str,
+        gffcompare_db,
+        reference_db,
+        extended_debug: bool) -> dict:
     output_manager.output_line({
         "line": "COMPUTE OFFSETS",
         "is_title": True
@@ -113,7 +117,8 @@ def execute_offset_computation(class_code: str, gffcompare_db, reference_db, ext
         })
     else:
         output_manager.output_line({
-            "line": "Offset computation finished. Hint: to output results into a file, enable extended debug.",
+            "line": "Offset computation finished. " +
+            "Hint: to output results into a file, enable extended debug.",
             "is_info": True
         })
     return offset_results_as_dict

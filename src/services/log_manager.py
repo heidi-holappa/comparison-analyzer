@@ -22,7 +22,8 @@ class LogManager:
                 "transcript_id\treference_id\tclass_code\tstrand\toffsets\n")
             for key, value in self.offset_results.items():
                 file.write(
-                    f"{key}\t{value['reference_id']}\t{value['class_code']}\t{value['strand']}\t{value['offsets']}\n")
+                    f"{key}\t{value['reference_id']}\t{value['class_code']}\t" +
+                    f"{value['strand']}\t{value['offsets']}\n")
 
     def write_alignment_errors_to_file(self):
 
@@ -43,12 +44,11 @@ class LogManager:
                 continue
             for indel_type, indel_dict in matching_case['indel_errors'].items():
                 key = (
-                    indel_type, matching_case['strand'], matching_case['location_type'], matching_case['offset'])
+                    indel_type, matching_case['strand'],
+                    matching_case['location_type'],
+                    matching_case['offset'])
                 if key not in indel_results:
                     indel_results[key] = {}
-                # TODO: A more pythonic way but harder to read?
-                # indel_results[key] = {k: indel_results[key].get(k, 0) + indel_dict.get(k, 0)
-                #                       for k in set(list(indel_results[key].keys()) + list(indel_dict.keys()))}
                 for indel_dict_key, indel_event_count in indel_dict.items():
                     if indel_dict_key not in indel_results[key]:
                         indel_results[key][indel_dict_key] = 0
@@ -56,7 +56,8 @@ class LogManager:
 
         if count_indel_errors:
             output_manager.output_line({
-                "line": f"Indel results: number of cases without indel errors: {count_indel_errors}",
+                "line": "Indel results: number of cases without indel errors: " +
+                f"{count_indel_errors}",
                 "is_error": True
             })
         return indel_results
@@ -91,7 +92,8 @@ class LogManager:
                     continue
                 case_count = sum(cases.values())
 
-                title = f"{nucleotide_pair}: strand: {key[0]}, exon location: {key[1]}, offset: {key[2]}, " + \
+                title = f"{nucleotide_pair}: strand: {key[0]}, exon location: {key[1]}, " + \
+                    f"offset: {key[2]}, " + \
                     f"direction of pair: {key[3]}, n of cases: {case_count}"
                 filename = "closest-canonicals." + ".strand_" + str(key[0]) + ".exon-loc-" + \
                     str(key[1]) + ".offset-(" + str(key[2]) + ")" + \
@@ -108,7 +110,8 @@ class LogManager:
                 )
                 graphs_created += 1
         output_manager.output_line({
-            "line": f"Closest canonicals: done. A total of {graphs_created} graphs created for closest canonicals.",
+            "line": f"Closest canonicals: done. A total of {graphs_created} " +
+            "graphs created for closest canonicals.",
             "is_info": True
         })
 
@@ -122,7 +125,8 @@ class LogManager:
                 f"offset: {key[3]}, n of cases: {sum(value.values())}: {value}\n")
             total_reads_in_indel_results += sum(value.values())
 
-        summary_line = f"Indel results: count of reads in indel results: {total_reads_in_indel_results}" + \
+        summary_line = "Indel results: count of reads in indel results: " + \
+            f"{total_reads_in_indel_results}" + \
             "(Note: one read can be related to multiple matching cases, " + \
             "or be related to multiple transcripts) \n"
 
@@ -141,7 +145,8 @@ class LogManager:
 
     def generate_indel_graphs(self, parser_args, indel_results):
         output_manager.output_line({
-            "line": "Indel results: generating graphs for insertions and deletions found at given locations",
+            "line": "Indel results: generating graphs for insertions and deletions " +
+            "found at given locations",
             "is_info": True
         })
         total_reads_in_indel_results = 0
@@ -163,7 +168,8 @@ class LogManager:
             )
             graphs_created += 1
         output_manager.output_line({
-            "line": f"Indel results: total number of reads in indel results: {total_reads_in_indel_results}",
+            "line": "Indel results: total number of reads in indel results: " +
+            f"{total_reads_in_indel_results}",
             "is_info": True
         })
         output_manager.output_line({
@@ -245,7 +251,8 @@ class LogManager:
                 file.write(
                     "This section contains the results in table-format. ")
                 file.write(
-                    "To disable this section, set extended debug 'false' in provided arguments.  \n")
+                    "To disable this section, set extended debug 'false' " +
+                    "in provided arguments.  \n")
                 current_chromosome = "chr1"
                 file.write(f'\n### {current_chromosome}\n')
                 file.write(

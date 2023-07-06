@@ -1,7 +1,6 @@
-import json
 from pyfaidx import Fasta
 from services.output_manager import default_output_manager as output_manager
-from config import FASTA_OVERVIEW_FILE, DEFAULT_WINDOW_SIZE
+from config import DEFAULT_WINDOW_SIZE
 
 
 class FastaExtractor:
@@ -44,7 +43,8 @@ class FastaExtractor:
         errors = False
         if not self.fasta:
             output_manager.output_line({
-                "line": "FASTA-file not found. Please check path and try again. Moving to next section.",
+                "line": "FASTA-file not found. Please check path and try again. " +
+                "Moving to next section.",
                 "is_error": True
             })
             errors = True
@@ -98,8 +98,9 @@ class FastaExtractor:
                 splice_cite_location = value["location"] - 2
             else:
                 splice_cite_location = value["location"] + 1
-            coordinates = (key.split('.')[
-                           1], splice_cite_location - self.window_size, splice_cite_location + self.window_size)
+            coordinates = (key.split('.')[1],
+                           splice_cite_location - self.window_size,
+                           splice_cite_location + self.window_size)
             nucleotides = self.extract_characters_at_given_coordinates(
                 coordinates)
             if value["location_type"] == "start":
@@ -115,7 +116,8 @@ class FastaExtractor:
             return
 
         output_manager.output_line({
-            "line": f"Searching closest possible canonical sites for provided offset range: {self.offset}",
+            "line": "Searching closest possible canonical " +
+            f"sites for provided offset range: {self.offset}",
             "is_info": True
         })
 

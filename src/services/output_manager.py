@@ -9,7 +9,8 @@ class OutputManager:
         self.log_output = []
 
     def output_line(self, config: dict):
-        """Outputs given line to console. Can be used to output titles, info, errors and more. A simple custom logger.
+        """Outputs given line to console. Can be used to output titles,
+        info, warnings, errors and more. A simple custom logger.
 
         Args:
             config (dict): Configuration options for the output line.

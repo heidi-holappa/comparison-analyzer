@@ -71,10 +71,9 @@ class TestBamManagerExecution(TestCase):
 class TestBamReader(TestCase):
 
     def setUp(self):
-        self.bam_manager = BamManager("", "", {})
         test_bam_file = os.path.join(
             TEST_FILE_DIR, "Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.bam")
-        self.bam_manager.initialize_file(test_bam_file)
+        self.bam_manager = BamManager(test_bam_file, "", {})
 
     def test_bam_reader_runs_without_errors(self):
         reads_and_references = {
@@ -89,4 +88,5 @@ class TestBamReader(TestCase):
             }
 
         }
-        self.bam_manager.process_bam_file(reads_and_references)
+        window_size = 10
+        self.bam_manager.process_bam_file(reads_and_references, window_size)
