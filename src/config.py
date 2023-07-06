@@ -30,6 +30,7 @@ FASTA_OVERVIEW_FILE = os.path.join(LOG_FILE_DIR, fasta_overview)
 CIGAR_RESULTS_LOG = os.path.join(LOG_FILE_DIR, cigar_results)
 TITLE_FILE_LENGTH = os.getenv("TITLE_FILE_LENGTH") or 50
 DEFAULT_WINDOW_SIZE = os.getenv("DEFAULT_WINDOW_SIZE") or 8
+CREATE_IMG_N_TRESHOLD = os.getenv("CREATE_IMG_N_TRESHOLD") or 100
 
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
