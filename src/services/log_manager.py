@@ -142,10 +142,6 @@ class LogManager:
             title = f"Type: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}"
             filename = "indel." + str(key[0]) + ".strand_" + str(key[1]) + ".exon-loc-" + \
                 str(key[2]) + ".offset-(" + str(key[3]) + ")"
-            output_manager.output_line({
-                "line": f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}",
-                "is_info": True
-            })
             total_reads_in_indel_results += sum(value.values())
             graph_manager.construct_bar_chart_from_dict(
                 graph_values=value,
