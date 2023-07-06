@@ -32,13 +32,15 @@ def init_databases(gffcompare_gtf: str, reference_gtf: str, force=False) -> tupl
 
         if not force and db_exists:
             output_manager.output_line({
-                "line": f"{key}: database file already exists. Using existing database. Use -f to force overwriting existing db-files.",
+                "line": f"{key}: database file already exists. Using existing database. " +
+                "Use -f to force overwriting existing db-files.",
                 "is_info": True
             })
 
         else:
             output_manager.output_line({
-                "line": f"{key}: database file does not exist. Creating database. This might take a while.",
+                "line": f"{key}: database file does not exist. " +
+                "Creating database. This might take a while.",
                 "is_info": True
             })
             gffutils.create_db(

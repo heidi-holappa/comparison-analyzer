@@ -76,13 +76,17 @@ def fetch_exons(transcript, class_code, gffcompare_db, reference_db):
     return aligned_exons, reference_exons
 
 
-def execute_offset_computation(class_code: str, gffcompare_db, reference_db, extended_debug: bool) -> dict:
+def execute_offset_computation(
+        class_code: str,
+        gffcompare_db,
+        reference_db,
+        extended_debug: bool) -> dict:
     output_manager.output_line({
-        "line": "ANNOTATION COMPARISON",
+        "line": "COMPUTE OFFSETS",
         "is_title": True
     })
     output_manager.output_line({
-        "line": "Counting offsets for class code instances for: " + class_code,
+        "line": "Computing offsets for class code instances for: " + class_code,
         "is_info": True
     })
 
@@ -107,10 +111,14 @@ def execute_offset_computation(class_code: str, gffcompare_db, reference_db, ext
 
     if extended_debug:
         log_manager.offset_results = offset_results_as_dict
-
+        output_manager.output_line({
+            "line": "Finished.",
+            "is_info": True
+        })
     else:
         output_manager.output_line({
-            "line": "offset computation finished. Hint: to output results into a file, enable extended debug.",
+            "line": "Offset computation finished. " +
+            "Hint: to output results into a file, enable extended debug.",
             "is_info": True
         })
     return offset_results_as_dict

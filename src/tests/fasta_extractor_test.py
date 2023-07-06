@@ -64,7 +64,7 @@ class TestFastaExtractor(TestCase):
         extractor = FastaExtractor(self.fasta_config)
         extractor.output_section_header()
         captured = self.capsys.readouterr()
-        assert 'FASTA EXTRACTION' in captured.out
+        assert 'CLOSEST CANONICALS' in captured.out
 
     def test_successful_execution_of_extraction_updates_dictionary(self):
         extractor = FastaExtractor(self.fasta_config)

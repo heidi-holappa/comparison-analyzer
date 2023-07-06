@@ -4,9 +4,10 @@
     "reference_gtf": "<file.gtf>",
     "reference_fasta": "<file.fa>",
     "gffcompare_gtf": "<file.gtf>",
-    "offset": 0,
-    "class_code": "j c k",
-    "force": false,
+    "offset": [0, 6],
+    "class_code": "j c k s x",
     "window_size": 8,
+    "min_reads_for_graph": 100,
+    "force": false,
     "extended_debugging": false
 }
