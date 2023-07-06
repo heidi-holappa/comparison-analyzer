@@ -10,7 +10,7 @@ except FileNotFoundError:
     print("Warning! .env file not found.")
 
 temporary_dir_path = os.getenv("TEMPORARY_DIR") or "temporary_files"
-offset_log = os.getenv("OFFSET_LOG") or "offset_log.txt"
+offset_log = os.getenv("OFFSET_LOG_FILE") or "debug_offsets.log"
 test_file_directory = os.getenv(
     "TEST_FILE_DIRECTORY") or "src/tests/files"
 
