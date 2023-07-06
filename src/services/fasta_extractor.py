@@ -32,11 +32,11 @@ class FastaExtractor:
 
     def output_section_header(self):
         output_manager.output_line({
-            "line": "FASTA EXTRACTION",
+            "line": "CLOSEST CANONICALS",
             "is_title": True
         })
         output_manager.output_line({
-            "line": "Fethching reference fasta file...",
+            "line": "Fethching reference FASTA-file.",
             "is_info": True
         })
 
@@ -44,7 +44,7 @@ class FastaExtractor:
         errors = False
         if not self.fasta:
             output_manager.output_line({
-                "line": "fasta-file not found. Please check path and try again. Moving to next section.",
+                "line": "FASTA-file not found. Please check path and try again. Moving to next section.",
                 "is_error": True
             })
             errors = True
@@ -122,6 +122,6 @@ class FastaExtractor:
         self.iterate_matching_cases()
 
         output_manager.output_line({
-            "line": "Phase finished.",
+            "line": "Finished.",
             "is_info": True
         })

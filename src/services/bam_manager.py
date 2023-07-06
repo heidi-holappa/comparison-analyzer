@@ -109,7 +109,7 @@ class BamManager:
 
     def output_heading_information(self):
         output_manager.output_line({
-            "line": "PROCESSING BAM-FILE",
+            "line": "ITERATE READS",
             "is_title": True
         })
         output_manager.output_line({
@@ -157,12 +157,12 @@ class BamManager:
         log_manager.debug_logs['reads_and_references'] = reads_and_references
 
         output_manager.output_line({
-            "line": "NUMBER OF MATCHING CASES:" + str(len(self.matching_cases_dict)),
+            "line": "Number of matching cases:" + str(len(self.matching_cases_dict)),
             "is_info": True
         })
 
         output_manager.output_line({
-            "line": "NUMBER OF READS: " + str(len(reads_and_references)),
+            "line": "Number of reads: " + str(len(reads_and_references)),
             "is_info": True
         })
 

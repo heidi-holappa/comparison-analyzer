@@ -307,7 +307,7 @@ class LogManager:
     def execute_log_file_creation(self, matching_cases_dict: dict, parser_args):
 
         output_manager.output_line({
-            "line": "CREATING LOG-FILES",
+            "line": "CREATING LOG-FILES AND GRAPHS",
             "is_title": True
         })
 
