@@ -113,10 +113,6 @@ class LogManager:
         for key, value in indel_results.items():
             results.append(
                 f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}\n")
-            output_manager.output_line({
-                "line": f"in/del: {key[0]}, strand: {key[1]}, exon location: {key[2]}, offset: {key[3]}, n of cases: {sum(value.values())}: {value}",
-                "is_info": True
-            })
             total_reads_in_indel_results += sum(value.values())
 
         with open(filepath, "w", encoding="utf-8") as file:
