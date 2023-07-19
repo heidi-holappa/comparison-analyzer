@@ -1,3 +1,5 @@
+import sys
+
 from services.bam_manager import BamManager
 
 from services.offset_computation import execute_offset_computation
@@ -9,12 +11,17 @@ from services.fasta_extractor import FastaExtractor
 from services.output_manager import default_output_manager as output_manager
 from services.log_manager import default_log_manager as log_manager
 
+from implementation_services.isoquant_db_init import init_isoquant_db
+from implementation_services.case_extractor import CaseExtractor
+
 
 def run_pipeline(parser_args):
     output_manager.output_heading()
 
     gffcompare_db, reference_db = init_databases(
-        parser_args.gffcompare_gtf, parser_args.reference_gtf, parser_args.force)
+        parser_args.gffcompare_gtf,
+        parser_args.reference_gtf,
+        parser_args.force)
 
     if parser_args.stats:
         class_code_stats = ClassCodeStats(gffcompare_db)
@@ -53,15 +60,40 @@ def run_pipeline(parser_args):
 
     log_manager.execute_log_file_creation(matching_cases_dict, parser_args)
 
-    # Extract all intron site locations from isoquant-gtf
+    if not parser_args.isoquant_gtf:
+        sys.exit(1)
 
-    # Compute reads and locations
+    isoquant_db = init_isoquant_db(parser_args.isoquant_gtf)
+
+    # Extract all intron site locations from isoquant-db
+    # input: isoquant-db
+    # output: implementation matching cases dictionary
+
+    case_extractor = CaseExtractor()
+    extracted_cases_dict = case_extractor.extract_intron_site_locations(
+        isoquant_db)
+
+    transcript_set = case_extractor.extract_transcripts(isoquant_db)
+
+    # extract reads and references
+    # input model_reads.tsv, implementation matching cases dictionary
+    # output: reads and references dictionary
 
     # compute indels
+    # input: implementation matching cases dictionary, reads and references dictionary, bam file
+    # output: updated implementation matching cases dictionary
 
     # compute closest canonicals for interesting cases
+    # input: implementation matching cases dictionary, reference fasta file
+    # output: updated implementation matching cases dictionary
+
+    # Predict possible mistakes based on indels and closest canonicals
+    # Input: implementation matching cases dictionary
+    # Output: updated  transcript model
 
     # verify results
+    # input: implementation matching cases
+    # output: verification results: misses, hits, errors
 
 
 def main():
