@@ -14,6 +14,7 @@ from services.log_manager import default_log_manager as log_manager
 from implementation_services.isoquant_db_init import init_isoquant_db
 from implementation_services.case_extractor import CaseExtractor
 from implementation_services.read_extractor import create_dict_of_transcripts_and_reads, create_dict_of_reads_and_references
+from implementation_services.indel_computer import execute_indel_computation
 
 
 def run_pipeline(parser_args):
@@ -68,7 +69,7 @@ def run_pipeline(parser_args):
 
     # Extract all intron site locations from isoquant-db and create a set of transcripts
     # input: isoquant-db
-    # output: insertion site dictionary
+    # output: intron site dictionary
 
     case_extractor = CaseExtractor()
     intron_site_dict = case_extractor.extract_intron_site_locations(
@@ -77,7 +78,7 @@ def run_pipeline(parser_args):
     transcript_set = case_extractor.extract_transcripts(isoquant_db)
 
     # extract reads and references
-    # input model_reads.tsv, insertion site dictionary
+    # input model_reads.tsv, intron site dictionary
     # output: reads and references dictionary
 
     transcripts_and_reads = create_dict_of_transcripts_and_reads(
@@ -87,19 +88,25 @@ def run_pipeline(parser_args):
         intron_site_dict, transcripts_and_reads)
 
     # compute indels
-    # input: insertion site dictionary, reads and references dictionary, bam file
-    # output: updated insertion site dictionary
+    # input: intorn site dictionary, reads and references dictionary, bam file
+    # output: updated intron site dictionary
+
+    execute_indel_computation(
+        parser_args.reads_bam,
+        intron_site_dict,
+        reads_and_references,
+        parser_args.window_size)
 
     # compute closest canonicals for interesting cases
-    # input: implementation matching cases dictionary, reference fasta file
-    # output: updated implementation matching cases dictionary
+    # input: intron site dictionary, reference fasta file
+    # output: updated intron site dictionary
 
     # Predict possible mistakes based on indels and closest canonicals
-    # Input: implementation matching cases dictionary
-    # Output: updated  transcript model
+    # Input: intron site dictionary
+    # Output: updated transcript model
 
     # verify results
-    # input: implementation matching cases
+    # input: intron site dictionary, matching cases dict
     # output: verification results: misses, hits, errors
 
 
