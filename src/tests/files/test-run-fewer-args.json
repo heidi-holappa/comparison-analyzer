@@ -2,6 +2,8 @@
     "reference_gtf": "src/tests/files/gencode.vM26.basic.annotation.extract.gtf",
     "gffcompare_gtf": "src/tests/files/gffcompare.annotated.gtf",
     "isoquant_gtf": "src/tests/files/isoquant.gtf",
+    "reads_tsv": "src/tests/files/00_Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.transcript_model_reads.tsv",
+    "reads_bam": "src/tests/files/Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.bam",
     "offset": [4, 4],
     "force": false,
     "stats": true
