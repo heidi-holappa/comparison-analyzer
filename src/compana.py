@@ -13,6 +13,7 @@ from services.log_manager import default_log_manager as log_manager
 
 from implementation_services.isoquant_db_init import init_isoquant_db
 from implementation_services.case_extractor import CaseExtractor
+from implementation_services.read_extractor import create_dict_of_transcripts_and_reads, create_dict_of_reads_and_references
 
 
 def run_pipeline(parser_args):
@@ -65,23 +66,29 @@ def run_pipeline(parser_args):
 
     isoquant_db = init_isoquant_db(parser_args.isoquant_gtf)
 
-    # Extract all intron site locations from isoquant-db
+    # Extract all intron site locations from isoquant-db and create a set of transcripts
     # input: isoquant-db
-    # output: implementation matching cases dictionary
+    # output: insertion site dictionary
 
     case_extractor = CaseExtractor()
-    extracted_cases_dict = case_extractor.extract_intron_site_locations(
+    intron_site_dict = case_extractor.extract_intron_site_locations(
         isoquant_db)
 
     transcript_set = case_extractor.extract_transcripts(isoquant_db)
 
     # extract reads and references
-    # input model_reads.tsv, implementation matching cases dictionary
+    # input model_reads.tsv, insertion site dictionary
     # output: reads and references dictionary
 
+    transcripts_and_reads = create_dict_of_transcripts_and_reads(
+        parser_args.reads_tsv, transcript_set)
+
+    reads_and_references = create_dict_of_reads_and_references(
+        intron_site_dict, transcripts_and_reads)
+
     # compute indels
-    # input: implementation matching cases dictionary, reads and references dictionary, bam file
-    # output: updated implementation matching cases dictionary
+    # input: insertion site dictionary, reads and references dictionary, bam file
+    # output: updated insertion site dictionary
 
     # compute closest canonicals for interesting cases
     # input: implementation matching cases dictionary, reference fasta file
