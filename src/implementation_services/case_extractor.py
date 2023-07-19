@@ -38,7 +38,19 @@ class CaseExtractor:
                     'transcript_id': transcript_id,
                     'strand': transcript.strand,
                     'location_type': "end",
-                    "location": exon.end
+                    "location": exon.end,
+                    "extracted_information": {
+                        "left": {
+                            "insertions": 0,
+                            "deletions": 0,
+                            "closest_canonical": ""
+                        },
+                        "right": {
+                            "insertions": 0,
+                            "deletions": 0,
+                            "closest_canonical": ""
+                        }
+                    }
                 }
 
         output_manager.output_line({
