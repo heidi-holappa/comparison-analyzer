@@ -21,6 +21,12 @@ def init_argparser():
         required=False,
         metavar='')
     parser.add_argument(
+        '-i', '--isoquant_gtf',
+        help="IsoQuant GTF-file to be imported into database",
+        required=False,
+        metavar=''
+    )
+    parser.add_argument(
         '-a', '--reference_fasta',
         help='reference FASTA-file to be compared against',
         required=False,
