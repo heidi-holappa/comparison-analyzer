@@ -53,6 +53,16 @@ def run_pipeline(parser_args):
 
     log_manager.execute_log_file_creation(matching_cases_dict, parser_args)
 
+    # Extract all intron site locations from isoquant-gtf
+
+    # Compute reads and locations
+
+    # compute indels
+
+    # compute closest canonicals for interesting cases
+
+    # verify results
+
 
 def main():
     parser_args = init_argparser()
