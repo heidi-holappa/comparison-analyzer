@@ -1,73 +1,56 @@
 from services.output_manager import default_output_manager as output_manager
 
 
-class CasesExtractor:
+class CaseExtractor:
 
-    def __init__(self, offset_results: dict, offset_range: tuple, isoquant_db):
+    def __init__(self):
         """
-            Extract candidates matching the selected offset. Currently first and last 
-            exon are not considered. These are omitted with the magic numbers in the 
-            second for loop.
+            Extract all intron site locations from isoquant gtf-db.
 
         Args:
-            offset_results (dict): a dictionary containing the offset results for each transcript
-            offset (int): the offset to match
-            reference_db: reference to a gffutils database with the reference annotation
+            isoquant_db: reference to a gffutils database with the isoquant annotation
         """
-        self.offset_results = offset_results
-        self.offset_range = offset_range
-        self.isoquant_db = isoquant_db
+        pass
 
-    def extract_candidates_matching_selected_offset(self) -> dict:
+    def extract_intron_site_locations(self, isoquant_db) -> dict:
         output_manager.output_line({
             "line": "IMPLEMENTATION: EXTRACTING CASES",
             "is_title": True
         })
         output_manager.output_line({
-            "line": f"Extracting cases from the IsoQuant gtf-db",
+            "line": f"Extracting intron site locations from the IsoQuant gtf-db",
             "is_info": True
         })
         extracted_cases = {}
-        for transcript_id, value in self.offset_results.items():
-            strand, offsets, reference_id = value["strand"], value["offsets"], value["reference_id"]
-            for offset_exon_idx in range(1, len(offsets)-1):
-                start_is_in_range = bool(
-                    abs(offsets[offset_exon_idx][0]) >= self.offset_range[0] and
-                    abs(offsets[offset_exon_idx][0]) <= self.offset_range[1])
-                if start_is_in_range:
-                    entry_key = transcript_id + ".exon_" + \
-                        str(offset_exon_idx) + ".start" + \
-                        '.offset_' + str(offsets[offset_exon_idx][0])
-                    for exon_number, exon in enumerate(self.isoquant_db.children(
-                            reference_id, featuretype='exon', order_by='start')):
-                        if exon_number == offset_exon_idx:
-                            extracted_cases[entry_key] = {
-                                "transcript_id": transcript_id,
-                                "strand": strand,
-                                "exon_number": offset_exon_idx,
-                                "location_type": "start",
-                                "location": exon.start + offsets[offset_exon_idx][0],
-                                "offset": offsets[offset_exon_idx][0]
-                            }
-                end_is_in_range = bool(abs(offsets[offset_exon_idx][1]) >= self.offset_range[0] and
-                                       abs(offsets[offset_exon_idx][1]) <= self.offset_range[1])
-                if end_is_in_range:
-                    entry_key = transcript_id + ".exon_" + \
-                        str(offset_exon_idx) + ".end" + \
-                        '.offset_' + str(offsets[offset_exon_idx][1])
-                    for exon_number, exon in enumerate(self.isoquant_db.children(
-                            reference_id, featuretype='exon', order_by='start')):
-                        if exon_number == offset_exon_idx:
-                            extracted_cases[entry_key] = {
-                                "transcript_id": transcript_id,
-                                "strand": strand,
-                                "exon_number": offset_exon_idx,
-                                "location_type": "end",
-                                "location": exon.end + offsets[offset_exon_idx][1],
-                                "offset": offsets[offset_exon_idx][1]
-                            }
+
+        for transcript in isoquant_db.features_of_type('transcript'):
+            for exon in isoquant_db.children(transcript, featuretype='exon', order_by='start'):
+                transcript_id = str(transcript.id)
+                exon_start_entry_key = transcript_id + str(exon.start)
+                exon_end_entry_key = transcript_id + str(exon.end)
+                extracted_cases[exon_start_entry_key] = {
+                    'transcript_id': transcript_id,
+                    'strand': transcript.strand,
+                    'location_type': "start",
+                    "location": exon.start
+                }
+                extracted_cases[exon_end_entry_key] = {
+                    'transcript_id': transcript_id,
+                    'strand': transcript.strand,
+                    'location_type': "end",
+                    "location": exon.end
+                }
+
         output_manager.output_line({
-            "line": f"Found {len(extracted_cases)} candidates in the given offset range",
+            "line": f"Total of {len(extracted_cases)} intron sites extracted from isoquant gtf-db",
             "is_info": True
         })
         return extracted_cases
+
+    def extract_transcripts(self, isoquant_db) -> set:
+        transcripts = set()
+
+        for transcript in isoquant_db.features_of_type('transcript'):
+            transcripts.add(transcript)
+
+        return transcripts
