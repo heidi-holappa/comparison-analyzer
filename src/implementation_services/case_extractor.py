@@ -26,19 +26,33 @@ class CaseExtractor:
         for transcript in isoquant_db.features_of_type('transcript'):
             for exon in isoquant_db.children(transcript, featuretype='exon', order_by='start'):
                 transcript_id = str(transcript.id)
-                exon_start_entry_key = transcript_id + str(exon.start)
-                exon_end_entry_key = transcript_id + str(exon.end)
+                exon_start_entry_key = (transcript_id, str(exon.start))
+                exon_end_entry_key = (transcript_id, str(exon.end))
                 extracted_cases[exon_start_entry_key] = {
                     'transcript_id': transcript_id,
                     'strand': transcript.strand,
                     'location_type': "start",
-                    "location": exon.start
+                    "location": exon.start,
+                    "seq_id": exon.seqid,
+                    "extracted_information": {
+                        "left": {
+                            "insertions": 0,
+                            "deletions": 0,
+                            "closest_canonical": ""
+                        },
+                        "right": {
+                            "insertions": 0,
+                            "deletions": 0,
+                            "closest_canonical": ""
+                        }
+                    }
                 }
                 extracted_cases[exon_end_entry_key] = {
                     'transcript_id': transcript_id,
                     'strand': transcript.strand,
                     'location_type': "end",
                     "location": exon.end,
+                    "seq_id": exon.seqid,
                     "extracted_information": {
                         "left": {
                             "insertions": 0,
