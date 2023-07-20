@@ -36,13 +36,13 @@ class CaseExtractor:
                     "seq_id": exon.seqid,
                     "extracted_information": {
                         "left": {
-                            "insertions": 0,
-                            "deletions": 0,
+                            "insertions": {},
+                            "deletions": {},
                             "closest_canonical": ""
                         },
                         "right": {
-                            "insertions": 0,
-                            "deletions": 0,
+                            "insertions": {},
+                            "deletions": {},
                             "closest_canonical": ""
                         }
                     }
@@ -55,13 +55,13 @@ class CaseExtractor:
                     "seq_id": exon.seqid,
                     "extracted_information": {
                         "left": {
-                            "insertions": 0,
-                            "deletions": 0,
+                            "insertions": {},
+                            "deletions": {},
                             "closest_canonical": ""
                         },
                         "right": {
-                            "insertions": 0,
-                            "deletions": 0,
+                            "insertions": {},
+                            "deletions": {},
                             "closest_canonical": ""
                         }
                     }
