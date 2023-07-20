@@ -138,7 +138,7 @@ def execute_indel_computation(
                     errors.append(f"{read.query_name}\tno reference end\n")
                     continue
 
-                for collection_direction, collected_info in intron_site_dict[matching_case_key]["extracted_information"]:
+                for direction, collected_info in intron_site_dict[matching_case_key]["extracted_information"].items():
                     aligned_location = extract_location_from_cigar_string(
                         read.cigartuples,
                         read.reference_start,
@@ -149,7 +149,7 @@ def execute_indel_computation(
                     count_indels_from_cigar_codes_in_given_window(
                         read.cigartuples,
                         aligned_location,
-                        collection_direction,
+                        direction,
                         collected_info,
                         window_size)
 
