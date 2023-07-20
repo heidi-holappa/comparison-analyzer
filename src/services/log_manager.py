@@ -331,9 +331,6 @@ class LogManager:
             self.debug_logs["matching_cases_dict"] = self.matching_cases_dict
             self.write_debug_files()
 
-        output_manager.output_footer()
-        output_manager.write_log_file()
-
         pass
 
 
