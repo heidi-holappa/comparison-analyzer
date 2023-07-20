@@ -74,7 +74,7 @@ def count_indels_from_cigar_codes_in_given_window(cigar_tuples: list,
 
     if deletions not in indel_count["deletions"]:
         indel_count["deletions"][deletions] = 0
-    if deletions not in indel_count["insertions"]:
+    if insertions not in indel_count["insertions"]:
         indel_count["insertions"][insertions] = 0
 
     indel_count["deletions"][deletions] += 1
