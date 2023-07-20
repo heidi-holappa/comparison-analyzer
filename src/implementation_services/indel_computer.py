@@ -1,7 +1,7 @@
 import pysam
 
 from services.output_manager import default_output_manager as output_manager
-from services.alignment_parser import default_alignment_parser as alignment_parser
+from services.log_manager import default_log_manager as log_manager
 
 
 def extract_location_from_cigar_string(cigar_tuples: list,
@@ -88,7 +88,7 @@ def execute_indel_computation(
         window_size: int):
 
     output_manager.output_line({
-        "line": "COUNTING INDELS FOR ISOQUANT TRANSCRIPT MODEL",
+        "line": "ISOQUANT-GTF: COUNTING INDELS",
         "is_title": True
     })
     output_manager.output_line({
@@ -157,3 +157,6 @@ def execute_indel_computation(
         "line": "Processing BAM-file finished.",
         "is_info": True
     })
+
+    if errors:
+        log_manager.debug_logs["BAM-file-errors"] = errors
