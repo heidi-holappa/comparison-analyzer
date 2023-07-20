@@ -77,6 +77,6 @@ class CaseExtractor:
         transcripts = set()
 
         for transcript in isoquant_db.features_of_type('transcript'):
-            transcripts.add(transcript)
+            transcripts.add(str(transcript.id))
 
         return transcripts
