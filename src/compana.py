@@ -85,6 +85,8 @@ def run_pipeline(parser_args):
     reads_and_references = create_dict_of_reads_and_references(
         intron_site_dict, transcripts_and_reads)
 
+    log_manager.debug_logs["implementation_reads_and_references"] = reads_and_references
+
     # compute indels
     # input: intorn site dictionary, reads and references dictionary, bam file
     # output: updated intron site dictionary
@@ -106,9 +108,7 @@ def run_pipeline(parser_args):
     # Input: intron site dictionary
     # Output: updated transcript model
 
-    with open("test-file.log", "w") as test_file:
-        for key, value in intron_site_dict.items():
-            test_file.write(f"{key}: {value}\n")
+    log_manager.debug_logs["intron_site_dict"] = intron_site_dict
 
     # verify results
     # input: intron site dictionary, matching cases dict
