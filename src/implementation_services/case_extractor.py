@@ -38,12 +38,15 @@ class CaseExtractor:
                         "left": {
                             "insertions": {},
                             "deletions": {},
-                            "closest_canonical": ""
+                            "closest_canonical": "",
+                            "error_detected": False
+
                         },
                         "right": {
                             "insertions": {},
                             "deletions": {},
-                            "closest_canonical": ""
+                            "closest_canonical": "",
+                            "error_detected": False
                         }
                     }
                 }
@@ -57,12 +60,14 @@ class CaseExtractor:
                         "left": {
                             "insertions": {},
                             "deletions": {},
-                            "closest_canonical": ""
+                            "closest_canonical": "",
+                            "error_detected": False
                         },
                         "right": {
                             "insertions": {},
                             "deletions": {},
-                            "closest_canonical": ""
+                            "closest_canonical": "",
+                            "error_detected": False
                         }
                     }
                 }
