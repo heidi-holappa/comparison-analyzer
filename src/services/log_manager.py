@@ -293,9 +293,14 @@ class LogManager:
 
         for log_name, log_values in self.debug_logs.items():
             filepath = os.path.join(LOG_FILE_DIR, 'debug_' + log_name + '.log')
-            with open(filepath, "w") as file:
-                for entry_key, entry_values in log_values.items():
-                    file.write(f"{entry_key}\t{entry_values}\n")
+
+            if isinstance(log_values, dict):
+                with open(filepath, "w") as file:
+                    for entry_key, entry_values in log_values.items():
+                        file.write(f"{entry_key}\t{entry_values}\n")
+            if isinstance(log_values, list):
+                with open(filepath, "w") as file:
+                    file.writelines(log_values)
             output_manager.output_line({
                 "line": f"{log_name} written to: {filepath}",
                 "is_info": True
