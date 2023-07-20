@@ -9,9 +9,6 @@ class FastaExtractor:
         self.fasta = None
         self.fasta_path = fasta_config.get('fasta_path', '')
         self.offset = fasta_config.get('offset', -1)
-        self.gffcompare_gtf = fasta_config.get('gffcompare_gtf', '')
-        self.reference_gtf = fasta_config.get('reference_gtf', '')
-        self.class_codes = fasta_config.get('class_codes', '')
         self.matching_cases_dict = fasta_config.get(
             'matching_cases_dict', {})
         self.window_size = int(fasta_config.get(
