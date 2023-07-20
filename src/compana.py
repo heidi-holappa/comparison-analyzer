@@ -15,6 +15,7 @@ from implementation_services.isoquant_db_init import init_isoquant_db
 from implementation_services.case_extractor import CaseExtractor
 from implementation_services.read_extractor import create_dict_of_transcripts_and_reads, create_dict_of_reads_and_references
 from implementation_services.indel_computer import execute_indel_computation
+from implementation_services.closest_canonicals_extractor import execute_closest_canonicals_extraction
 
 
 def run_pipeline(parser_args):
@@ -44,9 +45,6 @@ def run_pipeline(parser_args):
         fasta_config = {
             "fasta_path": parser_args.reference_fasta,
             "offset": parser_args.offset,
-            "gffcompare_gtf": parser_args.gffcompare_gtf,
-            "reference_gtf": parser_args.reference_gtf,
-            "class_codes": parser_args.class_code,
             "matching_cases_dict": matching_cases_dict,
             "window_size": parser_args.window_size
         }
@@ -101,9 +99,16 @@ def run_pipeline(parser_args):
     # input: intron site dictionary, reference fasta file
     # output: updated intron site dictionary
 
+    execute_closest_canonicals_extraction(
+        intron_site_dict, int(parser_args.window_size), parser_args.reference_fasta)
+
     # Predict possible mistakes based on indels and closest canonicals
     # Input: intron site dictionary
     # Output: updated transcript model
+
+    with open("test-file.log", "w") as test_file:
+        for key, value in intron_site_dict.items():
+            test_file.write(f"{key}: {value}\n")
 
     # verify results
     # input: intron site dictionary, matching cases dict
