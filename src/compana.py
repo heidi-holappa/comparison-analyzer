@@ -33,12 +33,16 @@ def run_prediction_pipeline(parser_args):
     # input: isoquant-db
     # output: transcript set
     transcript_set = case_extractor.extract_transcripts(isoquant_db)
+    log_manager.debug_logs["implementation_transcript_set"] = [
+        str(transcript_set)]
 
     # 4. extract reads and references
     # input model_reads.tsv, intron site dictionary
     # output: reads and references dictionary
     transcripts_and_reads = create_dict_of_transcripts_and_reads(
         parser_args.reads_tsv, transcript_set)
+
+    log_manager.debug_logs["implementation_transcripts_and_reads"] = transcripts_and_reads
 
     reads_and_references = create_dict_of_reads_and_references(
         intron_site_dict, transcripts_and_reads)
