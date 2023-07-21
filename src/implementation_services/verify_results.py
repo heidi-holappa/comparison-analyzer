@@ -18,7 +18,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
 
             case = matching_cases_dict.get(key)
             if not case:
-                debug_errors.append(key)
+                debug_errors.append(str(key))
                 continue
             offset = case['offset']
 
