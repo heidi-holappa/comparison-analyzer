@@ -14,6 +14,7 @@ from implementation_services.case_extractor import CaseExtractor
 from implementation_services.read_extractor import create_dict_of_transcripts_and_reads, create_dict_of_reads_and_references
 from implementation_services.indel_computer import execute_indel_computation
 from implementation_services.closest_canonicals_extractor import execute_closest_canonicals_extraction
+from implementation_services.error_predictor import execute_error_prediction
 
 
 def run_prediction_pipeline(parser_args):
@@ -70,13 +71,13 @@ def run_prediction_pipeline(parser_args):
     # Input: intron site dictionary
     # Output: updated transcript model
 
-    log_manager.debug_logs["intron_site_dict"] = intron_site_dict
+    execute_error_prediction(intron_site_dict)
 
     # 8. verify results
     # input: intron site dictionary, matching cases dict
     # output: verification results: misses, hits, errors
 
-    pass
+    log_manager.debug_logs["intron_site_dict"] = intron_site_dict
 
 
 def run_pipeline(parser_args):
