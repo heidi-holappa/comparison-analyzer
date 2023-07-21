@@ -5,14 +5,13 @@ def make_prediction(findings: dict):
     total_cases = sum(findings['insertions'].values())
     if total_cases < 3:
         return
-    if 0 not in findings['insertions']:
-        prec_no_ins_errors = 0.0
-    else:
-        prec_no_ins_errors = findings['insertions'][0] / total_cases
-    if 0 not in findings['deletions']:
-        prec_no_del_errors = 0.0
-    else:
-        prec_no_del_errors = findings['deletions'][0] / total_cases
+
+    no_ins_errors = findings['insertions'].get(0, 0)
+    no_del_errors = findings['deletions'].get(0, 0)
+
+    prec_no_ins_errors = no_ins_errors / total_cases
+    prec_no_del_errors = no_del_errors / total_cases
+
     error_treshold = 0.25
     if (prec_no_ins_errors < error_treshold or prec_no_del_errors < error_treshold) and findings['closest_canonical'][2] != 0:
         findings['error_detected'] = True
