@@ -1,3 +1,5 @@
+from services.output_manager import default_output_manager as output_manager
+
 
 def make_prediction(findings: dict):
     total_cases = sum(findings['insertions'].values())
@@ -9,7 +11,16 @@ def make_prediction(findings: dict):
         [key * value for key, value in findings['deletions'].items()]) / total_cases
     average_treshold = 2
     if (insertion_average > average_treshold or deletion_average > average_treshold) and findings['closest_canonical'][2] != 0:
-        findings['insertion_error'] = True
+        findings['error_detected'] = True
+
+
+def count_predicted_errors(intron_site_dict: dict):
+    count_of_errors = 0
+    for value in intron_site_dict.values():
+        for findings in value["extracted_information"].values():
+            if findings['error_detected']:
+                count_of_errors += 1
+                break
 
 
 def execute_error_prediction(intron_site_dict: dict):
