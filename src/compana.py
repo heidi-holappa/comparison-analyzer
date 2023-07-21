@@ -15,9 +15,10 @@ from implementation_services.read_extractor import create_dict_of_transcripts_an
 from implementation_services.indel_computer import execute_indel_computation
 from implementation_services.closest_canonicals_extractor import execute_closest_canonicals_extraction
 from implementation_services.error_predictor import execute_error_prediction
+from implementation_services.verify_results import verify_results
 
 
-def run_prediction_pipeline(parser_args):
+def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
 
     # Prediction pipeline
     # 1. Initialize database
@@ -77,6 +78,8 @@ def run_prediction_pipeline(parser_args):
     # input: intron site dictionary, matching cases dict
     # output: verification results: misses, hits, errors
 
+    verify_results(intron_site_dict, matching_cases_dict)
+
     log_manager.debug_logs["intron_site_dict"] = intron_site_dict
 
 
@@ -132,7 +135,7 @@ def run_pipeline(parser_args):
     # 6. Run prediction pipeline
     if parser_args.isoquant_gtf:
         # Initialize isoquant gtf-db
-        run_prediction_pipeline(parser_args)
+        run_prediction_pipeline(parser_args, matching_cases_dict)
 
     # 7. Create log files and output footer to stdout
     log_manager.execute_log_file_creation(matching_cases_dict, parser_args)
