@@ -10,9 +10,9 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
         'TP': 0,
         'FP': 0
     }
-    for key, values in intron_site_dict.values():
-        if values['extracted_information']['right']['error_found'] == True or \
-                values['extracted_information']['left']['error_found'] == True:
+    for key, value in intron_site_dict.values():
+        if value['extracted_information']['right']['error_detected'] or \
+                value['extracted_information']['left']['error_detected']:
             offset = matching_cases_dict[key]['offset']
             if offset != 0:
                 results['TP'] += 1

@@ -5,12 +5,10 @@ def make_prediction(findings: dict):
     total_cases = sum(findings['insertions'].values())
     if total_cases < 3:
         return
-    insertion_average = sum(
-        [key * value for key, value in findings['insertions'].items()]) / total_cases
-    deletion_average = sum(
-        [key * value for key, value in findings['deletions'].items()]) / total_cases
-    average_treshold = 2
-    if (insertion_average > average_treshold or deletion_average > average_treshold) and findings['closest_canonical'][2] != 0:
+    prec_no_ins_errors = findings['insertions'][0] / total_cases
+    prec_no_del_errors = findings['deletions'][0] / total_cases
+    error_treshold = 0.25
+    if (prec_no_ins_errors < error_treshold or prec_no_del_errors < error_treshold) and findings['closest_canonical'][2] != 0:
         findings['error_detected'] = True
 
 
