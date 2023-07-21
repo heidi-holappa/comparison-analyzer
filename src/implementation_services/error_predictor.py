@@ -21,6 +21,10 @@ def count_predicted_errors(intron_site_dict: dict):
             if findings['error_detected']:
                 count_of_errors += 1
                 break
+    output_manager.output_line({
+        "line": f"Predicted errors: {count_of_errors}",
+        "is_info": True
+    })
 
 
 def execute_error_prediction(intron_site_dict: dict):
