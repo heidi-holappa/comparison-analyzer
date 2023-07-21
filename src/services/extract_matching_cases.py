@@ -40,14 +40,16 @@ class MatchingCasesExtractor:
                         '.offset_' + str(offsets[offset_exon_idx][0])
                     for exon_number, exon in enumerate(self.reference_db.children(
                             reference_id, featuretype='exon', order_by='start')):
+                        new_entry_key = (transcript_id, exon.start)
                         if exon_number == offset_exon_idx:
-                            extracted_candidates[entry_key] = {
+                            extracted_candidates[new_entry_key] = {
                                 "transcript_id": transcript_id,
                                 "strand": strand,
                                 "exon_number": offset_exon_idx,
                                 "location_type": "start",
                                 "location": exon.start + offsets[offset_exon_idx][0],
-                                "offset": offsets[offset_exon_idx][0]
+                                "offset": offsets[offset_exon_idx][0],
+                                "seq_id": exon.seqid
                             }
                 end_is_in_range = bool(abs(offsets[offset_exon_idx][1]) >= self.offset_range[0] and
                                        abs(offsets[offset_exon_idx][1]) <= self.offset_range[1])
@@ -58,13 +60,15 @@ class MatchingCasesExtractor:
                     for exon_number, exon in enumerate(self.reference_db.children(
                             reference_id, featuretype='exon', order_by='start')):
                         if exon_number == offset_exon_idx:
-                            extracted_candidates[entry_key] = {
+                            new_entry_key = (transcript_id, exon.end)
+                            extracted_candidates[new_entry_key] = {
                                 "transcript_id": transcript_id,
                                 "strand": strand,
                                 "exon_number": offset_exon_idx,
                                 "location_type": "end",
                                 "location": exon.end + offsets[offset_exon_idx][1],
-                                "offset": offsets[offset_exon_idx][1]
+                                "offset": offsets[offset_exon_idx][1],
+                                "seq_id": exon.seqid
                             }
         output_manager.output_line({
             "line": f"Found {len(extracted_candidates)} candidates in the given offset range",
