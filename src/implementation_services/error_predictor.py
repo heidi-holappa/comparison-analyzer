@@ -28,6 +28,17 @@ def count_predicted_errors(intron_site_dict: dict):
 
 
 def execute_error_prediction(intron_site_dict: dict):
+    output_manager.output_line({
+        "line": "PREDICTING ERRORS",
+        "is_title": True
+    })
     for value in intron_site_dict.values():
         for findings in value["extracted_information"].values():
             make_prediction(findings)
+
+    count_predicted_errors(intron_site_dict)
+
+    output_manager.output_line({
+        "line": "error prediction finished",
+        "is_info": True
+    })
