@@ -13,7 +13,10 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     for key, value in intron_site_dict.items():
         if value['extracted_information']['right']['error_detected'] or \
                 value['extracted_information']['left']['error_detected']:
-            offset = matching_cases_dict[key]['offset']
+
+            offset = matching_cases_dict[key].get('offset', float('inf'))
+            if offset == float('inf'):
+                continue
             if offset != 0:
                 results['TP'] += 1
             else:
