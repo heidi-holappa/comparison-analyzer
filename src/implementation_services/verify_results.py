@@ -9,7 +9,10 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     })
     results = {
         'TP': 0,
-        'FP': {},
+        'FP': {
+            'left': {},
+            'right': {}
+        },
     }
     debug_errors = []
     for key, value in intron_site_dict.items():
@@ -28,9 +31,9 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                 else:
                     most_common_del = max(value['extracted_information'][direction]['deletions'],
                                           key=value['extracted_information'][direction]['deletions'].get)
-                    if most_common_del not in results['FP']:
-                        results['FP'][most_common_del] = 0
-                    results['FP'][most_common_del] += 1
+                    if most_common_del not in results['FP'][direction]:
+                        results['FP'][direction][most_common_del] = 0
+                    results['FP'][direction][most_common_del] += 1
 
     output_manager.output_line({
         "line": "True positives: " + str(results['TP']),
