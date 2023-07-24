@@ -40,7 +40,8 @@ class MatchingCasesExtractor:
                         '.offset_' + str(offsets[offset_exon_idx][0])
                     for exon_number, exon in enumerate(self.reference_db.children(
                             reference_id, featuretype='exon', order_by='start')):
-                        new_entry_key = (str(transcript_id), str(exon.start))
+                        new_entry_key = (str(transcript_id), str(
+                            exon.start + offsets[offset_exon_idx][0]))
                         if exon_number == offset_exon_idx:
                             extracted_candidates[new_entry_key] = {
                                 "transcript_id": transcript_id,
@@ -60,7 +61,8 @@ class MatchingCasesExtractor:
                     for exon_number, exon in enumerate(self.reference_db.children(
                             reference_id, featuretype='exon', order_by='start')):
                         if exon_number == offset_exon_idx:
-                            new_entry_key = (str(transcript_id), str(exon.end))
+                            new_entry_key = (str(transcript_id), str(
+                                exon.end + offsets[offset_exon_idx][1]))
                             extracted_candidates[new_entry_key] = {
                                 "transcript_id": transcript_id,
                                 "strand": strand,
