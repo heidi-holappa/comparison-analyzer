@@ -9,7 +9,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     })
     results = {
         'TP': 0,
-        'FP': 0
+        'FP': 0,
     }
     debug_errors = []
     for key, value in intron_site_dict.items():

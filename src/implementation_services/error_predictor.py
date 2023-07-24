@@ -9,12 +9,16 @@ def make_prediction(findings: dict):
     no_ins_errors = findings['insertions'].get(0, 0)
     no_del_errors = findings['deletions'].get(0, 0)
 
-    prec_no_ins_errors = no_ins_errors / total_cases
-    prec_no_del_errors = no_del_errors / total_cases
+    # prec_no_ins_errors = no_ins_errors / total_cases
+    # prec_no_del_errors = no_del_errors / total_cases
+    # error_treshold = 0.25
 
-    error_treshold = 0.25
-    if (prec_no_ins_errors < error_treshold or prec_no_del_errors < error_treshold) and findings['closest_canonical'][2] != 0:
+    if max(findings['deletions'], key=findings['deletions'].get) == findings['closest_canonical'][2]:
         findings['error_detected'] = True
+
+    # Let's first focus on deletions
+    # if (prec_no_ins_errors < error_treshold or prec_no_del_errors < error_treshold) and findings['closest_canonical'][2] != 0:
+    #     findings['error_detected'] = True
 
 
 def count_predicted_errors(intron_site_dict: dict):
