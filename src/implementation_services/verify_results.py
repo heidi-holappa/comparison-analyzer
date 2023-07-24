@@ -13,23 +13,24 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     }
     debug_errors = []
     for key, value in intron_site_dict.items():
-        if value['extracted_information']['right']['error_detected'] or \
-                value['extracted_information']['left']['error_detected']:
+        directions = ['right', 'left']
+        for direction in directions:
+            if value['extracted_information'][direction]['error_detected']:
 
-            case = matching_cases_dict.get(key)
-            if not case:
-                debug_errors.append(str(key))
-                continue
-            offset = case['offset']
+                case = matching_cases_dict.get(key)
+                if not case:
+                    debug_errors.append(str(key))
+                    continue
+                offset = case['offset']
 
-            if offset != 0:
-                results['TP'] += 1
-            else:
-                most_common_del = max(value['extracted_information']['right']['deletions'],
-                                      key=value['extracted_information']['right']['deletions'].get)
-                if most_common_del not in results['FP']:
-                    results['FP'][most_common_del] = 0
-                results['FP'][most_common_del] += 1
+                if offset != 0:
+                    results['TP'] += 1
+                else:
+                    most_common_del = max(value['extracted_information'][direction]['deletions'],
+                                          key=value['extracted_information'][direction]['deletions'].get)
+                    if most_common_del not in results['FP']:
+                        results['FP'][most_common_del] = 0
+                    results['FP'][most_common_del] += 1
 
     output_manager.output_line({
         "line": "True positives: " + str(results['TP']),
