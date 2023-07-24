@@ -105,5 +105,5 @@ class TestVerifyResults(TestCase):
 
         verify_results(intron_site_dict, matching_cases_dict)
         captured = self.capsys.readouterr()
-        assert "True positives: 2" in captured.out
-        assert "False positives: {2: 1}" in captured.out
+        assert "True positives: 3" in captured.out
+        assert "False positives: {'left': {2: 1}, 'right': {}}" in captured.out
