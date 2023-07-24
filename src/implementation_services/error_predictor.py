@@ -6,8 +6,8 @@ def make_prediction(findings: dict):
     if total_cases < 3:
         return
 
-    no_ins_errors = findings['insertions'].get(0, 0)
-    no_del_errors = findings['deletions'].get(0, 0)
+    # no_ins_errors = findings['insertions'].get(0, 0)
+    # no_del_errors = findings['deletions'].get(0, 0)
 
     # prec_no_ins_errors = no_ins_errors / total_cases
     # prec_no_del_errors = no_del_errors / total_cases
