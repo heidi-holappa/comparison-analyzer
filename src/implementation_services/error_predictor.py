@@ -13,7 +13,7 @@ def make_prediction(findings: dict):
     # prec_no_del_errors = no_del_errors / total_cases
     # error_treshold = 0.25
 
-    if max(findings['deletions'], key=findings['deletions'].get) == findings['closest_canonical'][2]:
+    if max(findings['deletions'], key=findings['deletions'].get) == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0:
         findings['error_detected'] = True
 
     # Let's first focus on deletions
