@@ -26,51 +26,39 @@ class CaseExtractor:
         for transcript in isoquant_db.features_of_type('transcript'):
             for exon in isoquant_db.children(transcript, featuretype='exon', order_by='start'):
                 transcript_id = str(transcript.id)
-                exon_start_entry_key = (transcript_id, str(exon.start))
-                exon_end_entry_key = (transcript_id, str(exon.end))
-                extracted_cases[exon_start_entry_key] = {
-                    'transcript_id': transcript_id,
-                    'strand': transcript.strand,
-                    'location_type': "start",
-                    "location": exon.start,
-                    "seq_id": exon.seqid,
-                    "extracted_information": {
-                        "left": {
-                            "insertions": {},
-                            "deletions": {},
-                            "closest_canonical": "",
-                            "error_detected": False
+                case_information = {
+                    'exon_start': {
+                        'case_key': (transcript_id, str(exon.start)),
+                        'location': exon.start,
+                    },
+                    'exon_end': {
+                        'case_key': (transcript_id, str(exon.end)),
+                        'location': exon.end,
+                    }
+                }
+                for case in case_information.values():
+                    extracted_cases[case['case_key']] = {
+                        'transcript_id': transcript_id,
+                        'strand': transcript.strand,
+                        'location_type': "start",
+                        "location": case['location'],
+                        "seq_id": exon.seqid,
+                        "extracted_information": {
+                            "left": {
+                                "insertions": {},
+                                "deletions": {},
+                                "closest_canonical": "",
+                                "error_detected": False
 
-                        },
-                        "right": {
-                            "insertions": {},
-                            "deletions": {},
-                            "closest_canonical": "",
-                            "error_detected": False
+                            },
+                            "right": {
+                                "insertions": {},
+                                "deletions": {},
+                                "closest_canonical": "",
+                                "error_detected": False
+                            }
                         }
                     }
-                }
-                extracted_cases[exon_end_entry_key] = {
-                    'transcript_id': transcript_id,
-                    'strand': transcript.strand,
-                    'location_type': "end",
-                    "location": exon.end,
-                    "seq_id": exon.seqid,
-                    "extracted_information": {
-                        "left": {
-                            "insertions": {},
-                            "deletions": {},
-                            "closest_canonical": "",
-                            "error_detected": False
-                        },
-                        "right": {
-                            "insertions": {},
-                            "deletions": {},
-                            "closest_canonical": "",
-                            "error_detected": False
-                        }
-                    }
-                }
 
         output_manager.output_line({
             "line": f"Total of {len(extracted_cases)} intron sites extracted from isoquant gtf-db",
