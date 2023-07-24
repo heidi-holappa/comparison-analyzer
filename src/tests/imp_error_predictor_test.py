@@ -38,14 +38,14 @@ class TestErrorPredictor(TestCase):
     def test_prediction_maker_does_not_give_key_error_if_no_zeroes(self):
         findings = {
             'insertions': {1: 100},
-            'deletions': {1: 100},
+            'deletions': {4: 100},
             'closest_canonical': ('', '', 4),
-            'error_detected': False
+            'error_detected': True
         }
 
         expected_result = {
             'insertions': {1: 100},
-            'deletions': {1: 100},
+            'deletions': {4: 100},
             'closest_canonical': ('', '', 4),
             'error_detected': True
         }
