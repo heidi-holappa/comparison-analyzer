@@ -15,8 +15,8 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
         },
     }
     verified_cases = 0
-    debug_true_positives_dict = []
-    debug_false_positives_dict = []
+    debug_true_positives_dict = {}
+    debug_false_positives_dict = {}
     debug_errors = []
     for key, value in intron_site_dict.items():
         directions = ['right', 'left']
@@ -32,14 +32,14 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
 
                 if offset != 0:
                     results['TP'] += 1
-                    debug_true_positives_dict.append(str(value) + "\n")
+                    debug_true_positives_dict[key] = value
                 else:
                     most_common_del = max(value['extracted_information'][direction]['deletions'],
                                           key=value['extracted_information'][direction]['deletions'].get)
                     if most_common_del not in results['FP'][direction]:
                         results['FP'][direction][most_common_del] = 0
                     results['FP'][direction][most_common_del] += 1
-                    debug_false_positives_dict.append(str(value) + "\n")
+                    debug_false_positives_dict[key] = value
 
     output_manager.output_line({
         "line": "Verified cases: " + str(verified_cases),
