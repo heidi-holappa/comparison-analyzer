@@ -155,11 +155,7 @@ def run_pipeline(parser_args):
     log_manager.execute_log_file_creation(matching_cases_dict, parser_args)
 
     run_time_str = get_elapsed_time_as_string(start_time)
-    output_manager.output_line({
-        "line": "Total run time: " + run_time_str,
-        "is_info": True
-    })
-    output_manager.output_footer()
+    output_manager.output_footer(run_time_str)
     output_manager.write_log_file()
 
 
