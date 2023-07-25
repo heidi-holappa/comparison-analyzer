@@ -1,5 +1,7 @@
-from services.bam_manager import BamManager
+from datetime import timedelta
+from time import time
 
+from services.bam_manager import BamManager
 from services.offset_computation import execute_offset_computation
 from services.argument_parser import init_argparser
 from services.db_initializer import init_databases
@@ -16,6 +18,16 @@ from implementation_services.indel_computer import execute_indel_computation
 from implementation_services.closest_canonicals_extractor import execute_closest_canonicals_extraction
 from implementation_services.error_predictor import execute_error_prediction
 from implementation_services.verify_results import verify_results
+
+
+def record_start_time() -> float:
+    return time()
+
+
+def get_elapsed_time_as_string(start_time) -> str:
+    elapsed_time = time() - start_time
+    elapsed_time_as_str = str(timedelta(seconds=elapsed_time))
+    return elapsed_time_as_str
 
 
 def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
@@ -84,6 +96,8 @@ def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
 
 
 def run_pipeline(parser_args):
+
+    start_time = record_start_time()
     output_manager.output_heading()
 
     # Pipeline (see documentation for more details)
@@ -140,6 +154,11 @@ def run_pipeline(parser_args):
     # 7. Create log files and output footer to stdout
     log_manager.execute_log_file_creation(matching_cases_dict, parser_args)
 
+    run_time_str = get_elapsed_time_as_string(start_time)
+    output_manager.output_line({
+        "line": "Total run time: " + run_time_str,
+        "is_info": True
+    })
     output_manager.output_footer()
     output_manager.write_log_file()
 
