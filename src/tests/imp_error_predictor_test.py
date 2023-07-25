@@ -23,16 +23,18 @@ class TestErrorPredictor(TestCase):
             'insertions': {0: 0},
             'deletions': {0: 0},
             'closest_canonical': ('', '', 0),
-            'error_detected': False
+            'error_detected': False,
+            'location_type': 'start'
         }
 
         expected_result = {
             'insertions': {0: 0},
             'deletions': {0: 0},
             'closest_canonical': ('', '', 0),
-            'error_detected': False
+            'error_detected': False,
+            'location_type': 'start'
         }
-        make_prediction(findings)
+        make_prediction(findings, 'start')
         self.assertEqual(findings, expected_result)
 
     def test_prediction_maker_does_not_give_key_error_if_no_zeroes(self):
@@ -40,16 +42,18 @@ class TestErrorPredictor(TestCase):
             'insertions': {1: 100},
             'deletions': {4: 100},
             'closest_canonical': ('', '', 4),
-            'error_detected': True
+            'error_detected': True,
+            'location_type': 'start'
         }
 
         expected_result = {
             'insertions': {1: 100},
             'deletions': {4: 100},
             'closest_canonical': ('', '', 4),
-            'error_detected': True
+            'error_detected': True,
+            'location_type': 'start'
         }
-        make_prediction(findings)
+        make_prediction(findings, 'start')
         self.assertEqual(findings, expected_result)
 
     def test_only_one_error_is_counted_per_intron_site(self):
