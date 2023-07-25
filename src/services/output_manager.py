@@ -64,13 +64,17 @@ class OutputManager:
             }
         )
 
-    def output_footer(self):
+    def output_footer(self, run_time_str: str):
         self.output_line({
             "line": "",
             "is_title": True
         })
         self.output_line({
             "line": "Pipeline finished.",
+            "is_info": True
+        })
+        self.output_line({
+            "line": "Total run time: " + run_time_str,
             "is_info": True
         })
         self.output_line({
