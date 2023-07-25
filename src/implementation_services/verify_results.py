@@ -14,6 +14,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
             'right': {}
         },
     }
+    verified_cases = 0
     debug_true_positives_dict = []
     debug_false_positives_dict = []
     debug_errors = []
@@ -26,6 +27,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                 if not case:
                     debug_errors.append(str(key) + "\n")
                     continue
+                verified_cases += 1
                 offset = case['offset']
 
                 if offset != 0:
@@ -38,6 +40,11 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                         results['FP'][direction][most_common_del] = 0
                     results['FP'][direction][most_common_del] += 1
                     debug_false_positives_dict.append(str(value) + "\n")
+
+    output_manager.output_line({
+        "line": "Verified cases: " + str(verified_cases),
+        "is_info": True
+    })
 
     output_manager.output_line({
         "line": "True positives: " + str(results['TP']),
