@@ -1,9 +1,17 @@
 from services.output_manager import default_output_manager as output_manager
 
 
-def make_prediction(findings: dict):
+def make_prediction(findings: dict, location_type: str):
     total_cases = sum(findings['insertions'].values())
     if total_cases < 3:
+        return
+
+    if location_type == "start":
+        canonicals = ["AG", "AC"]
+    else:
+        canonicals = ["GT", "GC", "AT"]
+
+    if findings['closest_canonical'][1] not in canonicals:
         return
 
     # no_ins_errors = findings['insertions'].get(0, 0)
@@ -41,7 +49,7 @@ def execute_error_prediction(intron_site_dict: dict):
     })
     for value in intron_site_dict.values():
         for findings in value["extracted_information"].values():
-            make_prediction(findings)
+            make_prediction(findings, value["location_type"])
 
     count_predicted_errors(intron_site_dict)
 
