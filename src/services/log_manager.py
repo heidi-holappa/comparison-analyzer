@@ -296,8 +296,9 @@ class LogManager:
 
             if isinstance(log_values, dict):
                 with open(filepath, "w") as file:
-                    for entry_key, entry_values in log_values.items():
-                        file.write(f"{entry_key}\t{entry_values}\n")
+                    # for entry_key, entry_values in log_values.items():
+                    #     file.write(f"{entry_key}\t{entry_values}\n")
+                    file.write(json.dumps(log_values, indent=4))
             if isinstance(log_values, list):
                 with open(filepath, "w") as file:
                     file.writelines(log_values)
