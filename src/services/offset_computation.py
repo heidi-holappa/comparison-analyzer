@@ -86,7 +86,7 @@ def execute_offset_computation(
         "is_title": True
     })
     output_manager.output_line({
-        "line": "Computing offsets for class code instances for: " + class_code,
+        "line": "Computing offsets for Gffcompare class codes: " + class_code,
         "is_info": True
     })
 
