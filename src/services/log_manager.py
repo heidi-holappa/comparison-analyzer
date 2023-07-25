@@ -307,9 +307,11 @@ class LogManager:
             if isinstance(log_values, dict):
                 content = self.pretty_print(log_values)
                 with open(filepath, "w") as file:
-                    file.write(content + "\n")
-                    # for entry_key, entry_values in log_values.items():
-                    #     file.write(f"{entry_key}\t{entry_values}\n")
+                    # file.write(content + "\n")
+                    file.write("{\n")
+                    for entry_key, entry_values in log_values.items():
+                        file.write(f"{entry_key}: {entry_values},\n")
+                    file.write("}\n")
             if isinstance(log_values, list):
                 with open(filepath, "w") as file:
                     file.writelines(log_values)
