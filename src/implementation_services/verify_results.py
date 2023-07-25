@@ -14,6 +14,8 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
             'right': {}
         },
     }
+    debug_true_positives_dict = []
+    debug_false_positives_dict = []
     debug_errors = []
     for key, value in intron_site_dict.items():
         directions = ['right', 'left']
@@ -22,18 +24,20 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
 
                 case = matching_cases_dict.get(key)
                 if not case:
-                    debug_errors.append(str(key))
+                    debug_errors.append(str(key) + "\n")
                     continue
                 offset = case['offset']
 
                 if offset != 0:
                     results['TP'] += 1
+                    debug_true_positives_dict.append(str(value) + "\n")
                 else:
                     most_common_del = max(value['extracted_information'][direction]['deletions'],
                                           key=value['extracted_information'][direction]['deletions'].get)
                     if most_common_del not in results['FP'][direction]:
                         results['FP'][direction][most_common_del] = 0
                     results['FP'][direction][most_common_del] += 1
+                    debug_false_positives_dict.append(str(value) + "\n")
 
     output_manager.output_line({
         "line": "True positives: " + str(results['TP']),
@@ -45,3 +49,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     })
     if debug_errors:
         log_manager.debug_logs['verifying_results_keys_not_found'] = debug_errors
+    if debug_true_positives_dict:
+        log_manager.debug_logs['verifying_results_true_positives'] = debug_true_positives_dict
+    if debug_false_positives_dict:
+        log_manager.debug_logs['verifying_results_false_positives'] = debug_false_positives_dict
