@@ -271,6 +271,16 @@ class LogManager:
             "is_info": True
         })
 
+    def pretty_print(self, element, indent=0, output=""):
+        for item in element:
+            if isinstance(element[item], dict):
+                output += (" " * indent + str(item) + ":\n")
+                output = self.pretty_print(element[item], indent + 4, output)
+            else:
+                output += (" " * indent + str(item) +
+                           ": " + str(element[item]) + "\n")
+        return output
+
     def write_debug_files(self):
         output_manager.output_line({
             "line": "CREATING DEBUG LOGS",
@@ -295,9 +305,11 @@ class LogManager:
             filepath = os.path.join(LOG_FILE_DIR, 'debug_' + log_name + '.log')
 
             if isinstance(log_values, dict):
+                content = self.pretty_print(log_values)
                 with open(filepath, "w") as file:
-                    for entry_key, entry_values in log_values.items():
-                        file.write(f"{entry_key}\t{entry_values}\n")
+                    file.write(content + "\n")
+                    # for entry_key, entry_values in log_values.items():
+                    #     file.write(f"{entry_key}\t{entry_values}\n")
             if isinstance(log_values, list):
                 with open(filepath, "w") as file:
                     file.writelines(log_values)
