@@ -520,3 +520,111 @@ The pipeline gives a rough overview of the functionality of compAna-tool:
 - **Output logs and graphs:** Finally the log-files and graphs are output.
 
 ![pipeline](img/pipeline.png)
+
+
+
+# Implementing algorithm
+
+## Initial plan
+
+Now that the compAna-application has the requested features, we can move towards the implementation step. 
+
+### Implementation step
+
+To get started, built the following steps:
+
+\begin{enumerate}
+    \item[1.] Extract data from IsoQuant transcript (`transcript\_model.gtf`) and IsoQuant  `model\_reads.tsv` files
+    \item[2.] Access reads provided to IsoQuant and count indels for every intron site (=before start of the exon position and after the end of the exon position) 
+    \item[3.] For interesting cases count closest canonical nucleotides 
+\end{enumerate}
+
+The goal is to try to predict if there is an offset or not. In a user story format the initial goal could be formulated as: \\
+
+\textit{As a user I can see that n \% of reads have indel of x and there is possible splice site y nucleotides from the current position} \\
+
+
+Start with an easy case (e.g. offset of $|4|$). As a starting point, it is good to practice with simulated data. Insertions and deletions should be separated. Note that precision is of high priority. Not all errors need to be corrected.  \\
+
+\textbf{Output:} As an output the code should produce either a corrected transcript or in case there are no errors, the same transcript without corrections. 
+
+
+### Future steps
+
+Once the initial steps have been taken, the new feature can be input into IsoQuant. When this is relevant look into the file `graph\_based\_model\_construction.py`. On line \#143 is method `process`. In this method:
+
+```
+def process(args):
+    # ...
+    self.transcript_model_storage 
+    # [TranscriptModel] ~ GTF(db)
+    # ...
+    self.transcript_read_ids 
+    # ~ model_reads.tsv => dict with key:
+    # transcript_id, value: [read_ids]
+    # ...
+```
+
+
+## Pipeline for implementation
+
+
+1. **Extract cases:** similarily as before the possible cases are extracted into a dictionary. This time locations and types of every intron site are extracted. 
+2. **Compute reads and locations:** After interesting cases and related transcripts are extracted, reads and locations are created. 
+3. **Compute indels:** Next for each given location insertions and deletions are computed. 
+4. **Closest canonicals:** For cases with interesting amounts of insertions or deletions closest canonicals are extracted from reference.fa. 
+5. **Make prediction:** TBA
+6. **Verify results:** In some way at this point it should be verified whether the results are desired or not. As a first step it would perhaps be beneficial to compare the results to the offset computations to see, how the predictions worked out. 
+
+
+![Implementation pipeline](img/implementation-pipeline.png)
+
+## Extracting intron sites and information
+
+The intron site dictionary is similar to the matching\_cases\_dictionary. In this case insertions, deletions and closest canonicals are stored for both 'directions', to the left and right from the intron site. 
+
+```python
+{
+  'transcript_id.location': {
+    'transcript_id': <str>,
+    'strand': <str>,
+    'location_type': <str>,
+    "location": <int>,
+    "extracted_information": {
+      "left": {
+        "insertions": <int>,
+        "deletions": <int>,
+        "closest_canonical": <str>
+      },
+      "right": {
+        "insertions": <int>,
+        "deletions": <int>,
+        "closest_canonical": <str>
+      }
+    }
+  }
+}
+```
+
+**Note:** In the actual implementation some of the included information may be redundant. 
+
+\subsection{Computing indels}
+Insertions and deletions are computed similarly as in preceding phase. Differences are that in this case indels are counted for 'both directions' in each case and stored in a slightly more complex data structure. Also this time a reference to the dictionary containing the related results is passed to the method.
+
+\begin{tcolorbox}[info]
+    As dictionaries in Python are \href{https://docs.python.org/3/tutorial/datastructures.html#dictionaries}{mutable}, only a reference to the dictionary with related results is passed to the method counting indels. 
+\end{tcolorbox}
+
+## Closest Canonicals
+For each intron site closest canonicals are computed into each direction. Canonicals are then stored into the intron\_site\_dictionary. 
+
+## Make prediction
+
+TBA 
+
+## Verify prediction
+
+Once predicted errors have been flagged, prediction is then compared to the 'correct answers'. Results are then divided into two categories:
+
+- **True positive (TP):** an error was correctly identified
+- **False positive (FP):** a false flag

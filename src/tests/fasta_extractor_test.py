@@ -17,19 +17,21 @@ class TestFastaExtractor(TestCase):
             when the sample data is updated.
         """
         matching_cases_dict = {
-            'transcript1.chr1.nnic.exon_4.start': {
+            ('transcript1.chr1.nnic', 210): {
                 'transcript_id': 'transcript1.chr1.nnic',
                 'strand': '+',
                 'location_type': 'start',
                 'exon_number': 3,
                 'location': 210,
+                'seq_id': 'chr1'
             },
-            'transcript1.chr1.nnic.exon_4.end': {
+            ('transcript1.chr1.nnic', 45): {
                 'transcript_id': 'transcript1.chr1.nnic',
                 'strand': '+',
                 'location_type': 'end',
                 'exon_number': 4,
                 'location': 45,
+                'seq_id': 'chr1'
             },
         }
         self.fasta_config = {
@@ -70,7 +72,7 @@ class TestFastaExtractor(TestCase):
         extractor = FastaExtractor(self.fasta_config)
         extractor.execute_fasta_extraction()
         result = bool(
-            'closest_canonical' in extractor.matching_cases_dict['transcript1.chr1.nnic.exon_4.start'])
+            'closest_canonical' in extractor.matching_cases_dict[('transcript1.chr1.nnic', 210)])
         print(extractor.matching_cases_dict)
         self.assertTrue(result)
 
@@ -85,7 +87,7 @@ class TestFastaExtractor(TestCase):
 
     def test_finding_closest_canonicals_returns_correct_values_when_both_matches_are_found(self):
         extractor = FastaExtractor(self.fasta_config)
-        dict_entry = 'transcript1.chr1.nnic.exon_4.start'
+        dict_entry = ('transcript1.chr1.nnic', 210)
         nucleotides = 'GAAAGCAAGTATTTTG'
         canonicals = ['GT', 'GC', 'AT']
         extractor.find_closest_canonicals(
@@ -97,7 +99,7 @@ class TestFastaExtractor(TestCase):
 
     def test_finding_closest_canonicals_returns_correct_values_when_only_right_match_is_found(self):
         extractor = FastaExtractor(self.fasta_config)
-        dict_entry = 'transcript1.chr1.nnic.exon_4.start'
+        dict_entry = ('transcript1.chr1.nnic', 210)
         nucleotides = 'GAAAACAAGTATTTTG'
         canonicals = ['GT', 'GC', 'AT']
         extractor.find_closest_canonicals(
@@ -109,7 +111,7 @@ class TestFastaExtractor(TestCase):
 
     def test_finding_closest_canonicals_returns_correct_values_when_only_left_match_is_found(self):
         extractor = FastaExtractor(self.fasta_config)
-        dict_entry = 'transcript1.chr1.nnic.exon_4.start'
+        dict_entry = ('transcript1.chr1.nnic', 210)
         nucleotides = 'GAAAGCAAGTCTTTTG'
         canonicals = ['GT', 'GC', 'AT']
         extractor.find_closest_canonicals(

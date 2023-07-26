@@ -9,9 +9,6 @@ class FastaExtractor:
         self.fasta = None
         self.fasta_path = fasta_config.get('fasta_path', '')
         self.offset = fasta_config.get('offset', -1)
-        self.gffcompare_gtf = fasta_config.get('gffcompare_gtf', '')
-        self.reference_gtf = fasta_config.get('reference_gtf', '')
-        self.class_codes = fasta_config.get('class_codes', '')
         self.matching_cases_dict = fasta_config.get(
             'matching_cases_dict', {})
         self.window_size = int(fasta_config.get(
@@ -62,7 +59,7 @@ class FastaExtractor:
             })
         return errors
 
-    def find_closest_canonicals(self, nucleotides: str, dict_key: str, canonicals: list):
+    def find_closest_canonicals(self, nucleotides: str, dict_key: tuple, canonicals: list):
         nucleotides_middle = int(len(nucleotides) / 2)
         closest_canonicals = {}
         aligned_splice_site_nucleotides = nucleotides[nucleotides_middle:nucleotides_middle + 2]
@@ -98,7 +95,7 @@ class FastaExtractor:
                 splice_cite_location = value["location"] - 2
             else:
                 splice_cite_location = value["location"] + 1
-            coordinates = (key.split('.')[1],
+            coordinates = (value['seq_id'],
                            splice_cite_location - self.window_size,
                            splice_cite_location + self.window_size)
             nucleotides = self.extract_characters_at_given_coordinates(

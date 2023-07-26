@@ -1,0 +1,10 @@
+# 00_chr1.4M.ont.sim.fq IsoQuant generated GTF
+# Command line: /home/holaphei/.conda/envs/isoquant/bin/isoquant.py --test
+# IsoQuant version: 3.2.0
+# NOTE: DATA HAS BEEN MODIFIED FOR TESTING PURPOSES
+chr1	IsoQuant	gene	36753618	36797035	.	+	.	gene_id "ENSMUSG00000091028.1"; transcripts "1"; gene_type "protein_coding"; gene_name "Gm10722"; 
+chr1	IsoQuant	transcript	36753618	36797035	.	+	.	gene_id "ENSMUSG00000091028.1"; transcript_id "ENSMUST00000151376.2"; exons "4";
+chr1	IsoQuant	exon	36753618	36753778	.	+	 .	gene_id "ENSMUSG00000091028.1"; transcript_id "ENSMUST00000151376.2"; exon "1"; exon_id "chr1.1";
+chr1	IsoQuant	exon	36757903	36757965	.	+	.	gene_id "ENSMUSG00000091028.1"; transcript_id "ENSMUST00000151376.2"; exon "2"; exon_id "chr1.2";
+chr1	IsoQuant	exon	36762446	36762536	.	+	.	gene_id "ENSMUSG00000091028.1"; transcript_id "ENSMUST00000151376.2"; exon "3"; exon_id "chr1.3";
+chr1	IsoQuant	exon	36764296	36764379	.	+	.	gene_id "ENSMUSG00000091028.1"; transcript_id "ENSMUST00000151376.2"; exon "4"; exon_id "chr1.4";
