@@ -41,7 +41,7 @@ def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
     # output: intron site dictionary
     case_extractor = CaseExtractor()
     intron_site_dict = case_extractor.extract_intron_site_locations(
-        isoquant_db)
+        isoquant_db, int(parser_args.window_size))
 
     # 3. Extract transcripts
     # input: isoquant-db
