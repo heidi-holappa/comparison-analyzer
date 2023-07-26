@@ -138,16 +138,30 @@ class TestIndelCountingFromCigarCodes(TestCase):
         direction = "right"
         indel_count = {
             'deletions': {},
-            'insertions': {}
+            'insertions': {},
+            "ins_pos_distr": [0] * self.window_size,
+            "del_pos_distr": [0] * self.window_size,
         }
-        expected_result = {'deletions': {0: 1}, 'insertions': {0: 1}}
+        expected_result = {
+            'deletions': {0: 1},
+            'insertions': {0: 1},
+            "ins_pos_distr": [0, 0, 0, 0, 0, 0, 0, 0],
+            "del_pos_distr": [0, 0, 0, 0, 0, 0, 0, 0]
+        }
         count_indels_from_cigar_codes_in_given_window(
             cigar_tuples,
             aligned_location,
             direction,
             indel_count,
             self.window_size)
-        self.assertEqual(indel_count, expected_result)
+        self.assertEqual(indel_count['deletions'],
+                         expected_result['deletions'])
+        self.assertEqual(indel_count['insertions'],
+                         expected_result['insertions'])
+        self.assertEqual(indel_count['ins_pos_distr'],
+                         expected_result['ins_pos_distr'])
+        self.assertEqual(indel_count['del_pos_distr'],
+                         expected_result['del_pos_distr'])
 
     def test_indels_are_counted_correctly(self):
         cigar_tuples = [(0, 20), (2, 3), (1, 2), (0, 10)]
@@ -155,9 +169,16 @@ class TestIndelCountingFromCigarCodes(TestCase):
         direction = "left"
         indel_count = {
             'deletions': {},
-            'insertions': {}
+            'insertions': {},
+            "ins_pos_distr": [0] * self.window_size,
+            "del_pos_distr": [0] * self.window_size,
         }
-        expected_result = {'deletions': {3: 1}, 'insertions': {2: 1}}
+        expected_result = {
+            'deletions': {3: 1},
+            'insertions': {2: 1},
+            "ins_pos_distr": [0, 0, 0, 1, 1, 0, 0, 0],
+            "del_pos_distr": [1, 1, 1, 0, 0, 0, 0, 0]
+        }
 
         count_indels_from_cigar_codes_in_given_window(
             cigar_tuples,
@@ -165,7 +186,14 @@ class TestIndelCountingFromCigarCodes(TestCase):
             direction,
             indel_count,
             self.window_size)
-        self.assertEqual(indel_count, expected_result)
+        self.assertEqual(indel_count['deletions'],
+                         expected_result['deletions'])
+        self.assertEqual(indel_count['insertions'],
+                         expected_result['insertions'])
+        self.assertEqual(indel_count['ins_pos_distr'],
+                         expected_result['ins_pos_distr'])
+        self.assertEqual(indel_count['del_pos_distr'],
+                         expected_result['del_pos_distr'])
 
     def test_full_window_of_dels_returns_true_for_errors(self):
         cigar_tuples = [(0, 20), (2, 8), (1, 2), (0, 10)]
@@ -173,9 +201,16 @@ class TestIndelCountingFromCigarCodes(TestCase):
         direction = "right"
         indel_count = {
             'deletions': {},
-            'insertions': {}
+            'insertions': {},
+            "ins_pos_distr": [0] * self.window_size,
+            "del_pos_distr": [0] * self.window_size,
         }
-        expected_result = {'deletions': {8: 1}, 'insertions': {0: 1}}
+        expected_result = {
+            'deletions': {8: 1},
+            'insertions': {0: 1},
+            "ins_pos_distr": [0, 0, 0, 0, 0, 0, 0, 0],
+            "del_pos_distr": [1, 1, 1, 1, 1, 1, 1, 1]
+        }
 
         count_indels_from_cigar_codes_in_given_window(
             cigar_tuples,
@@ -183,4 +218,12 @@ class TestIndelCountingFromCigarCodes(TestCase):
             direction,
             indel_count,
             self.window_size)
-        self.assertEqual(indel_count, expected_result)
+
+        self.assertEqual(indel_count['deletions'],
+                         expected_result['deletions'])
+        self.assertEqual(indel_count['insertions'],
+                         expected_result['insertions'])
+        self.assertEqual(indel_count['ins_pos_distr'],
+                         expected_result['ins_pos_distr'])
+        self.assertEqual(indel_count['del_pos_distr'],
+                         expected_result['del_pos_distr'])
