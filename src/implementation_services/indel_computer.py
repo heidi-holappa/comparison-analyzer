@@ -66,11 +66,21 @@ def count_indels_from_cigar_codes_in_given_window(cigar_tuples: list,
         location += cigar_code[1]
 
     debug_list.append(cigar_code_list)
-    for cigar_code in cigar_code_list:
-        if cigar_code == 2:
+    # for cigar_code in cigar_code_list:
+    #     if cigar_code == 2:
+    #         deletions += 1
+    #     if cigar_code == 1:
+    #         insertions += 1
+
+    for i in range(window_size):
+        if i >= len(cigar_code_list):
+            break
+        if cigar_code_list[i] == 2:
             deletions += 1
-        if cigar_code == 1:
+            indel_count["del_pos_distr"][i] += 1
+        if cigar_code_list[i] == 1:
             insertions += 1
+            indel_count["ins_pos_distr"][i] += 1
 
     if deletions not in indel_count["deletions"]:
         indel_count["deletions"][deletions] = 0
