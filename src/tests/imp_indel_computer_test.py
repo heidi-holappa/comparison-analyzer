@@ -165,14 +165,24 @@ class TestIndelCountingFromCigarCodes(TestCase):
 
     def test_indels_are_counted_correctly(self):
         cigar_tuples = [(0, 20), (2, 3), (1, 2), (0, 10)]
+        key = ('ENST00000456328.2', '27')
         aligned_location = 27
         direction = "left"
-        indel_count = {
-            'deletions': {},
-            'insertions': {},
-            "ins_pos_distr": [0] * self.window_size,
-            "del_pos_distr": [0] * self.window_size,
+        intron_site_dict = {
+            key: {
+                'collected_information': {
+                    "left": {
+                        'deletions': {},
+                        'insertions': {},
+                        "ins_pos_distr": [0] * self.window_size,
+                        "del_pos_distr": [0] * self.window_size,
+                    }
+                }
+            }
         }
+
+        indel_count = intron_site_dict[key]['collected_information'][direction]
+
         expected_result = {
             'deletions': {3: 1},
             'insertions': {2: 1},
@@ -186,13 +196,13 @@ class TestIndelCountingFromCigarCodes(TestCase):
             direction,
             indel_count,
             self.window_size)
-        self.assertEqual(indel_count['deletions'],
+        self.assertEqual(intron_site_dict[key]['collected_information'][direction]['deletions'],
                          expected_result['deletions'])
-        self.assertEqual(indel_count['insertions'],
+        self.assertEqual(intron_site_dict[key]['collected_information'][direction]['insertions'],
                          expected_result['insertions'])
-        self.assertEqual(indel_count['ins_pos_distr'],
+        self.assertEqual(intron_site_dict[key]['collected_information'][direction]['ins_pos_distr'],
                          expected_result['ins_pos_distr'])
-        self.assertEqual(indel_count['del_pos_distr'],
+        self.assertEqual(intron_site_dict[key]['collected_information'][direction]['del_pos_distr'],
                          expected_result['del_pos_distr'])
 
     def test_full_window_of_dels_returns_true_for_errors(self):
