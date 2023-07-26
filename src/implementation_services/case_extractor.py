@@ -1,3 +1,4 @@
+from config import DEFAULT_WINDOW_SIZE
 from services.output_manager import default_output_manager as output_manager
 
 
@@ -12,7 +13,7 @@ class CaseExtractor:
         """
         pass
 
-    def extract_intron_site_locations(self, isoquant_db) -> dict:
+    def extract_intron_site_locations(self, isoquant_db, window_size: int = int(DEFAULT_WINDOW_SIZE)) -> dict:
         output_manager.output_line({
             "line": "IMPLEMENTATION: EXTRACTING CASES",
             "is_title": True
@@ -47,6 +48,8 @@ class CaseExtractor:
                             "left": {
                                 "insertions": {},
                                 "deletions": {},
+                                "ins_pos_distr": [0] * window_size,
+                                "del_pos_distr": [0] * window_size,
                                 "closest_canonical": "",
                                 "error_detected": False
 
@@ -54,6 +57,8 @@ class CaseExtractor:
                             "right": {
                                 "insertions": {},
                                 "deletions": {},
+                                "ins_pos_distr": [0] * window_size,
+                                "del_pos_distr": [0] * window_size,
                                 "closest_canonical": "",
                                 "error_detected": False
                             }
