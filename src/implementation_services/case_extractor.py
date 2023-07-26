@@ -31,17 +31,19 @@ class CaseExtractor:
                     'exon_start': {
                         'case_key': (transcript_id, str(exon.start)),
                         'location': exon.start,
+                        'location_type': 'start'
                     },
                     'exon_end': {
                         'case_key': (transcript_id, str(exon.end)),
                         'location': exon.end,
+                        'location_type': 'end'
                     }
                 }
                 for case in case_information.values():
                     extracted_cases[case['case_key']] = {
                         'transcript_id': transcript_id,
                         'strand': transcript.strand,
-                        'location_type': "start",
+                        'location_type': case['location_type'],
                         "location": case['location'],
                         "seq_id": exon.seqid,
                         "extracted_information": {
