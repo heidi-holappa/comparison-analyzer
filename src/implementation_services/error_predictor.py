@@ -20,6 +20,16 @@ def make_prediction(findings: dict, location_type: str):
     # prec_no_ins_errors = no_ins_errors / total_cases
     # prec_no_del_errors = no_del_errors / total_cases
     # error_treshold = 0.25
+    findings['ins_avg'] = sum(
+        [key * value for key, value in findings['insertions'].items()]) / sum(findings['insertions'].values())
+    findings['ins_sd'] = (sum(
+        [(key - findings['ins_avg']) ** 2 * value for key, value in findings['insertions'].items()]) / sum(
+        findings['insertions'].values())) ** 0.5
+    findings['del_avg'] = sum(
+        [key * value for key, value in findings['deletions'].items()]) / sum(findings['deletions'].values())
+    findings['del_sd'] = (sum(
+        [(key - findings['del_avg']) ** 2 * value for key, value in findings['deletions'].items()]) / sum(
+        findings['deletions'].values())) ** 0.5
 
     if max(findings['deletions'], key=findings['deletions'].get) == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0:
         findings['error_detected'] = True
