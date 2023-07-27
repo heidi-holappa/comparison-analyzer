@@ -1,25 +1,7 @@
 from services.output_manager import default_output_manager as output_manager
 
 
-def make_prediction(findings: dict, location_type: str):
-    total_cases = sum(findings['insertions'].values())
-    if total_cases < 3:
-        return
-
-    if location_type == "start":
-        canonicals = ["AG", "AC"]
-    else:
-        canonicals = ["GT", "GC", "AT"]
-
-    if findings['closest_canonical'][1] not in canonicals:
-        return
-
-    # no_ins_errors = findings['insertions'].get(0, 0)
-    # no_del_errors = findings['deletions'].get(0, 0)
-
-    # prec_no_ins_errors = no_ins_errors / total_cases
-    # prec_no_del_errors = no_del_errors / total_cases
-    # error_treshold = 0.25
+def compute_average_and_sd(findings: dict):
     findings['ins_avg'] = sum(
         [key * value for key, value in findings['insertions'].items()]) / sum(findings['insertions'].values())
     findings['ins_sd'] = (sum(
@@ -31,12 +13,29 @@ def make_prediction(findings: dict, location_type: str):
         [(key - findings['del_avg']) ** 2 * value for key, value in findings['deletions'].items()]) / sum(
         findings['deletions'].values())) ** 0.5
 
-    if max(findings['deletions'], key=findings['deletions'].get) == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0:
-        findings['error_detected'] = True
 
-    # Let's first focus on deletions
-    # if (prec_no_ins_errors < error_treshold or prec_no_del_errors < error_treshold) and findings['closest_canonical'][2] != 0:
-    #     findings['error_detected'] = True
+def make_prediction(findings: dict, location_type: str):
+    total_cases = sum(findings['insertions'].values())
+    if total_cases < 3:
+        return
+
+    compute_average_and_sd(findings)
+
+    if location_type == "start":
+        canonicals = ["AG", "AC"]
+    else:
+        canonicals = ["GT", "GC", "AT"]
+
+    if findings['closest_canonical'][1] not in canonicals:
+        return
+
+    del_max_value = [k for k, v in findings['deletions'].items(
+    ) if v == max(findings['deletions'].values())]
+    if len(del_max_value) > 1:
+        return
+
+    if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0:
+        findings['error_detected'] = True
 
 
 def count_predicted_errors(intron_site_dict: dict):
