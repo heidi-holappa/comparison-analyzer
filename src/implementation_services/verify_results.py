@@ -29,8 +29,9 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                     continue
                 verified_cases += 1
                 offset = case['offset']
+                predicted_offset = value['extracted_information'][direction]['closest_canonical'][2]
 
-                if offset != 0:
+                if offset == predicted_offset:
                     results['TP'] += 1
                     debug_true_positives_dict[key] = value
                 else:
