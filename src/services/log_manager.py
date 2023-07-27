@@ -305,7 +305,7 @@ class LogManager:
             filepath = os.path.join(LOG_FILE_DIR, 'debug_' + log_name + '.log')
 
             if isinstance(log_values, dict):
-                content = self.pretty_print(log_values)
+                # content = self.pretty_print(log_values)
                 with open(filepath, "w") as file:
                     # file.write(content + "\n")
                     file.write("{\n")
