@@ -27,6 +27,7 @@ The application accepts the following arguments
 | --- | --- | --- |
 | g | gffcompare_gtf | provide full path for `gtf` file produced by `gffcompare`. |
 | r | reference_gtf | provide full path for reference `gtf` file used to create the `gffcompare` `gtf`-file. |
+| i | isoquant_gtf | provide full path for IsoQuant `transcript_model.gtf` file |
 | f | force | force re-creation of sqlite3 database. By default a new database is not created if one already exists to improve efficiency. |
 | s | stats | output statistics on class codes. | 
 | c | class-code | specify one or several class codes for which to generate offset data. | 
