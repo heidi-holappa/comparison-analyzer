@@ -28,7 +28,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                     debug_errors.append(str(key) + "\n")
                     continue
                 verified_cases += 1
-                offset = case['offset']
+                offset = abs(case['offset'])
                 predicted_offset = value['extracted_information'][direction]['closest_canonical'][2]
 
                 if offset == predicted_offset:
