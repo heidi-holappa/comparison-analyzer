@@ -22,39 +22,65 @@ class TestErrorPredictor(TestCase):
         findings = {
             'insertions': {0: 0},
             'deletions': {0: 0},
-            'closest_canonical': ('', '', 0),
+            'closest_canonical': ('AC', 'AC', 4),
             'error_detected': False,
-            'location_type': 'start'
         }
 
         expected_result = {
             'insertions': {0: 0},
             'deletions': {0: 0},
-            'closest_canonical': ('', '', 0),
+            'closest_canonical': ('AC', 'AC', 4),
             'error_detected': False,
-            'location_type': 'start'
         }
         make_prediction(findings, 'start')
         self.assertEqual(findings, expected_result)
 
-    def test_prediction_maker_does_not_give_key_error_if_no_zeroes(self):
+    def test_prediction_finds_error_for_exon_end(self):
         findings = {
             'insertions': {1: 100},
             'deletions': {4: 100},
-            'closest_canonical': ('', '', 4),
-            'error_detected': True,
-            'location_type': 'start'
+            'closest_canonical': ('GC', 'GC', 4),
+            'error_detected': False,
         }
 
         expected_result = {
+            'error_detected': True,
+        }
+        make_prediction(findings, 'end')
+        self.assertEqual(findings['error_detected'],
+                         expected_result['error_detected'])
+
+    def test_prediction_find_error_for_exon_start(self):
+        findings = {
             'insertions': {1: 100},
             'deletions': {4: 100},
-            'closest_canonical': ('', '', 4),
+            'closest_canonical': ('AC', 'AC', 4),
+            'error_detected': False,
+        }
+
+        expected_result = {
             'error_detected': True,
-            'location_type': 'start'
         }
         make_prediction(findings, 'start')
-        self.assertEqual(findings, expected_result)
+        self.assertEqual(findings['error_detected'],
+                         expected_result['error_detected'])
+
+    def test_avg_and_sd_are_calculated_correctly_for_insertions(self):
+        findings = {
+            'insertions': {1: 100, 2: 100, 3: 100, 4: 100, 5: 100},
+            'deletions': {4: 100},
+            'closest_canonical': ('AC', 'AC', 4),
+            'error_detected': False,
+        }
+        expected_result = {
+            'ins_avg': 3.0,
+            'ins_sd': 1.4142135623730951,
+            'del_avg': 4.0,
+            'del_sd': 0.0,
+        }
+        make_prediction(findings, 'start')
+        self.assertEqual(findings['ins_avg'], expected_result['ins_avg'])
+        self.assertEqual(findings['ins_sd'], expected_result['ins_sd'])
 
     def test_only_one_error_is_counted_per_intron_site(self):
         intron_site_dict = {
