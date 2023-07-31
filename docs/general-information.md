@@ -1,24 +1,31 @@
 # General information
 [Back to README.md](../README.md)  
 
-**Content:**
-[Analyzing errors](#analyzing-errors)
-- [Offsets](#offsets)
-  - [Defining offset](#defining-offset)
-  - [Computing offset](#computing-offset)
-  - [Pseudocode](#pseudocode)
-  - [Offset output](#offset-output)
-- [Extracting information](#extracting-information)
-  - [Extracting closest canonicals](#extracting-closest-canonicals)
-  - [Processing imported BAM-file](#processing-the-imported-bam-file)
-  - [Processing CIGAR-string](#processing-a-cigar-string)
-  - [Extracting CIGAR-codes](#extracting-cigar-codes-from-the-window-next-to-aligned-location)
-- [Data structures](#data-structures)
-  - [Normalizing results](#normalizing-results)
-- [Output](#compana-output-files)
-- [Pipeline](#pipeline)
-[Implementing error prediction and correction](#implementing-error-prediction-and-correction)
-- 
+**Content:**  
+
+- [Analyzing errors](#analyzing-errors)
+  - [Offsets](#offsets)
+    - [Defining offset](#defining-offset)
+    - [Computing offset](#computing-offset)
+    - [Pseudocode](#pseudocode)
+    - [Offset output](#offset-output)
+  - [Extracting information](#extracting-information)
+    - [Extracting closest canonicals](#extracting-closest-canonicals)
+    - [Processing imported BAM-file](#processing-the-imported-bam-file)
+    - [Processing CIGAR-string](#processing-a-cigar-string)
+    - [Extracting CIGAR-codes](#extracting-cigar-codes-from-the-window-next-to-aligned-location)
+  - [Data structures](#data-structures)
+    - [Normalizing results](#normalizing-results)
+  - [Output](#compana-output-files)
+  - [Pipeline](#pipeline)
+- [Implementing error prediction and correction](#implementing-error-prediction-and-correction)
+  - [Pipeline for implementation](#pipeline-for-implementation)
+  - [Extracting intron sites and information](#extracting-intron-sites-and-information)
+  - [Computing indels](#computing-indels)
+  - [Closest canonicals](#closest-canonicals)
+  - [Making predictions](#making-predictions)
+  - [Verifying predictions](#verifying-predictions)
+  - [Future steps](#future-steps)
 
 The purpose of this application is to 
 
@@ -532,10 +539,12 @@ The pipeline gives a rough overview of the functionality of compAna-tool:
 
 
 # Implementing error prediction and correction
+[Back to top](#general-information)  
+
 With the information collected in the analysis-phase it is now possible to try to implement features that can predict and correct errors in transcript. When the implementation is finished, the final output will be a corrected transcript. Precision is key. The goal is to detect and repair errors and improve precision. Ideally no new errors are created while making corrections.   
 
 ## Pipeline for implementation
-
+[Back to top](#general-information)  
 
 1. **Extract cases:** similarily as before the possible cases are extracted into a dictionary. This time locations and types of every intron site are extracted. 
 2. **Compute reads and locations:** After interesting cases and related transcripts are extracted, reads and locations are created. 
@@ -548,6 +557,7 @@ With the information collected in the analysis-phase it is now possible to try t
 ![Implementation pipeline](img/implementation-pipeline.png)
 
 ## Extracting intron sites and information
+[Back to top](#general-information)  
 
 The intron site dictionary is similar to the matching\_cases\_dictionary. In this case insertions, deletions and closest canonicals are extracted for both 'directions', to the left and right from the interesting location (intron site). Additionally the distribution of insertions and deletions is stored. During prediction mean and standard deviation is computed for insertions and deletions.  
 
@@ -589,13 +599,18 @@ The intron site dictionary is similar to the matching\_cases\_dictionary. In thi
 **Note:** In the actual implementation some of the included information may be redundant. 
 
 ## Computing indels
+[Back to top](#general-information)  
+
 Insertions and deletions are computed similarly as in preceding phase. Differences are that in this case indels are counted for 'both directions' in each case and stored in a slightly more complex data structure. Also this time a reference to the dictionary containing the related results is passed to the method.  
 
 **Note:** As dictionaries in Python are [mutable](https://docs.python.org/3/tutorial/datastructures.html#dictionaries), only a reference to the dictionary with related results is passed to the method counting indels.  
 ## Closest Canonicals
+[Back to top](#general-information)  
+
 For each intron site closest canonicals are computed into each direction. Canonicals are then stored into the intron\_site\_dictionary. 
 
-## Make prediction
+## Making predictions
+[Back to top](#general-information)  
 
 At the moment the prediction is still crude. For each dictionary stored in `extracted information` the following conditions are verified:
 
@@ -605,7 +620,8 @@ At the moment the prediction is still crude. For each dictionary stored in `extr
 
 **Note:** For now only error are considered only based on deletions. Insertions are so for now ignored. 
 
-## Verify prediction
+## Verifying predictions
+[Back to top](#general-information)  
 
 Once predicted errors have been flagged, prediction is then compared to the 'correct answers' received with gffcompare. Results are then divided into two categories:
 
@@ -614,6 +630,7 @@ Once predicted errors have been flagged, prediction is then compared to the 'cor
 
 
 ### Future steps
+[Back to top](#general-information)  
 
 Once the initial steps have been taken, the new feature can be input into IsoQuant. When this is relevant look into the file `graph\_based\_model\_construction.py`. On line \#143 is method `process`. In this method:
 
