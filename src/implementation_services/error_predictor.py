@@ -34,6 +34,8 @@ def make_prediction(findings: dict, location_type: str):
     if len(del_max_value) > 1:
         return
 
+    accepted_offset_cases = [3, 4, 5]
+
     threshold = 0.7
     nucleotides_exceeding_treshold = 0
     for value in findings['del_pos_distr']:
@@ -43,7 +45,7 @@ def make_prediction(findings: dict, location_type: str):
     # if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
     #     findings['error_detected'] = True
 
-    if del_max_value[0] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
+    if del_max_value[0] != 0 and nucleotides_exceeding_treshold == del_max_value[0] and del_max_value[0] in accepted_offset_cases:
         findings['error_detected'] = True
 
 
