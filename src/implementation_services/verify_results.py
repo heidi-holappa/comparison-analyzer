@@ -8,7 +8,10 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
         "is_title": True
     })
     results = {
-        'TP': 0,
+        'TP': {
+            'left': {},
+            'right': {}
+        },
         'FP': {
             'left': {},
             'right': {}
@@ -22,7 +25,8 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
         directions = ['right', 'left']
         for direction in directions:
             if value['extracted_information'][direction]['error_detected']:
-
+                deletions = value['extracted_information'][direction]['deletions']
+                most_common_del = max(deletions, key=deletions.get)
                 case = matching_cases_dict.get(key)
                 if not case:
                     debug_errors.append(str(key) + "\n")
@@ -30,16 +34,15 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                 verified_cases += 1
                 offset = abs(case['offset'])
                 # predicted_offset = value['extracted_information'][direction]['closest_canonical'][2]
-                del_max_value = [k for k, v in value['extracted_information'][direction]['deletions'].items(
-                ) if v == max(value['extracted_information'][direction]['deletions'].values())]
 
-                if offset == del_max_value[0]:
-                    results['TP'] += 1
+                if offset == most_common_del:
+                    if most_common_del not in results['TP'][direction]:
+                        results['TP'][direction][most_common_del] = 0
+                    results['TP'][direction][most_common_del] += 1
                     debug_true_positives_dict[key] = value
                     break
                 else:
-                    most_common_del = max(value['extracted_information'][direction]['deletions'],
-                                          key=value['extracted_information'][direction]['deletions'].get)
+
                     if most_common_del not in results['FP'][direction]:
                         results['FP'][direction][most_common_del] = 0
                     results['FP'][direction][most_common_del] += 1
