@@ -24,6 +24,7 @@ class TestErrorPredictor(TestCase):
             'deletions': {0: 0},
             'closest_canonical': ('AC', 'AC', 4),
             'error_detected': False,
+            'del_pos_distr': [0, 0, 0, 0, 0, 0, 0, 0],
         }
 
         expected_result = {
@@ -31,6 +32,7 @@ class TestErrorPredictor(TestCase):
             'deletions': {0: 0},
             'closest_canonical': ('AC', 'AC', 4),
             'error_detected': False,
+            'del_pos_distr': [0, 0, 0, 0, 0, 0, 0, 0],
         }
         make_prediction(findings, 'start')
         self.assertEqual(findings, expected_result)
@@ -41,6 +43,7 @@ class TestErrorPredictor(TestCase):
             'deletions': {4: 100},
             'closest_canonical': ('GC', 'GC', 4),
             'error_detected': False,
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
         }
 
         expected_result = {
@@ -56,6 +59,7 @@ class TestErrorPredictor(TestCase):
             'deletions': {4: 100},
             'closest_canonical': ('AC', 'AC', 4),
             'error_detected': False,
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
         }
 
         expected_result = {
@@ -71,6 +75,7 @@ class TestErrorPredictor(TestCase):
             'deletions': {4: 100},
             'closest_canonical': ('AC', 'AC', 4),
             'error_detected': False,
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
         }
         expected_result = {
             'ins_avg': 3.0,
