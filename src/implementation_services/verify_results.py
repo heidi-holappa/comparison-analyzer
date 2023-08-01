@@ -10,11 +10,13 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     results = {
         'TP': {
             'left': {},
-            'right': {}
+            'right': {},
+            'closest_canonical_matches': 0
         },
         'FP': {
             'left': {},
-            'right': {}
+            'right': {},
+            'closest_canonical_matches': 0
         },
     }
     verified_cases = 0
@@ -40,13 +42,16 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                         results['TP'][direction][most_common_del] = 0
                     results['TP'][direction][most_common_del] += 1
                     debug_true_positives_dict[key] = value
+                    if value['extracted_information'][direction]['closest_canonical'][2] == offset:
+                        results['TP']['closest_canonical_matches'] += 1
                     break
                 else:
-
                     if most_common_del not in results['FP'][direction]:
                         results['FP'][direction][most_common_del] = 0
                     results['FP'][direction][most_common_del] += 1
                     debug_false_positives_dict[key] = value
+                    if value['extracted_information'][direction]['closest_canonical'][2] == offset:
+                        results['TP']['closest_canonical_matches'] += 1
 
     output_manager.output_line({
         "line": "Verified cases: " + str(verified_cases),
