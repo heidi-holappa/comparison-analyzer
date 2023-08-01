@@ -54,11 +54,11 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     })
 
     output_manager.output_line({
-        "line": "True positives: " + str(results['TP']),
+        "line": "True positives: " + str(results['TP']) + ", total: " + str(sum(results['TP']['left'].values()) + sum(results['TP']['right'].values())),
         "is_info": True
     })
     output_manager.output_line({
-        "line": "False positives: " + str(results['FP']),
+        "line": "False positives: " + str(results['FP']) + ", total: " + str(sum(results['FP']['left'].values()) + sum(results['FP']['right'].values())),
         "is_info": True
     })
     if debug_errors:
