@@ -29,11 +29,14 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                     continue
                 verified_cases += 1
                 offset = abs(case['offset'])
-                predicted_offset = value['extracted_information'][direction]['closest_canonical'][2]
+                # predicted_offset = value['extracted_information'][direction]['closest_canonical'][2]
+                del_max_value = [k for k, v in value['extracted_information'][direction]['deletions'].items(
+                ) if v == max(value['extracted_information'][direction]['deletions'].values())]
 
-                if offset == predicted_offset:
+                if offset == del_max_value[0]:
                     results['TP'] += 1
                     debug_true_positives_dict[key] = value
+                    break
                 else:
                     most_common_del = max(value['extracted_information'][direction]['deletions'],
                                           key=value['extracted_information'][direction]['deletions'].get)
