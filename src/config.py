@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -21,7 +22,12 @@ cigar_results = os.getenv("CIGAR_RESULTS_LOG") or "cigar_results.md"
 
 LOG_DIR = os.path.join(dirname, "..", log_dir)
 
-LOG_FILE_DIR = os.path.join(dirname, "..", log_dir,
+if len(sys.argv) > 1 and sys.argv[1] == "-j":
+    log_extension = os.path.splitext(sys.argv[2])[0]
+else:
+    log_extension = ""
+
+LOG_FILE_DIR = os.path.join(dirname, "..", log_dir, log_extension,
                             datetime.now().strftime('%Y-%m-%d_%H-%M'))
 TEMPORARY_DIR = os.path.join(dirname, "..", temporary_dir_path)
 OFFSET_LOG = os.path.join(LOG_FILE_DIR, offset_log)
