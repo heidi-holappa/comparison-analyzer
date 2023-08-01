@@ -16,7 +16,7 @@ def compute_average_and_sd(findings: dict):
 
 def make_prediction(findings: dict, location_type: str):
     total_cases = sum(findings['insertions'].values())
-    if total_cases < 3:
+    if total_cases < 5:
         return
 
     compute_average_and_sd(findings)
@@ -34,7 +34,13 @@ def make_prediction(findings: dict, location_type: str):
     if len(del_max_value) > 1:
         return
 
-    if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0:
+    threshold = 0.7
+    nucleotides_exceeding_treshold = 0
+    for value in findings['del_post_distr']:
+        if value / total_cases > threshold:
+            nucleotides_exceeding_treshold += 1
+
+    if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
         findings['error_detected'] = True
 
 
