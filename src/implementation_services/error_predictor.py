@@ -26,8 +26,8 @@ def make_prediction(findings: dict, location_type: str):
     else:
         canonicals = ["GT", "GC", "AT"]
 
-    if findings['closest_canonical'][1] not in canonicals:
-        return
+    # if findings['closest_canonical'][1] not in canonicals:
+    #     return
 
     del_max_value = [k for k, v in findings['deletions'].items(
     ) if v == max(findings['deletions'].values())]
@@ -40,7 +40,10 @@ def make_prediction(findings: dict, location_type: str):
         if value / total_cases > threshold:
             nucleotides_exceeding_treshold += 1
 
-    if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
+    # if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
+    #     findings['error_detected'] = True
+
+    if findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
         findings['error_detected'] = True
 
 
