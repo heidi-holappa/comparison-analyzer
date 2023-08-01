@@ -43,7 +43,7 @@ def make_prediction(findings: dict, location_type: str):
     # if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
     #     findings['error_detected'] = True
 
-    if findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
+    if del_max_value[0] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
         findings['error_detected'] = True
 
 
