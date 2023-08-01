@@ -95,10 +95,14 @@ class TestVerifyResults(TestCase):
                 'extracted_information': {
                     'right': {
                         'error_detected': True,
+                        'deletions': {0: 1, 1: 2, 2: 3},
+                        'insertions': {0: 1, 1: 2, 2: 3},
                         'closest_canonical': ('CG', 'GT', 1)
                     },
                     'left': {
                         'error_detected': True,
+                        'deletions': {0: 1, 1: 2, 2: 3},
+                        'insertions': {0: 1, 1: 2, 2: 3},
                         'closest_canonical': ('CG', 'GT', 1)
                     }
                 },
@@ -107,5 +111,5 @@ class TestVerifyResults(TestCase):
 
         verify_results(intron_site_dict, matching_cases_dict)
         captured = self.capsys.readouterr()
-        assert "True positives: 2" in captured.out
+        assert "True positives: {'left': {2: 1}, 'right': {2: 1}}" in captured.out
         assert "False positives: {'left': {}, 'right': {2: 1}}" in captured.out
