@@ -36,7 +36,7 @@ def make_prediction(findings: dict, location_type: str):
 
     threshold = 0.7
     nucleotides_exceeding_treshold = 0
-    for value in findings['del_post_distr']:
+    for value in findings['del_pos_distr']:
         if value / total_cases > threshold:
             nucleotides_exceeding_treshold += 1
 
