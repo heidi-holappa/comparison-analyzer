@@ -22,26 +22,30 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     verified_cases = 0
     debug_true_positives_dict = {}
     debug_false_positives_dict = {}
-    debug_errors = []
+    debug_unverified_cases = {}
+    # debug_errors = []
     for key, value in intron_site_dict.items():
         directions = ['right', 'left']
         for direction in directions:
             if value['extracted_information'][direction]['error_detected']:
                 deletions = value['extracted_information'][direction]['deletions']
                 most_common_del = max(deletions, key=deletions.get)
-                case = matching_cases_dict.get(key)
-                if not case:
-                    debug_errors.append(str(key) + "\n")
+                matching_case = matching_cases_dict.get(key)
+                case_key = str(key) + ", " + str(direction)
+                case_value = value['extracted_information'][direction]
+                if not matching_case:
+                    debug_unverified_cases[case_key] = case_value
+                    # debug_errors.append(str(key) + "\n")
                     continue
                 verified_cases += 1
-                offset = abs(case['offset'])
+                offset = abs(matching_case['offset'])
                 # predicted_offset = value['extracted_information'][direction]['closest_canonical'][2]
 
                 if offset == most_common_del:
                     if most_common_del not in results['TP'][direction]:
                         results['TP'][direction][most_common_del] = 0
                     results['TP'][direction][most_common_del] += 1
-                    debug_true_positives_dict[key] = value
+                    debug_true_positives_dict[case_key] = case_value
                     if value['extracted_information'][direction]['closest_canonical'][2] == offset:
                         results['TP']['closest_canonical_matches'] += 1
                     break
@@ -49,7 +53,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                     if most_common_del not in results['FP'][direction]:
                         results['FP'][direction][most_common_del] = 0
                     results['FP'][direction][most_common_del] += 1
-                    debug_false_positives_dict[key] = value
+                    debug_false_positives_dict[case_key] = case_value
                     if value['extracted_information'][direction]['closest_canonical'][2] == offset:
                         results['TP']['closest_canonical_matches'] += 1
 
@@ -66,8 +70,10 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
         "line": "False positives: " + str(results['FP']) + ", total: " + str(sum(results['FP']['left'].values()) + sum(results['FP']['right'].values())),
         "is_info": True
     })
-    if debug_errors:
-        log_manager.debug_logs['verifying_results_keys_not_found'] = debug_errors
+    # if debug_errors:
+    #     log_manager.debug_logs['verifying_results_keys_not_found'] = debug_errors
+    if debug_unverified_cases:
+        log_manager.debug_logs['verifying_results_unverified_cases'] = debug_unverified_cases
     if debug_true_positives_dict:
         log_manager.debug_logs['verifying_results_true_positives'] = debug_true_positives_dict
     if debug_false_positives_dict:
