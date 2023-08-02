@@ -315,6 +315,10 @@ class LogManager:
             if isinstance(log_values, list):
                 with open(filepath, "w") as file:
                     file.writelines(log_values)
+            if isinstance(log_values, set):
+                with open(filepath, "w") as file:
+                    for entry in log_values:
+                        file.write(entry + "\n")
             output_manager.output_line({
                 "line": f"{log_name} written to: {filepath}",
                 "is_info": True
