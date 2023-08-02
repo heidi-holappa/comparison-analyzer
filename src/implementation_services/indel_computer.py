@@ -118,12 +118,12 @@ def execute_indel_computation(
         if read.is_supplementary:
             continue
         if read.query_name in reads_and_references:
-            if read.query_name not in set_of_processed_reads:
-                set_of_processed_reads.add(read.query_name)
-            else:
-                prev_processed_reads_counter += 1
-                set_of_prev_processed_reads.add(read.query_name)
-                continue
+            # if read.query_name not in set_of_processed_reads:
+            #     set_of_processed_reads.add(read.query_name)
+            # else:
+            #     prev_processed_reads_counter += 1
+            #     set_of_prev_processed_reads.add(read.query_name)
+            #     continue
             count += 1
             if count % 1000 == 0:
                 output_manager.output_line({
