@@ -15,31 +15,36 @@ def compute_average_and_sd(findings: dict):
 
 
 def make_prediction(findings: dict, location_type: str):
+    # Constant thresholds
+    total_cases_threshold = 5
+    distribution_threshold = 0.7
+    accepted_offset_cases = [3, 4, 5]
+
     total_cases = sum(findings['insertions'].values())
-    if total_cases < 5:
+
+    if total_cases < total_cases_threshold:
         return
 
     compute_average_and_sd(findings)
 
-    if location_type == "start":
-        canonicals = ["AG", "AC"]
-    else:
-        canonicals = ["GT", "GC", "AT"]
+    # if location_type == "start":
+    #     canonicals = ["AG", "AC"]
+    # else:
+    #     canonicals = ["GT", "GC", "AT"]
 
     # if findings['closest_canonical'][1] not in canonicals:
     #     return
 
     del_max_value = [k for k, v in findings['deletions'].items(
     ) if v == max(findings['deletions'].values())]
+
+    # If a distinct most common deletion count does not exists, do nothing
     if len(del_max_value) > 1:
         return
 
-    accepted_offset_cases = [3, 4, 5]
-
-    threshold = 0.7
     nucleotides_exceeding_treshold = 0
     for value in findings['del_pos_distr']:
-        if value / total_cases > threshold:
+        if value / total_cases > distribution_threshold:
             nucleotides_exceeding_treshold += 1
 
     # if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
