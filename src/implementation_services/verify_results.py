@@ -20,7 +20,8 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
         },
         'unverified_cases': {
             'left': {},
-            'right': {}
+            'right': {},
+            'closest_canonical_matches': 0
         },
     }
     verified_cases = 0
@@ -37,12 +38,16 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                 matching_case = matching_cases_dict.get(key)
                 case_key = str(key) + ", " + str(direction)
                 case_value = value['extracted_information'][direction]
+                closest_canonical_distance = value['extracted_information'][direction]['closest_canonical'][2]
+
                 if not matching_case:
                     debug_unverified_cases[case_key] = case_value
                     # debug_errors.append(str(key) + "\n")
                     if most_common_del not in results['unverified_cases'][direction]:
                         results['unverified_cases'][direction][most_common_del] = 0
                     results['unverified_cases'][direction][most_common_del] += 1
+                    if closest_canonical_distance == most_common_del:
+                        results['TP']['closest_canonical_matches'] += 1
                     continue
                 verified_cases += 1
                 offset = abs(matching_case['offset'])
@@ -53,7 +58,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                         results['TP'][direction][most_common_del] = 0
                     results['TP'][direction][most_common_del] += 1
                     debug_true_positives_dict[case_key] = case_value
-                    if value['extracted_information'][direction]['closest_canonical'][2] == offset:
+                    if closest_canonical_distance == offset:
                         results['TP']['closest_canonical_matches'] += 1
                     break
                 else:
@@ -61,7 +66,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                         results['FP'][direction][most_common_del] = 0
                     results['FP'][direction][most_common_del] += 1
                     debug_false_positives_dict[case_key] = case_value
-                    if value['extracted_information'][direction]['closest_canonical'][2] == offset:
+                    if closest_canonical_distance == offset:
                         results['TP']['closest_canonical_matches'] += 1
 
     output_manager.output_line({
