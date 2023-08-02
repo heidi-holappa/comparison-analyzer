@@ -18,6 +18,10 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
             'right': {},
             'closest_canonical_matches': 0
         },
+        'unverified_cases': {
+            'left': {},
+            'right': {}
+        },
     }
     verified_cases = 0
     debug_true_positives_dict = {}
@@ -36,6 +40,9 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                 if not matching_case:
                     debug_unverified_cases[case_key] = case_value
                     # debug_errors.append(str(key) + "\n")
+                    if most_common_del not in results['unverified_cases'][direction]:
+                        results['unverified_cases'][direction][most_common_del] = 0
+                    results['unverified_cases'][direction][most_common_del] += 1
                     continue
                 verified_cases += 1
                 offset = abs(matching_case['offset'])
@@ -68,6 +75,10 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     })
     output_manager.output_line({
         "line": "False positives: " + str(results['FP']) + ", total: " + str(sum(results['FP']['left'].values()) + sum(results['FP']['right'].values())),
+        "is_info": True
+    })
+    output_manager.output_line({
+        "line": "Unverified cases: " + str(results['unverified_cases']) + ", total: " + str(sum(results['unverified_cases']['left'].values()) + sum(results['unverified_cases']['right'].values())),
         "is_info": True
     })
     # if debug_errors:
