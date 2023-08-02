@@ -47,7 +47,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                         results['unverified_cases'][direction][most_common_del] = 0
                     results['unverified_cases'][direction][most_common_del] += 1
                     if closest_canonical_distance == most_common_del:
-                        results['TP']['closest_canonical_matches'] += 1
+                        results['unverified_cases']['closest_canonical_matches'] += 1
                     continue
                 verified_cases += 1
                 offset = abs(matching_case['offset'])
