@@ -2,16 +2,16 @@ from services.output_manager import default_output_manager as output_manager
 
 
 def compute_average_and_sd(findings: dict):
+    del_sum = sum(findings['deletions'].values())
+    ins_sum = sum(findings['insertions'].values())
     findings['ins_avg'] = sum(
-        [key * value for key, value in findings['insertions'].items()]) / sum(findings['insertions'].values())
+        [key * value for key, value in findings['insertions'].items()]) / ins_sum
     findings['ins_sd'] = (sum(
-        [(key - findings['ins_avg']) ** 2 * value for key, value in findings['insertions'].items()]) / sum(
-        findings['insertions'].values())) ** 0.5
+        [(key - findings['ins_avg']) ** 2 * value for key, value in findings['insertions'].items()]) / ins_sum) ** 0.5
     findings['del_avg'] = sum(
-        [key * value for key, value in findings['deletions'].items()]) / sum(findings['deletions'].values())
+        [key * value for key, value in findings['deletions'].items()]) / del_sum
     findings['del_sd'] = (sum(
-        [(key - findings['del_avg']) ** 2 * value for key, value in findings['deletions'].items()]) / sum(
-        findings['deletions'].values())) ** 0.5
+        [(key - findings['del_avg']) ** 2 * value for key, value in findings['deletions'].items()]) / del_sum) ** 0.5
 
 
 def make_prediction(findings: dict, location_type: str):
