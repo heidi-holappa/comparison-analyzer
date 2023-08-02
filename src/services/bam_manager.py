@@ -62,8 +62,8 @@ class BamManager:
 
                     if read.reference_start > idx_corrected_location \
                             or read.reference_end < idx_corrected_location:
-                        errors.append(
-                            f"Non-matching location: {read.query_name}, {matching_case_key}\n")
+                        # errors.append(
+                        #     f"Non-matching location: {read.query_name}, {matching_case_key}\n")
                         continue
 
                     if not read.cigartuples:
