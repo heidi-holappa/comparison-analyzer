@@ -33,13 +33,19 @@ class TestVerifyResults(TestCase):
                         'error_detected': False,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     },
                     'left': {
                         'error_detected': False,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     }
                 },
             },
@@ -49,13 +55,19 @@ class TestVerifyResults(TestCase):
                         'error_detected': True,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     },
                     'left': {
                         'error_detected': False,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     }
                 },
             },
@@ -65,13 +77,19 @@ class TestVerifyResults(TestCase):
                         'error_detected': False,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     },
                     'left': {
                         'error_detected': True,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     }
                 },
             },
@@ -81,13 +99,19 @@ class TestVerifyResults(TestCase):
                         'error_detected': True,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     },
                     'left': {
                         'error_detected': True,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     }
                 },
             },
@@ -97,13 +121,19 @@ class TestVerifyResults(TestCase):
                         'error_detected': True,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 1)
+                        'closest_canonical': ('CG', 'GT', 1),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     },
                     'left': {
                         'error_detected': True,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 1)
+                        'closest_canonical': ('CG', 'GT', 1),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     }
                 },
             }
