@@ -36,9 +36,18 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                 deletions = value['extracted_information'][direction]['deletions']
                 most_common_del = max(deletions, key=deletions.get)
                 matching_case = matching_cases_dict.get(key)
-                case_key = str(key) + ", " + str(direction)
-                case_value = value['extracted_information'][direction]
+                case_key = key
+
                 closest_canonical_distance = value['extracted_information'][direction]['closest_canonical'][2]
+                case_value = {
+                    'direction': direction,
+                    'deletions': deletions,
+                    'del_pos_distr': value['extracted_information'][direction]['del_pos_distr'],
+                    'closest_canonical': value['extracted_information'][direction]['closest_canonical'],
+                    'del_avg': "{:.2f}".format(value['extracted_information'][direction]['del_avg']),
+                    'del_sd': "{:.2f}".format(value['extracted_information'][direction]['del_sd']),
+                    'most_common_del': most_common_del,
+                }
 
                 if not matching_case:
                     debug_unverified_cases[case_key] = case_value
