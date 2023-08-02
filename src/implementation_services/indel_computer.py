@@ -111,6 +111,7 @@ def execute_indel_computation(
     count = 0
     errors = []
     set_of_processed_reads = set()
+    set_of_prev_processed_reads = set()
     prev_processed_reads_counter = 0
     for read in samfile.fetch():
 
@@ -121,6 +122,7 @@ def execute_indel_computation(
                 set_of_processed_reads.add(read.query_name)
             else:
                 prev_processed_reads_counter += 1
+                set_of_prev_processed_reads.add(read.query_name)
                 continue
             count += 1
             if count % 1000 == 0:
@@ -137,8 +139,8 @@ def execute_indel_computation(
 
                 if read.reference_start > idx_corrected_location \
                         or read.reference_end < idx_corrected_location:
-                    errors.append(
-                        f"Non-matching location: {read.query_name}, {matching_case_key}\n")
+                    # errors.append(
+                    #     f"Non-matching location: {read.query_name}, {matching_case_key}\n")
                     continue
 
                 if not read.cigartuples:
@@ -163,10 +165,20 @@ def execute_indel_computation(
                         collected_info,
                         window_size)
 
+    if prev_processed_reads_counter:
+        output_manager.output_line({
+            "line": str(prev_processed_reads_counter) +
+            " iterations extracted an already processed read from the BAM-file",
+            "is_warning": True,
+        })
+
     output_manager.output_line({
         "line": "Processing BAM-file finished.",
         "is_info": True
     })
 
+    if set_of_prev_processed_reads:
+        log_manager.debug_logs["implementation-BAM-file-duplicates"] = set_of_prev_processed_reads
+
     if errors:
-        log_manager.debug_logs["BAM-file-errors"] = errors
+        log_manager.debug_logs["implementation-BAM-file-errors"] = errors
