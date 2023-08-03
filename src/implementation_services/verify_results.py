@@ -76,7 +76,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                     results['FP'][direction][most_common_del] += 1
                     debug_false_positives_dict[case_key] = case_value
                     if closest_canonical_distance == offset:
-                        results['TP']['closest_canonical_matches'] += 1
+                        results['FP']['closest_canonical_matches'] += 1
 
     output_manager.output_line({
         "line": "Verified cases: " + str(verified_cases),
