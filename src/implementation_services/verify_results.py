@@ -67,6 +67,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                         results['TP'][direction][most_common_del] = 0
                     results['TP'][direction][most_common_del] += 1
                     debug_true_positives_dict[case_key] = case_value
+                    debug_true_positives_dict[case_key]['offset'] = offset
                     if closest_canonical_distance == offset:
                         results['TP']['closest_canonical_matches'] += 1
                     break
@@ -75,6 +76,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                         results['FP'][direction][most_common_del] = 0
                     results['FP'][direction][most_common_del] += 1
                     debug_false_positives_dict[case_key] = case_value
+                    debug_false_positives_dict[case_key]['offset'] = offset
                     if closest_canonical_distance == offset:
                         results['FP']['closest_canonical_matches'] += 1
 
