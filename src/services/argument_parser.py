@@ -1,6 +1,10 @@
+import os
+
+from pathlib import Path
 import argparse
 import json
 
+from config import LOG_DIR
 from config import DEFAULT_WINDOW_SIZE
 from config import CREATE_IMG_N_TRESHOLD
 
@@ -81,8 +85,13 @@ def init_argparser():
         with open(parser_args.json, encoding="UTF-8") as json_file:
             json_dict = json.load(json_file)
             parser_dict.update(json_dict)
+
+        parser_dict['save_file'] = os.path.join(
+            LOG_DIR, Path(parser_args.json).stem + '-matching-cases.pkl')
     elif parser_args.offset:
         parser_dict["offset"] = parser_args.offset[0].split(" ")
+        parser_dict['save_file'] = os.path.join(LOG_DIR, Path(
+            parser_args.gffcompare_gtf).stem, 'matching-cases.pkl')
 
     if not parser_args.gffcompare_gtf or not parser_args.reference_gtf:
         parser.print_help()
