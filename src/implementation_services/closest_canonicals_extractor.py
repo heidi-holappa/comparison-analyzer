@@ -35,6 +35,13 @@ def find_closest_canonicals(nucleotides: str, dict_key: str, canonicals: list, i
 
 def iterate_intron_sites(intron_site_dict: dict, window_size: int, index_correction: int, fasta: Fasta):
     for key, value in intron_site_dict.items():
+        if value['strand'] not in ['+', '-']:
+            intron_site_dict[key]["extracted_information"]["left"]['closest_canonical'] = (
+                'XX', 'XX', 0)
+            intron_site_dict[key]["extracted_information"]["right"]['closest_canonical'] = (
+                'XX', 'XX', 0)
+            continue
+
         # TODO: check if this is correct and get rid of magic numbers
         if value["location_type"] == "start":
             splice_cite_location = value["location"] - 2
