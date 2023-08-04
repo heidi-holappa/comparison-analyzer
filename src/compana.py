@@ -63,7 +63,7 @@ def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
     log_manager.debug_logs["implementation_reads_and_references"] = reads_and_references
 
     # 5. compute indels
-    # input: intorn site dictionary, reads and references dictionary, bam file
+    # input: intron site dictionary, reads and references dictionary, bam file
     # output: updated intron site dictionary
 
     execute_indel_computation(
