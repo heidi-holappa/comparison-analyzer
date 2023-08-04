@@ -34,6 +34,11 @@ def get_elapsed_time_as_string(start_time) -> str:
 
 def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
 
+    output_manager.output_line({
+        "line": "ISOQUANT-GTF: PREDICTION PIPELINE",
+        "is_title": True
+    })
+
     intron_site_dict = get_intron_cases(parser_args.intron_save_file)
     if not intron_site_dict or parser_args.force:
 
@@ -101,6 +106,16 @@ def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
 
 def run_first_pipeline(parser_args):
 
+    output_manager.output_line({
+        "line": "GFFCOMPARE-GTF: COMPARISON PIPELINE",
+        "is_title": True
+    })
+
+    if not parser_args.force:
+        matching_cases_dict = get_matching_cases(parser_args.save_file)
+        if matching_cases_dict:
+            return matching_cases_dict
+
     gffcompare_db, reference_db = init_databases(
         parser_args.gffcompare_gtf,
         parser_args.reference_gtf,
@@ -154,9 +169,7 @@ def run_pipeline(parser_args):
     start_time = record_start_time()
     output_manager.output_heading()
 
-    matching_cases_dict = get_matching_cases(parser_args.save_file)
-    if not matching_cases_dict or parser_args.force:
-        matching_cases_dict = run_first_pipeline(parser_args)
+    matching_cases_dict = run_first_pipeline(parser_args)
 
     # Pipeline (see documentation for more details)
     # 1. Initialize databases
