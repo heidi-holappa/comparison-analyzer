@@ -10,6 +10,7 @@ from services.extract_matching_cases import MatchingCasesExtractor
 from services.fasta_extractor import FastaExtractor
 from services.output_manager import default_output_manager as output_manager
 from services.log_manager import default_log_manager as log_manager
+from services.save_point_handler import get_matching_cases, save_matching_cases
 
 from implementation_services.isoquant_db_init import init_isoquant_db
 from implementation_services.case_extractor import CaseExtractor
@@ -94,13 +95,7 @@ def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
     log_manager.debug_logs["intron_site_dict"] = intron_site_dict
 
 
-def run_pipeline(parser_args):
-
-    start_time = record_start_time()
-    output_manager.output_heading()
-
-    # Pipeline (see documentation for more details)
-    # 1. Initialize databases
+def run_first_pipeline(parser_args):
 
     gffcompare_db, reference_db = init_databases(
         parser_args.gffcompare_gtf,
@@ -144,6 +139,23 @@ def run_pipeline(parser_args):
             parser_args.reads_tsv,
             matching_cases_dict)
         bam_manager.execute(int(parser_args.window_size))
+
+    save_matching_cases(parser_args.save_file, matching_cases_dict)
+
+    return matching_cases_dict
+
+
+def run_pipeline(parser_args):
+
+    start_time = record_start_time()
+    output_manager.output_heading()
+
+    matching_cases_dict = get_matching_cases(parser_args.save_file)
+    if not matching_cases_dict:
+        matching_cases_dict = run_first_pipeline(parser_args)
+
+    # Pipeline (see documentation for more details)
+    # 1. Initialize databases
 
     # 6. Run prediction pipeline
     if parser_args.isoquant_gtf:
