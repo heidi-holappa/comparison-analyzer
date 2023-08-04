@@ -80,6 +80,7 @@ def init_argparser():
 
     parser_args = parser.parse_args()
     parser_dict = vars(parser_args)
+    force_bool = parser_args.force
 
     if parser_args.json:
         with open(parser_args.json, encoding="UTF-8") as json_file:
@@ -115,5 +116,8 @@ def init_argparser():
         parser_dict["offset"] = (
             max(0, offset_range[0]), max(0, offset_range[1])
         )
+
+    if force_bool:
+        parser_dict["force"] = True
 
     return parser_args
