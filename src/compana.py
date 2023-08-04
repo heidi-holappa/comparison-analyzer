@@ -82,15 +82,15 @@ def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
             reads_and_references,
             parser_args.window_size)
 
-        # 6. compute closest canonicals for interesting cases
-        # input: intron site dictionary, reference fasta file
-        # output: updated intron site dictionary
-
-        execute_closest_canonicals_extraction(
-            intron_site_dict, int(parser_args.window_size), parser_args.reference_fasta)
-
         # Save results
         save_intron_cases(parser_args.intron_save_file, intron_site_dict)
+
+    # 6. compute closest canonicals for interesting cases
+    # input: intron site dictionary, reference fasta file
+    # output: updated intron site dictionary
+
+    execute_closest_canonicals_extraction(
+        intron_site_dict, int(parser_args.window_size), parser_args.reference_fasta)
 
     # 7. Predict possible mistakes based on indels and closest canonicals
     # Input: intron site dictionary
