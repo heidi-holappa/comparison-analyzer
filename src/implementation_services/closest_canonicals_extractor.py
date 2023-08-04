@@ -10,6 +10,35 @@ def extract_characters_at_given_coordinates(coordinates: tuple, index_correction
     return fasta[chromosome][start + index_correction:end + index_correction]
 
 
+def count_most_common_indel_case(indel_dict: dict):
+    most_common_case = [
+        k for k, v in indel_dict.items() if v == max(indel_dict.values())]
+    if len(most_common_case) > 1 or len(most_common_case) == 0:
+        return -1
+    return most_common_case[0]
+
+
+def extract_canonicals_from_most_common_del_location(dict_entry: dict, fasta: Fasta):
+    deletions_right = dict_entry["extracted_information"]["right"]["deletions"]
+    deletions_left = dict_entry["extracted_information"]["left"]["deletions"]
+    most_common_right = count_most_common_indel_case(deletions_right)
+    most_common_left = count_most_common_indel_case(deletions_left)
+    if most_common_right:
+        chr = dict_entry["seq_id"]
+        location = dict_entry["location"]
+        coordinates = (chr, location + most_common_right,
+                       location + most_common_right + 2)
+        dict_entry["extracted_information"]["right"]["most_common_case_canonicals"] = extract_characters_at_given_coordinates(
+            coordinates, -1, fasta)
+    if most_common_left:
+        chr = dict_entry["seq_id"]
+        location = dict_entry["location"]
+        coordinates = (chr, location - most_common_left - 2,
+                       location - most_common_left)
+        dict_entry["extracted_information"]["left"]["most_common_case_canonicals"] = extract_characters_at_given_coordinates(
+            coordinates, -1, fasta)
+
+
 def find_closest_canonicals(nucleotides: str, dict_key: str, canonicals: list, intron_site_dict: dict):
     nucleotides_middle = int(len(nucleotides) / 2)
     closest_canonicals = {}
@@ -52,6 +81,7 @@ def iterate_intron_sites(intron_site_dict: dict, window_size: int, index_correct
                        splice_cite_location + window_size)
         nucleotides = extract_characters_at_given_coordinates(
             coordinates, index_correction, fasta)
+        extract_canonicals_from_most_common_del_location(value, fasta)
 
         possible_canonicals = {
             '+': {
