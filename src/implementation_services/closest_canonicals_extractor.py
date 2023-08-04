@@ -28,8 +28,8 @@ def extract_nucleotides_from_most_common_del_location(dict_entry: dict, fasta: F
         location = dict_entry["location"]
         coordinates = (chr, location + most_common_right,
                        location + most_common_right + 2)
-        dict_entry["extracted_information"]["right"]["most_common_case_nucleotides"] = extract_characters_at_given_coordinates(
-            coordinates, -1, fasta)
+        dict_entry["extracted_information"]["right"]["most_common_case_nucleotides"] = str(extract_characters_at_given_coordinates(
+            coordinates, -1, fasta))
     if most_common_left:
         chr = dict_entry["seq_id"]
         location = dict_entry["location"]
