@@ -35,6 +35,7 @@ def find_closest_canonicals(nucleotides: str, dict_key: str, canonicals: list, i
 
 def iterate_intron_sites(intron_site_dict: dict, window_size: int, index_correction: int, fasta: Fasta):
     for key, value in intron_site_dict.items():
+        # TODO: check if this is correct and get rid of magic numbers
         if value["location_type"] == "start":
             splice_cite_location = value["location"] - 2
         else:
@@ -44,10 +45,21 @@ def iterate_intron_sites(intron_site_dict: dict, window_size: int, index_correct
                        splice_cite_location + window_size)
         nucleotides = extract_characters_at_given_coordinates(
             coordinates, index_correction, fasta)
-        if value["location_type"] == "start":
-            canonicals = ["AG", "AC"]
-        else:
-            canonicals = ["GT", "GC", "AT"]
+
+        possible_canonicals = {
+            '+': {
+                'start': ['AG', 'AC'],
+                'end': ['GT', 'GC', 'AT']
+            },
+            '-': {
+                'start': ['AC', 'GC', 'AC'],
+                'end': ['CT', 'GT']
+            }
+        }
+        strand = value["strand"]
+        location_type = value["location_type"]
+        canonicals = possible_canonicals[strand][location_type]
+
         find_closest_canonicals(str(nucleotides), key,
                                 canonicals, intron_site_dict)
 
