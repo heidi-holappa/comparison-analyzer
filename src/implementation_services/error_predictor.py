@@ -35,11 +35,11 @@ def make_prediction(findings: dict, location_type: str):
     # if findings['closest_canonical'][1] not in canonicals:
     #     return
 
-    del_max_value = [k for k, v in findings['deletions'].items(
+    del_most_common_case = [k for k, v in findings['deletions'].items(
     ) if v == max(findings['deletions'].values())]
 
     # If a distinct most common deletion count does not exists, do nothing
-    if len(del_max_value) > 1:
+    if len(del_most_common_case) > 1:
         return
 
     nucleotides_exceeding_treshold = 0
@@ -50,7 +50,7 @@ def make_prediction(findings: dict, location_type: str):
     # if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
     #     findings['error_detected'] = True
 
-    if del_max_value[0] != 0 and nucleotides_exceeding_treshold == del_max_value[0] and del_max_value[0] in accepted_offset_cases:
+    if del_most_common_case[0] != 0 and nucleotides_exceeding_treshold == del_most_common_case[0] and del_most_common_case[0] in accepted_offset_cases:
         findings['error_detected'] = True
 
 
