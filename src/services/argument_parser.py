@@ -85,17 +85,23 @@ def init_argparser():
         with open(parser_args.json, encoding="UTF-8") as json_file:
             json_dict = json.load(json_file)
             parser_dict.update(json_dict)
-
-        parser_dict['save_file'] = os.path.join(
-            LOG_DIR, Path(parser_args.json).stem + '-matching-cases.pkl')
     elif parser_args.offset:
         parser_dict["offset"] = parser_args.offset[0].split(" ")
-        parser_dict['save_file'] = os.path.join(LOG_DIR, Path(
-            parser_args.gffcompare_gtf).stem, 'matching-cases.pkl')
 
     if not parser_args.gffcompare_gtf or not parser_args.reference_gtf:
         parser.print_help()
         exit(1)
+
+    if parser_args.json:
+        parser_dict['save_file'] = os.path.join(
+            LOG_DIR, Path(parser_args.json).stem + '-matching-cases.pkl')
+        parser_dict['intron_save_file'] = os.path.join(
+            LOG_DIR, Path(parser_args.json).stem + '-intron-cases.pkl')
+    else:
+        parser_dict['save_file'] = os.path.join(LOG_DIR, Path(
+            parser_args.gffcompare_gtf).stem, 'matching-cases.pkl')
+        parser_dict['intron_save_file'] = os.path.join(LOG_DIR, Path(
+            parser_args.gffcompare_gtf).stem, 'intron-cases.pkl')
 
     if not parser_args.offset:
         parser_dict["offset"] = (0, float('inf'))
