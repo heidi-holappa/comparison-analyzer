@@ -615,8 +615,8 @@ For each intron site closest canonicals are computed into each direction. Canoni
 At the moment the prediction is still crude. For each dictionary stored in `extracted information` the following conditions are verified:
 
 1. threshold for minimum number of reads is exceeded
-2. there is a distinct most common case
-3. the most common case for deletions matches the distance of the closest canonical pair and is other than zero
+2. there is a distinct most common case of deletions
+3. There are a distinct amount of nucleotides for which number of deletions exceeds a preset threshold and it is equal to the most common case of deletions
 
 **Note:** For now only error are considered only based on deletions. Insertions are so for now ignored. 
 
