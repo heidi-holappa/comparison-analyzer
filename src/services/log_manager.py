@@ -17,6 +17,8 @@ class LogManager:
         self.offset_results = {}
 
     def write_offset_results_to_file(self):
+        if not self.offset_results:
+            return
         with open(OFFSET_LOG, 'w', encoding="utf-8") as file:
             file.write(
                 "transcript_id\treference_id\tclass_code\tstrand\toffsets\n")
