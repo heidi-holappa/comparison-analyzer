@@ -60,6 +60,7 @@ def find_closest_canonicals(nucleotides: str, dict_key: str, canonicals: list, i
                 aligned_splice_site_nucleotides, aligned_splice_site_nucleotides, 0)
     intron_site_dict[dict_key]["extracted_information"]["left"]['closest_canonical'] = closest_canonicals['left']
     intron_site_dict[dict_key]["extracted_information"]["right"]['closest_canonical'] = closest_canonicals['right']
+    intron_site_dict[dict_key]["nucleotides"] = nucleotides
 
 
 def iterate_intron_sites(intron_site_dict: dict, window_size: int, index_correction: int, fasta: Fasta):
