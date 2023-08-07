@@ -15,12 +15,15 @@ offset_log = os.getenv("OFFSET_LOG_FILE") or "debug_offsets.log"
 test_file_directory = os.getenv(
     "TEST_FILE_DIRECTORY") or "src/tests/files"
 
+saved_results = os.getenv("SAVED_RESULTS_DIR") or "saved_results"
 log_dir = os.getenv("LOG_FILE_DIR") or "logs"
 fasta_overview = os.getenv("FASTA_OVERVIEW_FILE") or "fasta_overview.md"
 cigar_results = os.getenv("CIGAR_RESULTS_LOG") or "cigar_results.md"
 
 
 LOG_DIR = os.path.join(dirname, "..", log_dir)
+
+SAVE_DIR = os.path.join(dirname, "..", "saved_results")
 
 if len(sys.argv) > 1 and sys.argv[1] == "-j":
     log_extension = os.path.splitext(sys.argv[2])[0]
@@ -44,3 +47,5 @@ if not os.path.exists(LOG_FILE_DIR):
     os.mkdir(LOG_FILE_DIR)
 if not os.path.exists(TEMPORARY_DIR):
     os.mkdir(TEMPORARY_DIR)
+if not os.path.exists(SAVE_DIR):
+    os.mkdir(SAVE_DIR)
