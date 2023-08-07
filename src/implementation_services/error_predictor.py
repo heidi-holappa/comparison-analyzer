@@ -21,8 +21,9 @@ def make_prediction(findings: dict, location_type: str, strand: str):
     accepted_offset_cases = [3, 4, 5]
 
     total_cases = sum(findings['insertions'].values())
+    suported_strands = ['+', '-']
 
-    if total_cases < total_cases_threshold:
+    if total_cases < total_cases_threshold or strand not in suported_strands:
         return
 
     compute_average_and_sd(findings)
@@ -50,7 +51,7 @@ def make_prediction(findings: dict, location_type: str, strand: str):
     }
     canonicals = possible_canonicals[strand][location_type]
 
-    if strand == '.' or findings['most_common_del_pair'][1] not in canonicals:
+    if findings['most_common_del_pair'][1] not in canonicals:
         return
 
     # If a distinct most common deletion count does not exists, do nothing
