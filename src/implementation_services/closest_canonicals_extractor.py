@@ -39,6 +39,29 @@ def extract_nucleotides_from_most_common_del_location(dict_entry: dict, fasta: F
             coordinates, -1, fasta))
 
 
+def find_most_common_del_nucleotide_pair(nucleotides: str, dict_key: str, canonicals: list, intron_site_dict: dict):
+    nucleotides_middle = int(len(nucleotides) / 2)
+    closest_canonicals = {}
+    aligned_splice_site_nucleotides = nucleotides[nucleotides_middle:nucleotides_middle + 2]
+    deletions_right = intron_site_dict[dict_key]["extracted_information"]["right"]["deletions"]
+    right_offset = count_most_common_indel_case(deletions_right)
+    deletions_left = intron_site_dict[dict_key]["extracted_information"]["left"]["deletions"]
+    left_offset = count_most_common_indel_case(deletions_left)
+    if right_offset != -1:
+        nucleotide_pair_right = nucleotides[nucleotides_middle -
+                                            right_offset:nucleotides_middle - right_offset + 2]
+    else:
+        nucleotide_pair_right = "XX"
+    if left_offset != -1:
+        nucleotide_pair_left = nucleotides[nucleotides_middle +
+                                           left_offset:nucleotides_middle + left_offset + 2]
+    else:
+        nucleotide_pair_left = "XX"
+
+    intron_site_dict[dict_key]["extracted_information"]["left"]['most_common_del_pair'] = nucleotide_pair_left
+    intron_site_dict[dict_key]["extracted_information"]["right"]['most_common_del_pair'] = nucleotide_pair_right
+
+
 def find_closest_canonicals(nucleotides: str, dict_key: str, canonicals: list, intron_site_dict: dict):
     nucleotides_middle = int(len(nucleotides) / 2)
     closest_canonicals = {}
@@ -83,7 +106,7 @@ def iterate_intron_sites(intron_site_dict: dict, window_size: int, index_correct
         nucleotides = extract_characters_at_given_coordinates(
             coordinates, index_correction, fasta)
 
-        extract_nucleotides_from_most_common_del_location(value, fasta)
+        # extract_nucleotides_from_most_common_del_location(value, fasta)
 
         possible_canonicals = {
             '+': {
@@ -101,6 +124,9 @@ def iterate_intron_sites(intron_site_dict: dict, window_size: int, index_correct
 
         find_closest_canonicals(str(nucleotides), key,
                                 canonicals, intron_site_dict)
+
+        find_most_common_del_nucleotide_pair(str(nucleotides), key,
+                                             canonicals, intron_site_dict)
 
 
 def execute_closest_canonicals_extraction(intron_site_dict: dict, window_size: int, fasta_path: str):
