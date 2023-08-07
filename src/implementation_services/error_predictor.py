@@ -14,7 +14,7 @@ def compute_average_and_sd(findings: dict):
         [(key - findings['del_avg']) ** 2 * value for key, value in findings['deletions'].items()]) / del_sum) ** 0.5
 
 
-def make_prediction(findings: dict, location_type: str):
+def make_prediction(findings: dict, location_type: str, strand: str):
     # Constant thresholds
     total_cases_threshold = 5
     distribution_threshold = 0.7
@@ -37,6 +37,21 @@ def make_prediction(findings: dict, location_type: str):
 
     del_most_common_case = [k for k, v in findings['deletions'].items(
     ) if v == max(findings['deletions'].values())]
+
+    possible_canonicals = {
+        '+': {
+            'start': ['AG', 'AC'],
+            'end': ['GT', 'GC', 'AT']
+        },
+        '-': {
+            'start': ['AC', 'GC', 'AC'],
+            'end': ['CT', 'GT']
+        }
+    }
+    canonicals = possible_canonicals[strand][location_type]
+
+    if findings['most_common_del_pair'][1] not in canonicals:
+        return
 
     # If a distinct most common deletion count does not exists, do nothing
     if len(del_most_common_case) > 1:
@@ -74,7 +89,7 @@ def execute_error_prediction(intron_site_dict: dict):
     })
     for value in intron_site_dict.values():
         for findings in value["extracted_information"].values():
-            make_prediction(findings, value["location_type"])
+            make_prediction(findings, value["location_type"], value["strand"])
 
     count_predicted_errors(intron_site_dict)
 
