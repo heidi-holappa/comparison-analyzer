@@ -5,7 +5,6 @@ import argparse
 import json
 
 from config import SAVE_DIR
-from config import LOG_DIR
 from config import DEFAULT_WINDOW_SIZE
 from config import CREATE_IMG_N_TRESHOLD
 
