@@ -34,7 +34,7 @@ class TestErrorPredictor(TestCase):
             'error_detected': False,
             'del_pos_distr': [0, 0, 0, 0, 0, 0, 0, 0],
         }
-        make_prediction(findings, 'start')
+        make_prediction(findings, 'start', '+')
         self.assertEqual(findings, expected_result)
 
     def test_prediction_finds_error_for_exon_end(self):
@@ -44,12 +44,13 @@ class TestErrorPredictor(TestCase):
             'closest_canonical': ('GC', 'GC', 4),
             'error_detected': False,
             'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': (4, 'GT'),
         }
 
         expected_result = {
             'error_detected': True,
         }
-        make_prediction(findings, 'end')
+        make_prediction(findings, 'end', '+')
         self.assertEqual(findings['error_detected'],
                          expected_result['error_detected'])
 
@@ -60,12 +61,13 @@ class TestErrorPredictor(TestCase):
             'closest_canonical': ('AC', 'AC', 4),
             'error_detected': False,
             'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': (4, 'AG'),
         }
 
         expected_result = {
             'error_detected': True,
         }
-        make_prediction(findings, 'start')
+        make_prediction(findings, 'start', '+')
         self.assertEqual(findings['error_detected'],
                          expected_result['error_detected'])
 
@@ -76,6 +78,7 @@ class TestErrorPredictor(TestCase):
             'closest_canonical': ('AC', 'AC', 4),
             'error_detected': False,
             'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': (4, 'AC'),
         }
         expected_result = {
             'ins_avg': 3.0,
@@ -83,7 +86,7 @@ class TestErrorPredictor(TestCase):
             'del_avg': 4.0,
             'del_sd': 0.0,
         }
-        make_prediction(findings, 'start')
+        make_prediction(findings, 'start', '+')
         self.assertEqual(findings['ins_avg'], expected_result['ins_avg'])
         self.assertEqual(findings['ins_sd'], expected_result['ins_sd'])
 
