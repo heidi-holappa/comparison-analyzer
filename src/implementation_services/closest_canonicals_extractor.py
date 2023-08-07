@@ -41,8 +41,8 @@ def extract_nucleotides_from_most_common_del_location(dict_entry: dict, fasta: F
 
 def find_most_common_del_nucleotide_pair(nucleotides: str, dict_key: str, canonicals: list, intron_site_dict: dict):
     nucleotides_middle = int(len(nucleotides) / 2)
-    closest_canonicals = {}
-    aligned_splice_site_nucleotides = nucleotides[nucleotides_middle:nucleotides_middle + 2]
+    # closest_canonicals = {}
+    # aligned_splice_site_nucleotides = nucleotides[nucleotides_middle:nucleotides_middle + 2]
     deletions_right = intron_site_dict[dict_key]["extracted_information"]["right"]["deletions"]
     right_offset = count_most_common_indel_case(deletions_right)
     deletions_left = intron_site_dict[dict_key]["extracted_information"]["left"]["deletions"]
