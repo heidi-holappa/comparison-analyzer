@@ -44,7 +44,7 @@ class TestErrorPredictor(TestCase):
             'closest_canonical': ('GC', 'GC', 4),
             'error_detected': False,
             'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
-            'most_common_del_pair': (4, 'GT'),
+            'most_common_del_pair': 'GT',
         }
 
         expected_result = {
@@ -61,7 +61,7 @@ class TestErrorPredictor(TestCase):
             'closest_canonical': ('AC', 'AC', 4),
             'error_detected': False,
             'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
-            'most_common_del_pair': (4, 'AG'),
+            'most_common_del_pair': 'AG',
         }
 
         expected_result = {
@@ -78,7 +78,7 @@ class TestErrorPredictor(TestCase):
             'closest_canonical': ('AC', 'AC', 4),
             'error_detected': False,
             'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
-            'most_common_del_pair': (4, 'AC'),
+            'most_common_del_pair': 'AC',
         }
         expected_result = {
             'ins_avg': 3.0,
