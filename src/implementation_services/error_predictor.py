@@ -50,7 +50,7 @@ def make_prediction(findings: dict, location_type: str, strand: str):
     }
     canonicals = possible_canonicals[strand][location_type]
 
-    if findings['most_common_del_pair'][1] not in canonicals:
+    if strand == '.' or findings['most_common_del_pair'][1] not in canonicals:
         return
 
     # If a distinct most common deletion count does not exists, do nothing
