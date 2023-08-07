@@ -48,13 +48,13 @@ def find_most_common_del_nucleotide_pair(nucleotides: str, dict_key: str, canoni
     deletions_left = intron_site_dict[dict_key]["extracted_information"]["left"]["deletions"]
     left_offset = count_most_common_indel_case(deletions_left)
     if right_offset != -1:
-        nucleotide_pair_right = nucleotides[nucleotides_middle -
-                                            right_offset:nucleotides_middle - right_offset + 2]
+        nucleotide_pair_right = nucleotides[nucleotides_middle +
+                                            right_offset:nucleotides_middle + right_offset + 2]
     else:
         nucleotide_pair_right = "XX"
     if left_offset != -1:
-        nucleotide_pair_left = nucleotides[nucleotides_middle +
-                                           left_offset:nucleotides_middle + left_offset + 2]
+        nucleotide_pair_left = nucleotides[nucleotides_middle -
+                                           left_offset:nucleotides_middle - left_offset + 2]
     else:
         nucleotide_pair_left = "XX"
 
