@@ -19,6 +19,7 @@ for filename in os.listdir(directory):
             files.append(f)
 
 print("Found %d files" % len(files))
+max_len = max([len(Path(file).stem) for file in files])
 
 
 def get_intron_cases(intron_save_file: str):
@@ -40,6 +41,7 @@ results = {}
 
 for file in files:
     filename = Path(file).stem
+    filename = filename + ' ' * (max_len - len(filename))
     print("Processing file: %s" % filename, end='\r')
     intron_cases = get_intron_cases(file)
     max_del_count = {
