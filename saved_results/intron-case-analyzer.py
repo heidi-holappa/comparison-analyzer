@@ -41,7 +41,13 @@ def normalize_results(cases: dict):
     total_count = sum(cases.values())
     normalized_cases = {}
     for case, count in cases.items():
-        normalized_cases[case] = round(count / total_count, 2)
+        normalized = count / total_count * 100
+        if normalized > 1:
+            normalized_cases[case] = round(count / total_count, 2)
+        elif normalized > 0.01:
+            normalized_cases[case] = round(count / total_count, 3)
+        else:
+            normalized_cases[case] = round(count / total_count, 6)
     return normalized_cases
 
 
