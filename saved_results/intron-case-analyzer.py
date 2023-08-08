@@ -52,6 +52,7 @@ def normalize_results(cases: dict):
 
 
 results = {}
+normalized_results = {}
 count = 0
 for file in files:
     count += 1
@@ -73,15 +74,21 @@ for file in files:
             most_common_del = count_most_common_indel_case(dels)
             max_del_count[direction][most_common_del] += 1
 
-    normalized_results = {}
+    normalized_results_to_be_included = {}
 
     for direction, cases in max_del_count.items():
         normalized_cases = normalize_results(cases)
-        normalized_results[direction] = normalized_cases
+        normalized_results_to_be_included[direction] = normalized_cases
 
-    results[filename] = normalized_results
+    results[filename] = max_del_count
+    normalized_results[filename] = normalized_results_to_be_included
 
 print('\n')
+
+for filename, output in normalized_results.items():
+    for direction, cases in output.items():
+        print(filename, direction, {i: dict(cases)[i] for i in sorted(cases)})
+
 
 for filename, output in results.items():
     for direction, cases in output.items():
