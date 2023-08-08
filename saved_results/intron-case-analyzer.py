@@ -83,4 +83,4 @@ print('\n')
 
 for filename, output in results.items():
     for direction, cases in output.items():
-        print(filename, direction, dict(OrderedDict(dict(cases).items())))
+        print(filename, direction, {i: dict(cases)[i] for i in sorted(cases)})
