@@ -93,3 +93,18 @@ for filename, output in normalized_results.items():
 for filename, output in results.items():
     for direction, cases in output.items():
         print(filename, direction, {i: dict(cases)[i] for i in sorted(cases)})
+
+with open("table-form.md", "w") as f:
+    f.write("| Filename | direction | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | \n")
+    f.write(
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | \n")
+    for filename, output in results.items():
+        for direction, cases in output.items():
+            f.write("| %s | %s | " % (filename, direction))
+            for i in range(-1, 9):
+                if i not in cases:
+                    f.write(" NA |")
+                    continue
+                f.write(
+                    f" {cases[i]} ({normalized_results[filename][direction][i]}%) |")
+            f.write("\n")
