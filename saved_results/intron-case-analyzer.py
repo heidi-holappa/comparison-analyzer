@@ -37,6 +37,14 @@ def count_most_common_indel_case(indel_dict: dict):
     return most_common_case[0]
 
 
+def normalize_results(cases: dict):
+    total_count = sum(cases.values())
+    normalized_cases = {}
+    for case, count in cases.items():
+        normalized_cases[case] = count / total_count
+    return normalized_cases
+
+
 results = {}
 
 for file in files:
@@ -48,6 +56,7 @@ for file in files:
         'left': defaultdict(int),
         'right': defaultdict(int)
     }
+
     if not isinstance(intron_cases, dict):
         continue
     for value in intron_cases.values():
@@ -56,7 +65,13 @@ for file in files:
             most_common_del = count_most_common_indel_case(dels)
             max_del_count[direction][most_common_del] += 1
 
-    results[filename] = max_del_count
+    normalized_results = {}
+
+    for direction, cases in max_del_count.items():
+        normalized_cases = normalize_results(cases)
+        normalized_results[direction] = normalized_cases
+
+    results[filename] = normalized_results
 
 print('\n')
 
