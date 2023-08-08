@@ -1,7 +1,7 @@
 import os
 import sys
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from pathlib import Path
 import pickle
 
@@ -83,5 +83,4 @@ print('\n')
 
 for filename, output in results.items():
     for direction, cases in output.items():
-        print(filename, direction, sorted(
-            dict(cases).items(), key=lambda x: x[1], reverse=True))
+        print(filename, direction, dict(OrderedDict(dict(cases).items())))
