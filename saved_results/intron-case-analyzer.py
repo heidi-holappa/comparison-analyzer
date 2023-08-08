@@ -60,4 +60,5 @@ print('\n')
 
 for filename, output in results.items():
     for direction, cases in output.items():
-        print(filename, direction, dict(cases))
+        print(filename, direction, sorted(
+            dict(cases).items(), key=lambda x: x[1], reverse=True))
