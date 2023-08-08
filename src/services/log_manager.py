@@ -349,7 +349,8 @@ class LogManager:
 
         self.matching_cases_dict = matching_cases_dict
 
-        self.generate_output_for_closest_canonicals(parser_args)
+        # TODO: remove. related issue: https://github.com/heidi-holappa/comparison-analyzer/issues/195
+        # self.generate_output_for_closest_canonicals(parser_args)
         self.generate_output_for_indels(parser_args)
 
         if parser_args.extended_debug:
