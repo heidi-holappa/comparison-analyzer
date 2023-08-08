@@ -1,9 +1,15 @@
 import os
+import sys
+
 from collections import defaultdict
 from pathlib import Path
 import pickle
 
-directory = '/home/holaphei/koulutyot/lv-2022-2023/BI-summer-trainee/isoquant-summer-trainee/ca-task-2/comparison-analyzer/saved_results'
+if len(sys.argv) < 2:
+    print('Please provide a directory to search for intron cases')
+    sys.exit(1)
+
+directory = sys.argv[1]
 
 files = []
 for filename in os.listdir(directory):
@@ -11,6 +17,8 @@ for filename in os.listdir(directory):
     if os.path.isfile(f):
         if 'intron-cases' in f:
             files.append(f)
+
+print("Found %d files" % len(files))
 
 
 def get_intron_cases(intron_save_file: str):
@@ -31,6 +39,8 @@ def count_most_common_indel_case(indel_dict: dict):
 results = {}
 
 for file in files:
+    filename = Path(file).stem
+    print("Processing file: %s" % filename, end='\r')
     intron_cases = get_intron_cases(file)
     max_del_count = {
         'left': defaultdict(int),
@@ -43,8 +53,10 @@ for file in files:
             dels = value['extracted_information'][direction]['deletions']
             most_common_del = count_most_common_indel_case(dels)
             max_del_count[direction][most_common_del] += 1
-    filename = Path(file).stem
+
     results[filename] = max_del_count
+
+print('\n')
 
 for filename, output in results.items():
     for direction, cases in output.items():
