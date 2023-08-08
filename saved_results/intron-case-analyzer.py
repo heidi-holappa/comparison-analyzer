@@ -56,7 +56,7 @@ count = 0
 for file in files:
     count += 1
     filename = Path(file).stem
-    output = filename + ' ' * (max_len - len(filename)) + \
+    output = filename + '.' * (max_len - len(filename)) + \
         '(%d/%d)' % (count, len(files))
     print("Processing file: %s" % output, end='\r')
     intron_cases = get_intron_cases(file)
