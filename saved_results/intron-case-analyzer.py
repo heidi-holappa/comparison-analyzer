@@ -19,7 +19,7 @@ for filename in os.listdir(directory):
             files.append(f)
 
 print("Found %d files" % len(files))
-max_len = max([len(Path(file).stem) for file in files])
+max_len = max([len(Path(file).stem) for file in files]) + len(" (24/24)")
 
 
 def get_intron_cases(intron_save_file: str):
@@ -52,11 +52,13 @@ def normalize_results(cases: dict):
 
 
 results = {}
-
+count = 0
 for file in files:
+    count += 1
     filename = Path(file).stem
-    filename = filename + ' ' * (max_len - len(filename))
-    print("Processing file: %s" % filename, end='\r')
+    output = filename + ' ' * (max_len - len(filename)) + \
+        '(%d/%d)' % (count, len(files))
+    print("Processing file: %s" % output, end='\r')
     intron_cases = get_intron_cases(file)
     max_del_count = {
         'left': defaultdict(int),
