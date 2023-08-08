@@ -7,7 +7,10 @@ def initialize_fasta(fasta_path):
 
 def extract_characters_at_given_coordinates(coordinates: tuple, index_correction: int, fasta: Fasta):
     chromosome, start, end = coordinates
-    return fasta[chromosome][start + index_correction:end + index_correction]
+    try:
+        return fasta[chromosome][start + index_correction:end + index_correction]
+    except KeyError:
+        return "X" * (end - start)
 
 
 def count_most_common_indel_case(indel_dict: dict):
