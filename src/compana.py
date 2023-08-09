@@ -10,6 +10,8 @@ from services.extract_matching_cases import MatchingCasesExtractor
 from services.fasta_extractor import FastaExtractor
 from services.output_manager import default_output_manager as output_manager
 from services.log_manager import default_log_manager as log_manager
+from services.save_point_handler import get_matching_cases, save_matching_cases
+from services.save_point_handler import get_intron_cases, save_intron_cases
 
 from implementation_services.isoquant_db_init import init_isoquant_db
 from implementation_services.case_extractor import CaseExtractor
@@ -32,46 +34,56 @@ def get_elapsed_time_as_string(start_time) -> str:
 
 def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
 
-    # Prediction pipeline
-    # 1. Initialize database
-    isoquant_db = init_isoquant_db(parser_args.isoquant_gtf)
+    output_manager.output_line({
+        "line": "ISOQUANT-GTF: PREDICTION PIPELINE",
+        "is_title": True
+    })
 
-    # 2. Extract all intron site locations from isoquant-db.
-    # input: isoquant-db
-    # output: intron site dictionary
-    case_extractor = CaseExtractor()
-    intron_site_dict = case_extractor.extract_intron_site_locations(
-        isoquant_db, int(parser_args.window_size))
+    intron_site_dict = get_intron_cases(parser_args.intron_save_file)
+    if not intron_site_dict or parser_args.force:
 
-    # 3. Extract transcripts
-    # input: isoquant-db
-    # output: transcript set
-    transcript_set = case_extractor.extract_transcripts(isoquant_db)
-    log_manager.debug_logs["implementation_transcript_set"] = [
-        str(transcript_set)]
+        # Prediction pipeline
+        # 1. Initialize database
+        isoquant_db = init_isoquant_db(parser_args.isoquant_gtf)
 
-    # 4. extract reads and references
-    # input model_reads.tsv, intron site dictionary
-    # output: reads and references dictionary
-    transcripts_and_reads = create_dict_of_transcripts_and_reads(
-        parser_args.reads_tsv, transcript_set)
+        # 2. Extract all intron site locations from isoquant-db.
+        # input: isoquant-db
+        # output: intron site dictionary
+        case_extractor = CaseExtractor()
+        intron_site_dict = case_extractor.extract_intron_site_locations(
+            isoquant_db, int(parser_args.window_size))
 
-    log_manager.debug_logs["implementation_transcripts_and_reads"] = transcripts_and_reads
+        # 3. Extract transcripts
+        # input: isoquant-db
+        # output: transcript set
+        transcript_set = case_extractor.extract_transcripts(isoquant_db)
+        log_manager.debug_logs["implementation_transcript_set"] = transcript_set
 
-    reads_and_references = create_dict_of_reads_and_references(
-        intron_site_dict, transcripts_and_reads)
+        # 4. extract reads and references
+        # input model_reads.tsv, intron site dictionary
+        # output: reads and references dictionary
+        transcripts_and_reads = create_dict_of_transcripts_and_reads(
+            parser_args.reads_tsv, transcript_set)
 
-    log_manager.debug_logs["implementation_reads_and_references"] = reads_and_references
+        log_manager.debug_logs["implementation_transcripts_and_reads"] = transcripts_and_reads
 
-    # 5. compute indels
-    # input: intorn site dictionary, reads and references dictionary, bam file
-    # output: updated intron site dictionary
+        reads_and_references = create_dict_of_reads_and_references(
+            intron_site_dict, transcripts_and_reads)
 
-    execute_indel_computation(
-        parser_args.reads_bam,
-        intron_site_dict,
-        reads_and_references,
-        parser_args.window_size)
+        log_manager.debug_logs["implementation_reads_and_references"] = reads_and_references
+
+        # 5. compute indels
+        # input: intron site dictionary, reads and references dictionary, bam file
+        # output: updated intron site dictionary
+
+        execute_indel_computation(
+            parser_args.reads_bam,
+            intron_site_dict,
+            reads_and_references,
+            parser_args.window_size)
+
+        # Save results
+        save_intron_cases(parser_args.intron_save_file, intron_site_dict)
 
     # 6. compute closest canonicals for interesting cases
     # input: intron site dictionary, reference fasta file
@@ -95,13 +107,17 @@ def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
     log_manager.debug_logs["intron_site_dict"] = intron_site_dict
 
 
-def run_pipeline(parser_args):
+def run_first_pipeline(parser_args):
 
-    start_time = record_start_time()
-    output_manager.output_heading()
+    output_manager.output_line({
+        "line": "GFFCOMPARE-GTF: COMPARISON PIPELINE",
+        "is_title": True
+    })
 
-    # Pipeline (see documentation for more details)
-    # 1. Initialize databases
+    if not parser_args.force:
+        matching_cases_dict = get_matching_cases(parser_args.save_file)
+        if matching_cases_dict:
+            return matching_cases_dict
 
     gffcompare_db, reference_db = init_databases(
         parser_args.gffcompare_gtf,
@@ -127,24 +143,39 @@ def run_pipeline(parser_args):
         reference_db)
     matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
 
-    # 4. Extract closest canonicals
-    if parser_args.reference_fasta:
-        fasta_config = {
-            "fasta_path": parser_args.reference_fasta,
-            "offset": parser_args.offset,
-            "matching_cases_dict": matching_cases_dict,
-            "window_size": parser_args.window_size
-        }
-        reference_fasta_extractor = FastaExtractor(fasta_config)
-        reference_fasta_extractor.execute_fasta_extraction()
+    # # 4. Extract closest canonicals
+    # if parser_args.reference_fasta:
+    #     fasta_config = {
+    #         "fasta_path": parser_args.reference_fasta,
+    #         "offset": parser_args.offset,
+    #         "matching_cases_dict": matching_cases_dict,
+    #         "window_size": parser_args.window_size
+    #     }
+    #     reference_fasta_extractor = FastaExtractor(fasta_config)
+    #     reference_fasta_extractor.execute_fasta_extraction()
 
-    # 5. Count indels
-    if parser_args.reads_tsv and parser_args.reads_bam:
-        bam_manager = BamManager(
-            parser_args.reads_bam,
-            parser_args.reads_tsv,
-            matching_cases_dict)
-        bam_manager.execute(int(parser_args.window_size))
+    # # 5. Count indels
+    # if parser_args.reads_tsv and parser_args.reads_bam:
+    #     bam_manager = BamManager(
+    #         parser_args.reads_bam,
+    #         parser_args.reads_tsv,
+    #         matching_cases_dict)
+    #     bam_manager.execute(int(parser_args.window_size))
+
+    save_matching_cases(parser_args.save_file, matching_cases_dict)
+
+    return matching_cases_dict
+
+
+def run_pipeline(parser_args):
+
+    start_time = record_start_time()
+    output_manager.output_heading()
+
+    matching_cases_dict = run_first_pipeline(parser_args)
+
+    # Pipeline (see documentation for more details)
+    # 1. Initialize databases
 
     # 6. Run prediction pipeline
     if parser_args.isoquant_gtf:

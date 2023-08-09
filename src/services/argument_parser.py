@@ -1,6 +1,10 @@
+import os
+
+from pathlib import Path
 import argparse
 import json
 
+from config import SAVE_DIR
 from config import DEFAULT_WINDOW_SIZE
 from config import CREATE_IMG_N_TRESHOLD
 
@@ -76,6 +80,7 @@ def init_argparser():
 
     parser_args = parser.parse_args()
     parser_dict = vars(parser_args)
+    force_bool = parser_args.force
 
     if parser_args.json:
         with open(parser_args.json, encoding="UTF-8") as json_file:
@@ -87,6 +92,17 @@ def init_argparser():
     if not parser_args.gffcompare_gtf or not parser_args.reference_gtf:
         parser.print_help()
         exit(1)
+
+    if parser_args.json:
+        parser_dict['save_file'] = os.path.join(
+            SAVE_DIR, Path(parser_args.json).stem + '-matching-cases.pkl')
+        parser_dict['intron_save_file'] = os.path.join(
+            SAVE_DIR, Path(parser_args.json).stem + '-intron-cases.pkl')
+    else:
+        parser_dict['save_file'] = os.path.join(SAVE_DIR, Path(
+            parser_args.gffcompare_gtf).stem, 'matching-cases.pkl')
+        parser_dict['intron_save_file'] = os.path.join(SAVE_DIR, Path(
+            parser_args.gffcompare_gtf).stem, 'intron-cases.pkl')
 
     if not parser_args.offset:
         parser_dict["offset"] = (0, float('inf'))
@@ -100,5 +116,8 @@ def init_argparser():
         parser_dict["offset"] = (
             max(0, offset_range[0]), max(0, offset_range[1])
         )
+
+    if force_bool:
+        parser_dict["force"] = True
 
     return parser_args

@@ -132,15 +132,27 @@ class TestOffsetComputationFileManagement(TestCase):
         self.log_manager = LogManager()
 
     def test_a_test_file_is_initialized(self):
+        self.log_manager.offset_results = {"test": {
+            "reference_id": "test",
+            "strand": "+",
+            "class_code": "j",
+            "offsets": [(1, 2), (3, 4)],
+        }}
         self.log_manager.write_offset_results_to_file()
         self.assertTrue(os.path.exists(OFFSET_LOG))
 
     def test_initialized_log_file_only_has_header(self):
+        self.log_manager.offset_results = {"test": {
+            "reference_id": "test",
+            "strand": "+",
+            "class_code": "j",
+            "offsets": [(1, 2), (3, 4)],
+        }}
         self.log_manager.write_offset_results_to_file()
         with open(OFFSET_LOG, 'r') as f:
             lines = f.readlines()
             print(lines)
-            self.assertEqual(len(lines), 1)
+            self.assertEqual(len(lines), 2)
 
     def test_lines_are_written_to_log_file(self):
         self.log_manager.offset_results = {

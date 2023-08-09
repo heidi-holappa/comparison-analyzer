@@ -17,6 +17,8 @@ class LogManager:
         self.offset_results = {}
 
     def write_offset_results_to_file(self):
+        if not self.offset_results:
+            return
         with open(OFFSET_LOG, 'w', encoding="utf-8") as file:
             file.write(
                 "transcript_id\treference_id\tclass_code\tstrand\toffsets\n")
@@ -305,7 +307,7 @@ class LogManager:
             filepath = os.path.join(LOG_FILE_DIR, 'debug_' + log_name + '.log')
 
             if isinstance(log_values, dict):
-                content = self.pretty_print(log_values)
+                # content = self.pretty_print(log_values)
                 with open(filepath, "w") as file:
                     # file.write(content + "\n")
                     file.write("{\n")
@@ -315,6 +317,10 @@ class LogManager:
             if isinstance(log_values, list):
                 with open(filepath, "w") as file:
                     file.writelines(log_values)
+            if isinstance(log_values, set):
+                with open(filepath, "w") as file:
+                    for entry in log_values:
+                        file.write(entry + "\n")
             output_manager.output_line({
                 "line": f"{log_name} written to: {filepath}",
                 "is_info": True
@@ -343,7 +349,8 @@ class LogManager:
 
         self.matching_cases_dict = matching_cases_dict
 
-        self.generate_output_for_closest_canonicals(parser_args)
+        # TODO: remove. related issue: https://github.com/heidi-holappa/comparison-analyzer/issues/195
+        # self.generate_output_for_closest_canonicals(parser_args)
         self.generate_output_for_indels(parser_args)
 
         if parser_args.extended_debug:

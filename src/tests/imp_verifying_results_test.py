@@ -16,13 +16,13 @@ class TestVerifyResults(TestCase):
                 'offset': 0
             },
             'key2': {
-                'offset': 1
+                'offset': 2
             },
             'key3': {
-                'offset': 0
+                'offset': 4
             },
             'key4': {
-                'offset': 2
+                'offset': 4
             }
         }
 
@@ -33,13 +33,19 @@ class TestVerifyResults(TestCase):
                         'error_detected': False,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     },
                     'left': {
                         'error_detected': False,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     }
                 },
             },
@@ -47,15 +53,21 @@ class TestVerifyResults(TestCase):
                 'extracted_information': {
                     'right': {
                         'error_detected': True,
-                        'deletions': {0: 1, 1: 2, 2: 3},
+                        'deletions': {0: 1, 1: 2, 4: 100},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3, 3, 3, 100, 100, 100, 100],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     },
                     'left': {
                         'error_detected': False,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     }
                 },
             },
@@ -65,13 +77,19 @@ class TestVerifyResults(TestCase):
                         'error_detected': False,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     },
                     'left': {
                         'error_detected': True,
-                        'deletions': {0: 1, 1: 2, 2: 3},
+                        'deletions': {0: 1, 1: 2, 2: 3, 4: 100},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 3),
+                        'del_pos_distr': [1, 2, 3, 3, 3, 100, 100, 100, 100],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     }
                 },
             },
@@ -79,25 +97,43 @@ class TestVerifyResults(TestCase):
                 'extracted_information': {
                     'right': {
                         'error_detected': True,
-                        'deletions': {0: 1, 1: 2, 2: 3},
+                        'deletions': {0: 1, 1: 2, 2: 3, 4: 100},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 4),
+                        'del_pos_distr': [1, 2, 3, 3, 3, 100, 100, 100, 100],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     },
                     'left': {
                         'error_detected': True,
                         'deletions': {0: 1, 1: 2, 2: 3},
                         'insertions': {0: 1, 1: 2, 2: 3},
-                        'closest_canonical': ('CG', 'GT', 2)
+                        'closest_canonical': ('CG', 'GT', 2),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     }
                 },
             },
             'key5': {
                 'extracted_information': {
                     'right': {
-                        'error_detected': True
+                        'error_detected': True,
+                        'deletions': {0: 1, 1: 2, 2: 3, 4: 100},
+                        'insertions': {0: 1, 1: 2, 2: 3},
+                        'closest_canonical': ('CG', 'GT', 1),
+                        'del_pos_distr': [1, 2, 3, 3, 3, 100, 100, 100, 100],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     },
                     'left': {
-                        'error_detected': True
+                        'error_detected': False,
+                        'deletions': {0: 1, 1: 2, 2: 3},
+                        'insertions': {0: 1, 1: 2, 2: 3},
+                        'closest_canonical': ('CG', 'GT', 1),
+                        'del_pos_distr': [1, 2, 3],
+                        'del_avg': 2.0033333,
+                        'del_sd': 0.8164966
                     }
                 },
             }
@@ -105,5 +141,6 @@ class TestVerifyResults(TestCase):
 
         verify_results(intron_site_dict, matching_cases_dict)
         captured = self.capsys.readouterr()
-        assert "True positives: 3" in captured.out
-        assert "False positives: {'left': {2: 1}, 'right': {}}" in captured.out
+        print(captured.out)
+        assert "True positives: {'left': {4: 1}, 'right': {4: 1}, 'closest_canonical_matches': 1" in captured.out
+        assert "False positives: {'left': {}, 'right': {4: 1}, 'closest_canonical_matches': 1" in captured.out
