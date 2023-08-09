@@ -62,7 +62,7 @@ normalized_results = {}
 count = 0
 for file in files:
     count += 1
-    filename = Path(file).stem
+    filename = Path(file).stem.replace('-intron-cases', '')
     output = filename + '.' * (max_len - len(filename)) + \
         '(%d/%d)' % (count, len(files))
     print("Processing file: %s" % output, end='\r')
