@@ -101,12 +101,13 @@ for filename, output in results.items():
         print(filename, direction, {i: dict(cases)[i] for i in sorted(cases)})
 
 with open("table-form.md", "w") as f:
-    f.write("| Filename | direction | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | \n")
+    f.write("| Filename | direction | n | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | \n")
     f.write(
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | \n")
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | \n")
     for filename, output in results.items():
         for direction, cases in output.items():
-            f.write("| %s | %s | " % (filename, direction))
+            f.write("| %s | %s | %d | " %
+                    (filename, direction, sum(cases.values())))
             for i in range(-1, 9):
                 if i not in cases:
                     f.write(" NA |")
