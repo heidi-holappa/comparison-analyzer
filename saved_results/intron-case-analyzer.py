@@ -1,22 +1,28 @@
 import os
 import sys
 
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 from pathlib import Path
 import pickle
 
 if len(sys.argv) < 2:
-    print('Please provide a directory to search for intron cases')
+    print(
+        'Usage: python3 intron-case-analyzer.py <directory> [file-must-contain-str]]')
     sys.exit(1)
+
+file_contains = ''
+if len(sys.argv) == 3:
+    file_contains = sys.argv[2]
 
 directory = sys.argv[1]
 
 files = []
 for filename in os.listdir(directory):
     f = os.path.join(directory, filename)
-    if os.path.isfile(f):
-        if 'intron-cases' in f:
+    if os.path.isfile(f) and 'intron-cases' in f:
+        if file_contains in f:
             files.append(f)
+
 
 print("Found %d files" % len(files))
 max_len = max([len(Path(file).stem) for file in files]) + len(" (24/24)")
