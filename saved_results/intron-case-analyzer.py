@@ -91,8 +91,8 @@ for file in files:
 
 print('\n')
 
-for filename, output in normalized_results.items():
-    for direction, cases in output.items():
+for filename in sorted(normalized_results):
+    for direction, cases in normalized_results[filename].items():
         print(filename, direction, {i: dict(cases)[i] for i in sorted(cases)})
 
 
@@ -104,8 +104,8 @@ with open("table-form.md", "w") as f:
     f.write("| Filename | direction | n | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | \n")
     f.write(
         "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | \n")
-    for filename, output in results.items():
-        for direction, cases in output.items():
+    for filename in sorted(results):
+        for direction, cases in results[filename].items():
             f.write("| %s | %s | %d | " %
                     (filename, direction, sum(cases.values())))
             for i in range(-1, 9):
