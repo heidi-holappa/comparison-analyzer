@@ -63,8 +63,8 @@ def find_most_common_del_nucleotide_pair(nucleotides: str, dict_key: str, canoni
 
     intron_site_dict[dict_key]["extracted_information"]["left"]['most_common_del_pair'] = nucleotide_pair_left
     intron_site_dict[dict_key]["extracted_information"]["right"]['most_common_del_pair'] = nucleotide_pair_right
-    dict_entry["extracted_information"]["right"]["most_common_del"] = deletions_right
-    dict_entry["extracted_information"]["left"]["most_common_del"] = deletions_left
+    intron_site_dict[dict_key]["extracted_information"]["right"]["most_common_del"] = deletions_right
+    intron_site_dict[dict_key]["extracted_information"]["left"]["most_common_del"] = deletions_left
 
 
 def find_closest_canonicals(nucleotides: str, dict_key: str, canonicals: list, intron_site_dict: dict):
