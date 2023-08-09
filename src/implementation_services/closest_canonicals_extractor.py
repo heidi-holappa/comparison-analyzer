@@ -26,6 +26,8 @@ def extract_nucleotides_from_most_common_del_location(dict_entry: dict, fasta: F
     deletions_left = dict_entry["extracted_information"]["left"]["deletions"]
     most_common_right = count_most_common_indel_case(deletions_right)
     most_common_left = count_most_common_indel_case(deletions_left)
+    dict_entry["extracted_information"]["right"]["most_common_del"] = most_common_right
+    dict_entry["extracted_information"]["left"]["most_common_del"] = most_common_left
     if most_common_right != -1:
         chr = dict_entry["seq_id"]
         location = dict_entry["location"]
