@@ -96,7 +96,7 @@ def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
     # Input: intron site dictionary
     # Output: updated transcript model
 
-    execute_error_prediction(intron_site_dict)
+    execute_error_prediction(parser_args, intron_site_dict)
 
     # 8. verify results
     # input: intron site dictionary, matching cases dict
