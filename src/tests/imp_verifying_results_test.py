@@ -28,6 +28,7 @@ class TestVerifyResults(TestCase):
 
         intron_site_dict = {
             'key1': {
+                'strand': '+',
                 'extracted_information': {
                     'right': {
                         'error_detected': False,
@@ -36,7 +37,8 @@ class TestVerifyResults(TestCase):
                         'closest_canonical': ('CG', 'GT', 2),
                         'del_pos_distr': [1, 2, 3],
                         'del_avg': 2.0033333,
-                        'del_sd': 0.8164966
+                        'del_sd': 0.8164966,
+                        'most_common_del_pair': 'GT',
                     },
                     'left': {
                         'error_detected': False,
@@ -45,11 +47,13 @@ class TestVerifyResults(TestCase):
                         'closest_canonical': ('CG', 'GT', 2),
                         'del_pos_distr': [1, 2, 3],
                         'del_avg': 2.0033333,
-                        'del_sd': 0.8164966
+                        'del_sd': 0.8164966,
+                        'most_common_del_pair': 'GT',
                     }
                 },
             },
             'key2': {
+                'strand': '+',
                 'extracted_information': {
                     'right': {
                         'error_detected': True,
@@ -58,7 +62,8 @@ class TestVerifyResults(TestCase):
                         'closest_canonical': ('CG', 'GT', 2),
                         'del_pos_distr': [1, 2, 3, 3, 3, 100, 100, 100, 100],
                         'del_avg': 2.0033333,
-                        'del_sd': 0.8164966
+                        'del_sd': 0.8164966,
+                        'most_common_del_pair': 'GT',
                     },
                     'left': {
                         'error_detected': False,
@@ -67,11 +72,13 @@ class TestVerifyResults(TestCase):
                         'closest_canonical': ('CG', 'GT', 2),
                         'del_pos_distr': [1, 2, 3],
                         'del_avg': 2.0033333,
-                        'del_sd': 0.8164966
+                        'del_sd': 0.8164966,
+                        'most_common_del_pair': 'GT',
                     }
                 },
             },
             'key3': {
+                'strand': '+',
                 'extracted_information': {
                     'right': {
                         'error_detected': False,
@@ -80,7 +87,8 @@ class TestVerifyResults(TestCase):
                         'closest_canonical': ('CG', 'GT', 2),
                         'del_pos_distr': [1, 2, 3],
                         'del_avg': 2.0033333,
-                        'del_sd': 0.8164966
+                        'del_sd': 0.8164966,
+                        'most_common_del_pair': 'GT',
                     },
                     'left': {
                         'error_detected': True,
@@ -89,11 +97,13 @@ class TestVerifyResults(TestCase):
                         'closest_canonical': ('CG', 'GT', 3),
                         'del_pos_distr': [1, 2, 3, 3, 3, 100, 100, 100, 100],
                         'del_avg': 2.0033333,
-                        'del_sd': 0.8164966
+                        'del_sd': 0.8164966,
+                        'most_common_del_pair': 'GT',
                     }
                 },
             },
             'key4': {
+                'strand': '+',
                 'extracted_information': {
                     'right': {
                         'error_detected': True,
@@ -102,7 +112,8 @@ class TestVerifyResults(TestCase):
                         'closest_canonical': ('CG', 'GT', 4),
                         'del_pos_distr': [1, 2, 3, 3, 3, 100, 100, 100, 100],
                         'del_avg': 2.0033333,
-                        'del_sd': 0.8164966
+                        'del_sd': 0.8164966,
+                        'most_common_del_pair': 'GT',
                     },
                     'left': {
                         'error_detected': True,
@@ -111,11 +122,13 @@ class TestVerifyResults(TestCase):
                         'closest_canonical': ('CG', 'GT', 2),
                         'del_pos_distr': [1, 2, 3],
                         'del_avg': 2.0033333,
-                        'del_sd': 0.8164966
+                        'del_sd': 0.8164966,
+                        'most_common_del_pair': 'GT',
                     }
                 },
             },
             'key5': {
+                'strand': '+',
                 'extracted_information': {
                     'right': {
                         'error_detected': True,
@@ -124,7 +137,8 @@ class TestVerifyResults(TestCase):
                         'closest_canonical': ('CG', 'GT', 1),
                         'del_pos_distr': [1, 2, 3, 3, 3, 100, 100, 100, 100],
                         'del_avg': 2.0033333,
-                        'del_sd': 0.8164966
+                        'del_sd': 0.8164966,
+                        'most_common_del_pair': 'GT',
                     },
                     'left': {
                         'error_detected': False,
@@ -133,7 +147,8 @@ class TestVerifyResults(TestCase):
                         'closest_canonical': ('CG', 'GT', 1),
                         'del_pos_distr': [1, 2, 3],
                         'del_avg': 2.0033333,
-                        'del_sd': 0.8164966
+                        'del_sd': 0.8164966,
+                        'most_common_del_pair': 'GT',
                     }
                 },
             }
