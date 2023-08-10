@@ -85,6 +85,7 @@ def init_argparser():
     parser_args = parser.parse_args()
     parser_dict = vars(parser_args)
     force_bool = parser_args.force
+    no_canonicals_bool = parser_args.no_canonicals
 
     if parser_args.json:
         with open(parser_args.json, encoding="UTF-8") as json_file:
@@ -124,5 +125,7 @@ def init_argparser():
 
     if force_bool:
         parser_dict["force"] = True
+    if no_canonicals_bool:
+        parser_dict["no_canonicals"] = True
 
     return parser_args
