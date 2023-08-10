@@ -1,10 +1,30 @@
+import sys
+
 from unittest import TestCase
 import pytest
+
+from services.argument_parser import init_argparser
 
 from implementation_services.verify_results import verify_results
 
 
 class TestVerifyResults(TestCase):
+
+    def setUp(self):
+        sys.argv = [
+            'compAna.py',
+            '-g=gffcompare.gtf',
+            '-r=reference.gtf',
+            '-b=file.bam',
+            '-a=file.fasta',
+            '-t=file.tsv',
+            '-o=0 10',
+            '-f',
+            '-s',
+            '-c=j k',
+            '-n=true',
+        ]
+        self.parser = init_argparser()
 
     @pytest.fixture(autouse=True)
     def capsys(self, capsys):
@@ -154,7 +174,7 @@ class TestVerifyResults(TestCase):
             }
         }
 
-        verify_results(intron_site_dict, matching_cases_dict)
+        verify_results(self.parser, intron_site_dict, matching_cases_dict)
         captured = self.capsys.readouterr()
         print(captured.out)
         assert "True positives: {'left': {4: 1}, 'right': {4: 1}, 'closest_canonical_matches': 1" in captured.out
