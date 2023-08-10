@@ -48,7 +48,7 @@ def verify_results(parser_args, intron_site_dict: dict, matching_cases_dict: dic
                     'most_common_del_pair': value['extracted_information'][direction]['most_common_del_pair'],
                     'del_avg': "{:.2f}".format(value['extracted_information'][direction]['del_avg']),
                     'del_sd': "{:.2f}".format(value['extracted_information'][direction]['del_sd']),
-                    'aggressive': parser_args.no_canonicals,
+                    'aggressive_strategy': parser_args.no_canonicals,
                 }
 
                 if not matching_case:
