@@ -98,6 +98,7 @@ def init_argparser():
         exit(1)
 
     if parser_args.json:
+        parser_dict['json_file'] = Path(parser_args.json).stem
         parser_dict['save_file'] = os.path.join(
             SAVE_DIR, Path(parser_args.json).stem + '-matching-cases.pkl')
         parser_dict['intron_save_file'] = os.path.join(
