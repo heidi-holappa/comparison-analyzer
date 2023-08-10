@@ -101,8 +101,8 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     # if debug_errors:
     #     log_manager.debug_logs['verifying_results_keys_not_found'] = debug_errors
     if debug_unverified_cases:
-        log_manager.debug_logs['verifying_results_unverified_cases'] = debug_unverified_cases
+        log_manager.debug_logs['results_unverified_cases'] = debug_unverified_cases
     if debug_true_positives_dict:
-        log_manager.debug_logs['verifying_results_true_positives'] = debug_true_positives_dict
+        log_manager.debug_logs['results_true_positives'] = debug_true_positives_dict
     if debug_false_positives_dict:
-        log_manager.debug_logs['verifying_results_false_positives'] = debug_false_positives_dict
+        log_manager.debug_logs['results_false_positives'] = debug_false_positives_dict
