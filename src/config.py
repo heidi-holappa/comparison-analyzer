@@ -31,7 +31,7 @@ else:
     log_extension = ""
 
 LOG_FILE_DIR = os.path.join(dirname, "..", log_dir,
-                            log_extension + datetime.now().strftime('%Y-%m-%d_%H-%M'))
+                            log_extension + "-" + datetime.now().strftime('%Y-%m-%d_%H-%M'))
 TEMPORARY_DIR = os.path.join(dirname, "..", temporary_dir_path)
 OFFSET_LOG = os.path.join(LOG_FILE_DIR, offset_log)
 TEST_FILE_DIR = os.path.join(dirname, "..", test_file_directory)
