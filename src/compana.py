@@ -102,7 +102,7 @@ def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
     # input: intron site dictionary, matching cases dict
     # output: verification results: misses, hits, errors
 
-    verify_results(intron_site_dict, matching_cases_dict)
+    verify_results(parser_args, intron_site_dict, matching_cases_dict)
 
     log_manager.debug_logs["intron_site_dict"] = intron_site_dict
 

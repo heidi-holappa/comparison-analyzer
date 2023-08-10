@@ -2,7 +2,7 @@ from services.output_manager import default_output_manager as output_manager
 from services.log_manager import default_log_manager as log_manager
 
 
-def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
+def verify_results(parser_args, intron_site_dict: dict, matching_cases_dict: dict):
     output_manager.output_line({
         "line": "VERIFYING RESULTS",
         "is_title": True
@@ -48,6 +48,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                     'most_common_del_pair': value['extracted_information'][direction]['most_common_del_pair'],
                     'del_avg': "{:.2f}".format(value['extracted_information'][direction]['del_avg']),
                     'del_sd': "{:.2f}".format(value['extracted_information'][direction]['del_sd']),
+                    'aggressive': parser_args.no_canonicals,
                 }
 
                 if not matching_case:
