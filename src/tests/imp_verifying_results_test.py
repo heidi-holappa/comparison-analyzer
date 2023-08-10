@@ -49,6 +49,7 @@ class TestVerifyResults(TestCase):
         intron_site_dict = {
             'key1': {
                 'strand': '+',
+                'transcript_id': 'transcript1',
                 'extracted_information': {
                     'right': {
                         'error_detected': False,
@@ -74,6 +75,7 @@ class TestVerifyResults(TestCase):
             },
             'key2': {
                 'strand': '+',
+                'transcript_id': 'transcript2',
                 'extracted_information': {
                     'right': {
                         'error_detected': True,
@@ -99,6 +101,7 @@ class TestVerifyResults(TestCase):
             },
             'key3': {
                 'strand': '+',
+                'transcript_id': 'transcript3',
                 'extracted_information': {
                     'right': {
                         'error_detected': False,
@@ -124,6 +127,7 @@ class TestVerifyResults(TestCase):
             },
             'key4': {
                 'strand': '+',
+                'transcript_id': 'transcript4',
                 'extracted_information': {
                     'right': {
                         'error_detected': True,
@@ -149,6 +153,7 @@ class TestVerifyResults(TestCase):
             },
             'key5': {
                 'strand': '+',
+                'transcript_id': 'transcript5',
                 'extracted_information': {
                     'right': {
                         'error_detected': True,
@@ -174,7 +179,12 @@ class TestVerifyResults(TestCase):
             }
         }
 
-        verify_results(self.parser, intron_site_dict, matching_cases_dict)
+        class_codes_and_transcripts = {
+            'transcript2': 'j',
+        }
+
+        verify_results(self.parser, intron_site_dict,
+                       matching_cases_dict, class_codes_and_transcripts)
         captured = self.capsys.readouterr()
         print(captured.out)
         assert "True positives: {'left': {4: 1}, 'right': {4: 1}, 'closest_canonical_matches': 1" in captured.out
