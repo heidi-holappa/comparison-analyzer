@@ -172,8 +172,12 @@ def run_pipeline(parser_args):
     start_time = record_start_time()
     output_manager.output_heading()
     if parser_args.json:
+        if parser_args.no_canonicals:
+            strategy = 'aggressive'
+        else:
+            strategy = 'conservative'
         output_manager.output_line({
-            "line": "JSON-FILE: " + parser_args.json_file,
+            "line": "JSON-FILE: " + parser_args.json_file + " (strategy: " + strategy + ")",
             "is_info": True
         })
 
