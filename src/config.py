@@ -27,6 +27,8 @@ SAVE_DIR = os.path.join(dirname, "..", "saved_results")
 
 if len(sys.argv) > 1 and sys.argv[1] == "-j":
     log_extension = os.path.splitext(sys.argv[2])[0]
+    if '-n' in sys.argv:
+        log_extension += "-no_canonicals"
 else:
     log_extension = ""
 
