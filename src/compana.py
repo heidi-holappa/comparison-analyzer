@@ -171,6 +171,11 @@ def run_pipeline(parser_args):
 
     start_time = record_start_time()
     output_manager.output_heading()
+    if parser_args.json:
+        output_manager.output_line({
+            "line": "JSON-FILE: " + parser_args.json,
+            "is_title": True
+        })
 
     matching_cases_dict = run_first_pipeline(parser_args)
 
