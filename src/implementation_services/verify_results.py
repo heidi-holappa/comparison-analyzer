@@ -41,12 +41,13 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                 closest_canonical_distance = value['extracted_information'][direction]['closest_canonical'][2]
                 case_value = {
                     'direction': direction,
+                    'strand': value['strand'],
                     'deletions': deletions,
                     'del_pos_distr': value['extracted_information'][direction]['del_pos_distr'],
-                    'closest_canonical': value['extracted_information'][direction]['closest_canonical'],
+                    'most_common_del': most_common_del,
+                    'most_common_del_pair': value['extracted_information'][direction]['most_common_del_pair'],
                     'del_avg': "{:.2f}".format(value['extracted_information'][direction]['del_avg']),
                     'del_sd': "{:.2f}".format(value['extracted_information'][direction]['del_sd']),
-                    'most_common_del': most_common_del,
                 }
 
                 if not matching_case:
