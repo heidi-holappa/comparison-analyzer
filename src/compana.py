@@ -119,15 +119,15 @@ def run_first_pipeline(parser_args):
         "is_title": True
     })
 
-    if not parser_args.force:
-        matching_cases_dict = get_matching_cases(parser_args.save_file)
-        if matching_cases_dict:
-            return matching_cases_dict
-
     gffcompare_db, reference_db = init_databases(
         parser_args.gffcompare_gtf,
         parser_args.reference_gtf,
         parser_args.force)
+
+    if not parser_args.force:
+        matching_cases_dict = get_matching_cases(parser_args.save_file)
+        if matching_cases_dict:
+            return matching_cases_dict, gffcompare_db
 
     # Additional step: Compute class code stats for stdout
 
