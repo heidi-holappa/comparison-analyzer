@@ -14,8 +14,24 @@ def compute_average_and_sd(findings: dict):
         [(key - findings['del_avg']) ** 2 * value for key, value in findings['deletions'].items()]) / del_sum) ** 0.5
 
 
-def make_prediction(findings: dict, location_type: str, strand: str):
-    # Constant thresholds
+def verify_sublist_largest_values_exists(lst, n):
+    largest_values = set(sorted(lst, reverse=True)[:n])
+    count = 0
+
+    for num in lst:
+        if num in largest_values:
+            count += 1
+            if count >= n:
+                return True
+        else:
+            count = 0
+
+    return False
+
+
+def make_prediction(parser_args, findings: dict, location_type: str, strand: str):
+
+    # Constants
     total_cases_threshold = 5
     distribution_threshold = 0.7
     accepted_offset_cases = [3, 4, 5]
@@ -51,13 +67,16 @@ def make_prediction(findings: dict, location_type: str, strand: str):
     }
     canonicals = possible_canonicals[strand][location_type]
 
-    if findings['most_common_del_pair'] not in canonicals:
+    # If aggressive search is not enabled and the most common deletion pair is not a canonical, do nothing
+    if not parser_args.no_canonicals and findings['most_common_del_pair'] not in canonicals:
         return
 
-    # If a distinct most common deletion count does not exists, do nothing
-    if len(del_most_common_case) > 1:
+    # If a distinct most common deletion count does not exists or
+    # most common case is not among accepted offset cases, do nothing
+    if len(del_most_common_case) > 1 or del_most_common_case[0] not in accepted_offset_cases:
         return
 
+    # Compute count for nucleotides exceeding distribution threshold
     nucleotides_exceeding_treshold = 0
     for value in findings['del_pos_distr']:
         if value / total_cases > distribution_threshold:
@@ -66,7 +85,12 @@ def make_prediction(findings: dict, location_type: str, strand: str):
     # if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
     #     findings['error_detected'] = True
 
-    if del_most_common_case[0] != 0 and nucleotides_exceeding_treshold == del_most_common_case[0] and del_most_common_case[0] in accepted_offset_cases:
+    if parser_args.no_canonicals:
+        consentration_exists = verify_sublist_largest_values_exists(
+            findings['del_pos_distr'], del_most_common_case[0])
+        if consentration_exists and nucleotides_exceeding_treshold >= del_most_common_case[0]:
+            findings['error_detected'] = True
+    else:
         findings['error_detected'] = True
 
 
@@ -83,14 +107,15 @@ def count_predicted_errors(intron_site_dict: dict):
     })
 
 
-def execute_error_prediction(intron_site_dict: dict):
+def execute_error_prediction(parser_args, intron_site_dict: dict):
     output_manager.output_line({
         "line": "PREDICTING ERRORS",
         "is_title": True
     })
     for value in intron_site_dict.values():
         for findings in value["extracted_information"].values():
-            make_prediction(findings, value["location_type"], value["strand"])
+            make_prediction(parser_args, findings,
+                            value["location_type"], value["strand"])
 
     count_predicted_errors(intron_site_dict)
 
