@@ -19,7 +19,6 @@ class TestParser(unittest.TestCase):
             '-f',
             '-s',
             '-c=j k',
-
         ]
         parser = init_argparser()
         assert parser.gffcompare_gtf == 'gffcompare.gtf'
