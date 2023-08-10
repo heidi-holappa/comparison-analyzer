@@ -77,6 +77,10 @@ def init_argparser():
         '-m', '--min_reads_for_graph',
         help='threshold for the n of cases for creating images',
         default=CREATE_IMG_N_TRESHOLD)
+    parser.add_argument(
+        '-n', '--no_canonicals',
+        help='canonical splice sites are not considered. Enables more aggressive error prediction and correction.',
+        action='store_true')
 
     parser_args = parser.parse_args()
     parser_dict = vars(parser_args)
