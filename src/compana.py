@@ -173,8 +173,8 @@ def run_pipeline(parser_args):
     output_manager.output_heading()
     if parser_args.json:
         output_manager.output_line({
-            "line": "JSON-FILE: " + parser_args.json,
-            "is_title": True
+            "line": "JSON-FILE: " + parser_args.json_file,
+            "is_info": True
         })
 
     matching_cases_dict = run_first_pipeline(parser_args)
