@@ -179,6 +179,8 @@ def run_pipeline(parser_args):
     if parser_args.json:
         if parser_args.no_canonicals:
             strategy = 'aggressive'
+        elif parser_args.very_conservative:
+            strategy = 'very_conservative'
         else:
             strategy = 'conservative'
         output_manager.output_line({
