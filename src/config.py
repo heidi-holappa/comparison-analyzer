@@ -20,6 +20,9 @@ log_dir = os.getenv("LOG_FILE_DIR") or "logs"
 fasta_overview = os.getenv("FASTA_OVERVIEW_FILE") or "fasta_overview.md"
 cigar_results = os.getenv("CIGAR_RESULTS_LOG") or "cigar_results.md"
 
+PRED_PREC_OF_ALL_CASES_TRESHOLD = 0.7
+PRED_MIN_CASES_THRESHOLD = 5
+PRED_ACCEPTED_OFFSET_CASES = [3, 4, 5]
 
 LOG_DIR = os.path.join(dirname, "..", log_dir)
 
