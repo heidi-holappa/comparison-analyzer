@@ -1,4 +1,7 @@
 from services.output_manager import default_output_manager as output_manager
+from config import PRED_PREC_OF_ALL_CASES_TRESHOLD
+from config import PRED_MIN_CASES_THRESHOLD
+from config import PRED_ACCEPTED_OFFSET_CASES
 
 
 def compute_average_and_sd(findings: dict):
@@ -32,9 +35,9 @@ def verify_sublist_largest_values_exists(lst, n):
 def make_prediction(parser_args, findings: dict, location_type: str, strand: str):
 
     # Constants
-    total_cases_threshold = 5
-    distribution_threshold = 0.7
-    accepted_offset_cases = [3, 4, 5]
+    total_cases_threshold = PRED_MIN_CASES_THRESHOLD
+    count_proportion_threshold = PRED_PREC_OF_ALL_CASES_TRESHOLD
+    accepted_offset_cases = PRED_ACCEPTED_OFFSET_CASES
 
     total_cases = sum(findings['insertions'].values())
     suported_strands = ['+', '-']
@@ -79,7 +82,7 @@ def make_prediction(parser_args, findings: dict, location_type: str, strand: str
     # Compute count for nucleotides exceeding distribution threshold
     nucleotides_exceeding_treshold = 0
     for value in findings['del_pos_distr']:
-        if value / total_cases > distribution_threshold:
+        if value / total_cases > count_proportion_threshold:
             nucleotides_exceeding_treshold += 1
 
     # if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
