@@ -88,8 +88,20 @@ def make_prediction(parser_args, findings: dict, location_type: str, strand: str
     if parser_args.no_canonicals:
         consentration_exists = verify_sublist_largest_values_exists(
             findings['del_pos_distr'], del_most_common_case[0])
-        if consentration_exists and nucleotides_exceeding_treshold >= del_most_common_case[0]:
+        threshold_exceeds = bool(
+            nucleotides_exceeding_treshold >= del_most_common_case[0])
+        if consentration_exists and threshold_exceeds:
             findings['error_detected'] = True
+    elif parser_args.very_conservative:
+        consentration_exists = verify_sublist_largest_values_exists(
+            findings['del_pos_distr'], del_most_common_case[0])
+        threshold_exceeds = bool(
+            nucleotides_exceeding_treshold >= del_most_common_case[0])
+        canonical_matches = bool(
+            findings['closest_canonical'][2] == del_most_common_case[0])
+        if consentration_exists and threshold_exceeds and canonical_matches:
+            findings['error_detected'] = True
+        pass
     else:
         findings['error_detected'] = True
 
