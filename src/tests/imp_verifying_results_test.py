@@ -23,6 +23,7 @@ class TestVerifyResults(TestCase):
             '-s',
             '-c=j k',
             '-n=true',
+            '-v=true',
         ]
         self.parser = init_argparser()
 
