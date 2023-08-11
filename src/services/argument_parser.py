@@ -81,11 +81,17 @@ def init_argparser():
         '-n', '--no_canonicals',
         help='canonical splice sites are not considered. Enables more aggressive error prediction and correction.',
         action='store_true')
+    parser.add_argument(
+        '-v', '--very_conservative',
+        help='canonical splice sites are considered, threshold must exceed, there must be a consentration of deletions',
+        action='store_true'
+    )
 
     parser_args = parser.parse_args()
     parser_dict = vars(parser_args)
     force_bool = parser_args.force
     no_canonicals_bool = parser_args.no_canonicals
+    very_conservative_bool = parser_args.very_conservative
 
     if parser_args.json:
         with open(parser_args.json, encoding="UTF-8") as json_file:
@@ -127,5 +133,7 @@ def init_argparser():
         parser_dict["force"] = True
     if no_canonicals_bool:
         parser_dict["no_canonicals"] = True
+    if very_conservative_bool:
+        parser_dict["very_conservative"] = True
 
     return parser_args
