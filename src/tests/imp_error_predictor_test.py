@@ -8,6 +8,7 @@ from services.argument_parser import init_argparser
 from implementation_services.error_predictor import execute_error_prediction
 from implementation_services.error_predictor import make_prediction
 from implementation_services.error_predictor import count_predicted_errors
+from implementation_services.error_predictor import verify_sublist_largest_values_exists
 
 
 class TestErrorPredictor(TestCase):
@@ -25,6 +26,7 @@ class TestErrorPredictor(TestCase):
             '-s',
             '-c=j k',
             '-n=true',
+            '-v=true',
         ]
         self.parser = init_argparser()
 
@@ -126,3 +128,53 @@ class TestErrorPredictor(TestCase):
         count_predicted_errors(intron_site_dict)
         captured = self.capsys.readouterr()
         assert "Predicted errors: 1" in captured.out
+
+    def test_if_no_sublist_of_largest_values_exists_return_false(self):
+        l = [10, 10, 0, 0, 10, 10, 0, 0, 0]
+        n = 3
+        result = verify_sublist_largest_values_exists(l, n)
+        self.assertEqual(result, False)
+
+    def test_if_canonicals_strategy_and_canonicals_do_not_match_no_error_is_detected(self):
+        self.parser.no_canonicals = False
+        findings = {
+            'insertions': {1: 100, 2: 100, 3: 100, 4: 100, 5: 100},
+            'deletions': {4: 100},
+            'closest_canonical': ('AC', 'AC', 4),
+            'error_detected': False,
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': 'GG',
+        }
+
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
+
+    def test_if_not_accepted_offset_case_do_nothing(self):
+        findings = {
+            'insertions': {1: 100, 2: 100, 3: 100, 4: 100, 5: 100},
+            'deletions': {1: 100},
+            'closest_canonical': ('AC', 'AC', 4),
+            'error_detected': False,
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': 'GG',
+        }
+
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
+
+    def test_very_conservative_strategy_returns_true_if_conditions_are_met(self):
+        # For conditions see documentation
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {4: 100},
+            'closest_canonical': ('AC', 'AC', 4),
+            'error_detected': False,
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': 'AG',
+        }
+        self.parser.no_canonicals = False
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(True, findings['error_detected'])
