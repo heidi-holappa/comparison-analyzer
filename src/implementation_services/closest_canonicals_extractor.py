@@ -42,7 +42,7 @@ def extract_nucleotides_from_most_common_del_location(dict_entry: dict, fasta: F
             coordinates, -1, fasta))
 
 
-def find_most_common_del_nucleotide_pair(nucleotides: str, dict_key: str, canonicals: list, intron_site_dict: dict):
+def find_most_common_del_nucleotide_pair(nucleotides: str, dict_key: tuple, canonicals: list, intron_site_dict: dict):
     nucleotides_middle = int(len(nucleotides) / 2)
     # closest_canonicals = {}
     # aligned_splice_site_nucleotides = nucleotides[nucleotides_middle:nucleotides_middle + 2]
