@@ -165,16 +165,260 @@ class TestErrorPredictor(TestCase):
         self.assertEqual(False, findings['error_detected'])
 
     def test_very_conservative_strategy_returns_true_if_conditions_are_met(self):
-        # For conditions see documentation
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. There has to be a canonical pair at the distance of 
+             the most common case of deletions from the splice site
+          3. A constant threshold has to be exceeded (currently 0.7)
+          4. There has to be $n$ adjacent nucleotides that have larger or equal 
+             values to nucleotides in other positions (see explanation above)
+        '''
         findings = {
             'insertions': {0: 100},
-            'deletions': {4: 100},
-            'closest_canonical': ('AC', 'AC', 4),
-            'error_detected': False,
+            'deletions': {0: 20, 4: 80},
             'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
             'most_common_del_pair': 'AG',
+            'error_detected': False,
         }
         self.parser.no_canonicals = False
+        self.parser.very_conservative = True
         make_prediction(self.parser, findings,
                         location_type='start', strand='+')
         self.assertEqual(True, findings['error_detected'])
+
+    def test_very_conservative_strategy_returns_false_if_condition_one_is_not_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. There has to be a canonical pair at the distance of 
+             the most common case of deletions from the splice site
+          3. A constant threshold has to be exceeded (currently 0.7)
+          4. There has to be $n$ adjacent nucleotides that have larger or equal 
+             values to nucleotides in other positions (see explanation above)
+        '''
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {0: 50, 4: 50},
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': 'AG',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = False
+        self.parser.very_conservative = True
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
+
+    def test_very_conservative_strategy_returns_false_if_condition_two_is_not_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. There has to be a canonical pair at the distance of 
+             the most common case of deletions from the splice site
+          3. A constant threshold has to be exceeded (currently 0.7)
+          4. There has to be $n$ adjacent nucleotides that have larger or equal 
+             values to nucleotides in other positions (see explanation above)
+        '''
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {0: 20, 4: 80},
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': 'XX',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = False
+        self.parser.very_conservative = True
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
+
+    def test_very_conservative_strategy_returns_false_if_condition_three_is_not_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. There has to be a canonical pair at the distance of 
+             the most common case of deletions from the splice site
+          3. A constant threshold has to be exceeded (currently 0.7)
+          4. There has to be $n$ adjacent nucleotides that have larger or equal 
+             values to nucleotides in other positions (see explanation above)
+        '''
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {0: 35, 4: 65},
+            'del_pos_distr': [0, 0, 0, 0, 65, 65, 65, 65],
+            'most_common_del_pair': 'AG',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = False
+        self.parser.very_conservative = True
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
+
+    def test_very_conservative_strategy_returns_false_if_condition_four_is_not_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. There has to be a canonical pair at the distance of 
+             the most common case of deletions from the splice site
+          3. A constant threshold has to be exceeded (currently 0.7)
+          4. There has to be $n$ adjacent nucleotides that have larger or equal 
+             values to nucleotides in other positions (see explanation above)
+        '''
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {0: 20, 4: 80},
+            'del_pos_distr': [0, 0, 0, 80, 0, 80, 80, 80],
+            'most_common_del_pair': 'AG',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = False
+        self.parser.very_conservative = True
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
+
+    def test_aggressive_strategy_returns_true_if_conditions_are_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. A constant threshold has to be exceeded (currently 0.7)
+          3. There has to be $n$ adjacent nucleotides that have larger or equal 
+             values to nucleotides in other positions.         
+        '''
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {0: 20, 4: 80},
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': 'XX',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = True
+        self.parser.very_conservative = False
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(True, findings['error_detected'])
+
+    def test_aggressive_strategy_returns_false_if_condition_one_is_not_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. A constant threshold has to be exceeded (currently 0.7)
+          3. There has to be $n$ adjacent nucleotides that have larger or equal 
+             values to nucleotides in other positions.         
+        '''
+        findings = {
+            'insertions': {0: 160},
+            'deletions': {0: 80, 4: 80},
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': 'XX',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = True
+        self.parser.very_conservative = False
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
+
+    def test_aggressive_strategy_returns_false_if_condition_two_is_not_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. A constant threshold has to be exceeded (currently 0.7)
+          3. There has to be $n$ adjacent nucleotides that have larger or equal 
+             values to nucleotides in other positions.         
+        '''
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {0: 20, 4: 80},
+            'del_pos_distr': [0, 0, 0, 0, 60, 80, 60, 80],
+            'most_common_del_pair': 'XX',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = True
+        self.parser.very_conservative = False
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
+
+    def test_aggressive_strategy_returns_false_if_condition_three_is_not_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. A constant threshold has to be exceeded (currently 0.7)
+          3. There has to be $n$ adjacent nucleotides that have larger or equal 
+             values to nucleotides in other positions.         
+        '''
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {0: 20, 4: 80},
+            'del_pos_distr': [0, 0, 0, 80, 60, 80, 80, 80],
+            'most_common_del_pair': 'XX',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = True
+        self.parser.very_conservative = False
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
+
+    def test_conservative_strategy_returns_true_when_conditions_are_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. There has to be a canonical pair at the distance of the 
+             most common case of deletions from the splice site
+        '''
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {0: 20, 4: 80},
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': 'AG',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = False
+        self.parser.very_conservative = False
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(True, findings['error_detected'])
+
+    def test_conservative_strategy_returns_false_when_condition_one_is_not_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. There has to be a canonical pair at the distance of the 
+             most common case of deletions from the splice site
+        '''
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {0: 50, 4: 50},
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': 'AG',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = False
+        self.parser.very_conservative = False
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
+
+    def test_conservative_strategy_returns_false_when_condition_two_is_not_met(self):
+        '''
+        The conditions are:
+          1. There has to be a distinct most common case of deletions
+          2. There has to be a canonical pair at the distance of the 
+             most common case of deletions from the splice site
+        '''
+        findings = {
+            'insertions': {0: 100},
+            'deletions': {0: 20, 4: 80},
+            'del_pos_distr': [0, 0, 0, 0, 80, 80, 80, 80],
+            'most_common_del_pair': 'CC',
+            'error_detected': False,
+        }
+        self.parser.no_canonicals = False
+        self.parser.very_conservative = False
+        make_prediction(self.parser, findings,
+                        location_type='start', strand='+')
+        self.assertEqual(False, findings['error_detected'])
