@@ -20,6 +20,7 @@ from implementation_services.indel_computer import execute_indel_computation
 from implementation_services.closest_canonicals_extractor import execute_closest_canonicals_extraction
 from implementation_services.error_predictor import execute_error_prediction
 from implementation_services.verify_results import verify_results
+from implementation_services.class_code_extractor import extract_class_codes_with_transcripts
 
 
 def record_start_time() -> float:
@@ -32,7 +33,7 @@ def get_elapsed_time_as_string(start_time) -> str:
     return elapsed_time_as_str
 
 
-def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
+def run_prediction_pipeline(parser_args, matching_cases_dict: dict, gffcompare_db):
 
     output_manager.output_line({
         "line": "ISOQUANT-GTF: PREDICTION PIPELINE",
@@ -96,13 +97,17 @@ def run_prediction_pipeline(parser_args, matching_cases_dict: dict):
     # Input: intron site dictionary
     # Output: updated transcript model
 
-    execute_error_prediction(intron_site_dict)
+    class_codes_and_transcripts = extract_class_codes_with_transcripts(
+        gffcompare_db)
+
+    execute_error_prediction(parser_args, intron_site_dict)
 
     # 8. verify results
     # input: intron site dictionary, matching cases dict
     # output: verification results: misses, hits, errors
 
-    verify_results(intron_site_dict, matching_cases_dict)
+    verify_results(parser_args, intron_site_dict,
+                   matching_cases_dict, class_codes_and_transcripts)
 
     log_manager.debug_logs["intron_site_dict"] = intron_site_dict
 
@@ -114,15 +119,15 @@ def run_first_pipeline(parser_args):
         "is_title": True
     })
 
-    if not parser_args.force:
-        matching_cases_dict = get_matching_cases(parser_args.save_file)
-        if matching_cases_dict:
-            return matching_cases_dict
-
     gffcompare_db, reference_db = init_databases(
         parser_args.gffcompare_gtf,
         parser_args.reference_gtf,
         parser_args.force)
+
+    if not parser_args.force:
+        matching_cases_dict = get_matching_cases(parser_args.save_file)
+        if matching_cases_dict:
+            return matching_cases_dict, gffcompare_db
 
     # Additional step: Compute class code stats for stdout
 
@@ -164,15 +169,26 @@ def run_first_pipeline(parser_args):
 
     save_matching_cases(parser_args.save_file, matching_cases_dict)
 
-    return matching_cases_dict
+    return matching_cases_dict, gffcompare_db
 
 
 def run_pipeline(parser_args):
 
     start_time = record_start_time()
     output_manager.output_heading()
+    if parser_args.json:
+        if parser_args.no_canonicals:
+            strategy = 'aggressive'
+        elif parser_args.very_conservative:
+            strategy = 'very_conservative'
+        else:
+            strategy = 'conservative'
+        output_manager.output_line({
+            "line": "JSON-FILE: " + parser_args.json_file + " (strategy: " + strategy + ")",
+            "is_info": True
+        })
 
-    matching_cases_dict = run_first_pipeline(parser_args)
+    matching_cases_dict, gffcompare_db = run_first_pipeline(parser_args)
 
     # Pipeline (see documentation for more details)
     # 1. Initialize databases
@@ -180,7 +196,8 @@ def run_pipeline(parser_args):
     # 6. Run prediction pipeline
     if parser_args.isoquant_gtf:
         # Initialize isoquant gtf-db
-        run_prediction_pipeline(parser_args, matching_cases_dict)
+        run_prediction_pipeline(
+            parser_args, matching_cases_dict, gffcompare_db)
 
     # 7. Create log files and output footer to stdout
     log_manager.execute_log_file_creation(matching_cases_dict, parser_args)

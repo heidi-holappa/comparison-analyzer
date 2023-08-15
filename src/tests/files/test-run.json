@@ -7,7 +7,7 @@
     "isoquant_gtf": "src/tests/files/isoquant.gtf",
     "offset": [4, 4],
     "class_code": "j c k",
-    "force": false,
+    "force": true,
     "stats": true,
     "extended_debug": true
 }

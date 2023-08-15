@@ -2,7 +2,7 @@ from services.output_manager import default_output_manager as output_manager
 from services.log_manager import default_log_manager as log_manager
 
 
-def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
+def verify_results(parser_args, intron_site_dict: dict, matching_cases_dict: dict, class_codes_and_transcripts: dict):
     output_manager.output_line({
         "line": "VERIFYING RESULTS",
         "is_title": True
@@ -28,6 +28,7 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
     debug_true_positives_dict = {}
     debug_false_positives_dict = {}
     debug_unverified_cases = {}
+    unverified_cases_class_codes = {}
     # debug_errors = []
     for key, value in intron_site_dict.items():
         directions = ['right', 'left']
@@ -41,15 +42,22 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
                 closest_canonical_distance = value['extracted_information'][direction]['closest_canonical'][2]
                 case_value = {
                     'direction': direction,
+                    'strand': value['strand'],
                     'deletions': deletions,
                     'del_pos_distr': value['extracted_information'][direction]['del_pos_distr'],
-                    'closest_canonical': value['extracted_information'][direction]['closest_canonical'],
+                    'most_common_del': most_common_del,
+                    'most_common_del_pair': value['extracted_information'][direction]['most_common_del_pair'],
                     'del_avg': "{:.2f}".format(value['extracted_information'][direction]['del_avg']),
                     'del_sd': "{:.2f}".format(value['extracted_information'][direction]['del_sd']),
-                    'most_common_del': most_common_del,
+                    'aggressive_strategy': parser_args.no_canonicals,
                 }
 
                 if not matching_case:
+                    if value['transcript_id'] in class_codes_and_transcripts:
+                        class_code = class_codes_and_transcripts[value['transcript_id']]
+                        if class_code not in unverified_cases_class_codes:
+                            unverified_cases_class_codes[class_code] = 0
+                        unverified_cases_class_codes[class_code] += 1
                     debug_unverified_cases[case_key] = case_value
                     # debug_errors.append(str(key) + "\n")
                     if most_common_del not in results['unverified_cases'][direction]:
@@ -97,11 +105,16 @@ def verify_results(intron_site_dict: dict, matching_cases_dict: dict):
         "line": "Unverified cases: " + str(results['unverified_cases']) + ", total: " + str(sum(results['unverified_cases']['left'].values()) + sum(results['unverified_cases']['right'].values())),
         "is_info": True
     })
+    if unverified_cases_class_codes:
+        output_manager.output_line({
+            "line": "Unverified cases class codes: " + str(unverified_cases_class_codes),
+            "is_info": True
+        })
     # if debug_errors:
     #     log_manager.debug_logs['verifying_results_keys_not_found'] = debug_errors
     if debug_unverified_cases:
-        log_manager.debug_logs['verifying_results_unverified_cases'] = debug_unverified_cases
+        log_manager.debug_logs['results_unverified_cases'] = debug_unverified_cases
     if debug_true_positives_dict:
-        log_manager.debug_logs['verifying_results_true_positives'] = debug_true_positives_dict
+        log_manager.debug_logs['results_true_positives'] = debug_true_positives_dict
     if debug_false_positives_dict:
-        log_manager.debug_logs['verifying_results_false_positives'] = debug_false_positives_dict
+        log_manager.debug_logs['results_false_positives'] = debug_false_positives_dict

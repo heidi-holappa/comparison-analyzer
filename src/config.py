@@ -20,6 +20,9 @@ log_dir = os.getenv("LOG_FILE_DIR") or "logs"
 fasta_overview = os.getenv("FASTA_OVERVIEW_FILE") or "fasta_overview.md"
 cigar_results = os.getenv("CIGAR_RESULTS_LOG") or "cigar_results.md"
 
+PRED_PREC_OF_ALL_CASES_TRESHOLD = 0.7
+PRED_MIN_CASES_THRESHOLD = 5
+PRED_ACCEPTED_OFFSET_CASES = [3, 4, 5]
 
 LOG_DIR = os.path.join(dirname, "..", log_dir)
 
@@ -27,11 +30,15 @@ SAVE_DIR = os.path.join(dirname, "..", "saved_results")
 
 if len(sys.argv) > 1 and sys.argv[1] == "-j":
     log_extension = os.path.splitext(sys.argv[2])[0]
+    if '-n' in sys.argv:
+        log_extension += "-no_canonicals"
+    if '-v' in sys.argv:
+        log_extension += "-very_conservative"
 else:
     log_extension = ""
 
 LOG_FILE_DIR = os.path.join(dirname, "..", log_dir,
-                            log_extension + datetime.now().strftime('%Y-%m-%d_%H-%M'))
+                            log_extension + "-" + datetime.now().strftime('%Y-%m-%d_%H-%M'))
 TEMPORARY_DIR = os.path.join(dirname, "..", temporary_dir_path)
 OFFSET_LOG = os.path.join(LOG_FILE_DIR, offset_log)
 TEST_FILE_DIR = os.path.join(dirname, "..", test_file_directory)
