@@ -39,7 +39,7 @@ def make_prediction(parser_args, findings: dict, location_type: str, strand: str
     count_proportion_threshold = PRED_PREC_OF_ALL_CASES_TRESHOLD
     accepted_offset_cases = PRED_ACCEPTED_OFFSET_CASES
 
-    total_cases = sum(findings['insertions'].values())
+    total_cases = sum(findings['deletions'].values())
     suported_strands = ['+', '-']
 
     if total_cases < total_cases_threshold or strand not in suported_strands:
