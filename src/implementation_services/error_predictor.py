@@ -101,10 +101,9 @@ def make_prediction(parser_args, findings: dict, location_type: str, strand: str
         threshold_exceeds = bool(
             nucleotides_exceeding_treshold >= del_most_common_case[0])
         canonical_matches = bool(
-            findings['closest_canonical'][2] == del_most_common_case[0])
+            findings['most_common_del_pair'] in canonicals)
         if consentration_exists and threshold_exceeds and canonical_matches:
             findings['error_detected'] = True
-        pass
     else:
         findings['error_detected'] = True
 
