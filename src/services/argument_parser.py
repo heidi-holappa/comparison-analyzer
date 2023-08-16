@@ -1,6 +1,10 @@
+import os
+
+from pathlib import Path
 import argparse
 import json
 
+from config import SAVE_DIR
 from config import DEFAULT_WINDOW_SIZE
 from config import CREATE_IMG_N_TRESHOLD
 
@@ -20,6 +24,12 @@ def init_argparser():
         help='reference GTF-file to be compared against',
         required=False,
         metavar='')
+    parser.add_argument(
+        '-i', '--isoquant_gtf',
+        help="IsoQuant GTF-file to be imported into database",
+        required=False,
+        metavar=''
+    )
     parser.add_argument(
         '-a', '--reference_fasta',
         help='reference FASTA-file to be compared against',
@@ -67,9 +77,21 @@ def init_argparser():
         '-m', '--min_reads_for_graph',
         help='threshold for the n of cases for creating images',
         default=CREATE_IMG_N_TRESHOLD)
+    parser.add_argument(
+        '-n', '--no_canonicals',
+        help='canonical splice sites are not considered. Enables more aggressive error prediction and correction.',
+        action='store_true')
+    parser.add_argument(
+        '-v', '--very_conservative',
+        help='canonical splice sites are considered, threshold must exceed, there must be a consentration of deletions',
+        action='store_true'
+    )
 
     parser_args = parser.parse_args()
     parser_dict = vars(parser_args)
+    force_bool = parser_args.force
+    no_canonicals_bool = parser_args.no_canonicals
+    very_conservative_bool = parser_args.very_conservative
 
     if parser_args.json:
         with open(parser_args.json, encoding="UTF-8") as json_file:
@@ -81,6 +103,18 @@ def init_argparser():
     if not parser_args.gffcompare_gtf or not parser_args.reference_gtf:
         parser.print_help()
         exit(1)
+
+    if parser_args.json:
+        parser_dict['json_file'] = Path(parser_args.json).stem
+        parser_dict['save_file'] = os.path.join(
+            SAVE_DIR, Path(parser_args.json).stem + '-matching-cases.pkl')
+        parser_dict['intron_save_file'] = os.path.join(
+            SAVE_DIR, Path(parser_args.json).stem + '-intron-cases.pkl')
+    else:
+        parser_dict['save_file'] = os.path.join(SAVE_DIR, Path(
+            parser_args.gffcompare_gtf).stem, 'matching-cases.pkl')
+        parser_dict['intron_save_file'] = os.path.join(SAVE_DIR, Path(
+            parser_args.gffcompare_gtf).stem, 'intron-cases.pkl')
 
     if not parser_args.offset:
         parser_dict["offset"] = (0, float('inf'))
@@ -94,5 +128,12 @@ def init_argparser():
         parser_dict["offset"] = (
             max(0, offset_range[0]), max(0, offset_range[1])
         )
+
+    if force_bool:
+        parser_dict["force"] = True
+    if no_canonicals_bool:
+        parser_dict["no_canonicals"] = True
+    if very_conservative_bool:
+        parser_dict["very_conservative"] = True
 
     return parser_args

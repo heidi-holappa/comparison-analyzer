@@ -86,26 +86,26 @@ def execute_offset_computation(
         "is_title": True
     })
     output_manager.output_line({
-        "line": "Computing offsets for class code instances for: " + class_code,
+        "line": "Computing offsets for Gffcompare class codes: " + class_code,
         "is_info": True
     })
 
     offset_results_as_dict = {}
     for class_code in class_code.strip().split(" "):
 
-        for tc_element in gffcompare_db.features_of_type('transcript'):
+        for transcript_item in gffcompare_db.features_of_type('transcript'):
             aligned_exons, reference_exons = fetch_exons(
-                tc_element,
+                transcript_item,
                 class_code,
                 gffcompare_db,
                 reference_db
             )
             if aligned_exons:
                 offsets = compute_offsets(aligned_exons, reference_exons)
-                offset_results_as_dict[tc_element.id] = {
+                offset_results_as_dict[transcript_item.id] = {
                     "offsets": offsets,
-                    "reference_id": tc_element['cmp_ref'][0],
-                    "strand": tc_element.strand,
+                    "reference_id": transcript_item['cmp_ref'][0],
+                    "strand": transcript_item.strand,
                     "class_code": class_code
                 }
 

@@ -1,10 +1,10 @@
 chr1	IsoQuant	transcript	36753618	36797035	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; gene_name "4933424G06Rik"; xloc "XLOC_000001"; ref_gene_id "ENSMUSG00000102416.5"; cmp_ref "ENSMUST00000208994.2"; class_code "j"; tss_id "TSS1";
-chr1	IsoQuant	exon	36753618	36753778	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "1";
+chr1	IsoQuant	exon	36753618	36753782	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "1";
 chr1	IsoQuant	exon	36757903	36757965	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "2";
 chr1	IsoQuant	exon	36762446	36762536	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "3";
 chr1	IsoQuant	exon	36764296	36764379	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "4";
 chr1	IsoQuant	exon	36772929	36773034	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "5";
 chr1	IsoQuant	exon	36781359	36781457	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "6";
-chr1	IsoQuant	exon	36783592	36783742	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "7";
+chr1	IsoQuant	exon	36783592	36783746	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "7";
 chr1	IsoQuant	exon	36785443	36785652	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "8";
 chr1	IsoQuant	exon	36796871	36797035	.	+	.	transcript_id "transcript1.chr1.nnic"; gene_id "novel_gene_chr1_2"; exon_number "9";

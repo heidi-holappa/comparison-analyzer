@@ -27,6 +27,7 @@ The application accepts the following arguments
 | --- | --- | --- |
 | g | gffcompare_gtf | provide full path for `gtf` file produced by `gffcompare`. |
 | r | reference_gtf | provide full path for reference `gtf` file used to create the `gffcompare` `gtf`-file. |
+| i | isoquant_gtf | provide full path for IsoQuant `transcript_model.gtf` file |
 | f | force | force re-creation of sqlite3 database. By default a new database is not created if one already exists to improve efficiency. |
 | s | stats | output statistics on class codes. | 
 | c | class-code | specify one or several class codes for which to generate offset data. | 
@@ -38,6 +39,8 @@ The application accepts the following arguments
 | w | window_size | window from which indels are to be searched |
 | e | extended_debugging | enable extended debug output, to create more log-files | 
 | m | min_reads_for_graph |threshold for the n of cases for creating images |
+| n | no_canonicals | canonical splice sites are not considered. Enables more aggressive error prediction and correction.|
+| v | very_conservative | canonical splice sites are considered, threshold must exceed, there must be a consentration of deletions |
 
 
 Arguments can also be given in json-format. An [example template](../arguments_template.json) is provided in the root directory. For files use absolute path.
@@ -48,12 +51,15 @@ Arguments can also be given in json-format. An [example template](../arguments_t
     "reference_gtf": "<file.gtf>",
     "reference_fasta": "<file.fa>",
     "gffcompare_gtf": "<file.gtf>",
-    "offset": [0, 4],
-    "class_code": "j c k",
-    "force": false,
+    "isoquant_gtf": "<file.gtf>",
+    "offset": [0, 6],
+    "class_code": "j c k s x",
     "window_size": 8,
+    "min_reads_for_graph": 100,
+    "force": false,
     "extended_debugging": false,
-    "min_reads_for_graph": 10
+    "no_canonicals": false,
+    "very_conservative": false
 }
 ```
 

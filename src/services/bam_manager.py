@@ -35,11 +35,11 @@ class BamManager:
             if read.is_supplementary:
                 continue
             if read.query_name in reads_and_references:
-                if read.query_name not in set_of_processed_reads:
-                    set_of_processed_reads.add(read.query_name)
-                else:
-                    prev_processed_reads_counter += 1
-                    continue
+                # if read.query_name not in set_of_processed_reads:
+                #     set_of_processed_reads.add(read.query_name)
+                # else:
+                #     prev_processed_reads_counter += 1
+                #     continue
                 count += 1
                 if count % 1000 == 0:
                     output_manager.output_line({
@@ -62,8 +62,8 @@ class BamManager:
 
                     if read.reference_start > idx_corrected_location \
                             or read.reference_end < idx_corrected_location:
-                        errors.append(
-                            f"Non-matching location: {read.query_name}, {matching_case_key}\t")
+                        # errors.append(
+                        #     f"Non-matching location: {read.query_name}, {matching_case_key}\n")
                         continue
 
                     if not read.cigartuples:
@@ -107,6 +107,8 @@ class BamManager:
             "line": "Processing BAM-file finished.",
             "is_info": True
         })
+        if errors:
+            log_manager.debug_logs["BAM-errors-pipeline-1"] = errors
 
     def output_heading_information(self):
         output_manager.output_line({

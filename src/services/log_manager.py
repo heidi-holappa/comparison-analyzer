@@ -4,6 +4,7 @@ import json
 from services.output_manager import default_output_manager as output_manager
 from services.graph_manager import default_graph_manager as graph_manager
 from config import LOG_FILE_DIR, FASTA_OVERVIEW_FILE, OFFSET_LOG
+from config import PRED_MIN_CASES_THRESHOLD
 
 
 class LogManager:
@@ -17,6 +18,8 @@ class LogManager:
         self.offset_results = {}
 
     def write_offset_results_to_file(self):
+        if not self.offset_results:
+            return
         with open(OFFSET_LOG, 'w', encoding="utf-8") as file:
             file.write(
                 "transcript_id\treference_id\tclass_code\tstrand\toffsets\n")
@@ -62,18 +65,28 @@ class LogManager:
             })
         return indel_results
 
+    def get_canonicals(self, strand, location_type):
+        possible_canonicals = {
+            '+': {
+                'start': ['AG', 'AC'],
+                'end': ['GT', 'GC', 'AT']
+            },
+            '-': {
+                'start': ['AC', 'GC', 'AC'],
+                'end': ['CT', 'GT']
+            }
+        }
+        return possible_canonicals[strand][location_type]
+
     def validate_img_should_be_created_for_closest_canonical_dict_entry(self,
-                                                                        parser_args,
                                                                         key: tuple,
                                                                         nucleotide_pair: tuple,
                                                                         cases: dict):
-        if sum(cases.values()) < int(parser_args.min_reads_for_graph):
+        if sum(cases.values()) < PRED_MIN_CASES_THRESHOLD:
             return False
-        acceptor_site_canonicals = ["AG", "AC"]
-        donor_site_canonicals = ["GT", "GC", "AT"]
-        if key[1] == 'start' and str(nucleotide_pair[1]).upper() not in acceptor_site_canonicals:
-            return False
-        if key[1] == 'end' and str(nucleotide_pair[1]).upper() not in donor_site_canonicals:
+        # Key[0] is strand, key[1] is location_type
+        canonicals = self.get_canonicals(key[0], key[1])
+        if nucleotide_pair[1].upper() not in canonicals:
             return False
         return True
 
@@ -87,7 +100,7 @@ class LogManager:
         for key, nucleotides in dict_of_canonicals.items():
             for nucleotide_pair, cases in nucleotides.items():
                 if not self.validate_img_should_be_created_for_closest_canonical_dict_entry(
-                    parser_args, key, nucleotide_pair, cases
+                    key, nucleotide_pair, cases
                 ):
                     continue
                 case_count = sum(cases.values())
@@ -271,6 +284,16 @@ class LogManager:
             "is_info": True
         })
 
+    def pretty_print(self, element, indent=0, output=""):
+        for item in element:
+            if isinstance(element[item], dict):
+                output += (" " * indent + str(item) + ":\n")
+                output = self.pretty_print(element[item], indent + 4, output)
+            else:
+                output += (" " * indent + str(item) +
+                           ": " + str(element[item]) + "\n")
+        return output
+
     def write_debug_files(self):
         output_manager.output_line({
             "line": "CREATING DEBUG LOGS",
@@ -293,9 +316,22 @@ class LogManager:
 
         for log_name, log_values in self.debug_logs.items():
             filepath = os.path.join(LOG_FILE_DIR, 'debug_' + log_name + '.log')
-            with open(filepath, "w") as file:
-                for entry_key, entry_values in log_values.items():
-                    file.write(f"{entry_key}\t{entry_values}\n")
+
+            if isinstance(log_values, dict):
+                # content = self.pretty_print(log_values)
+                with open(filepath, "w") as file:
+                    # file.write(content + "\n")
+                    file.write("{\n")
+                    for entry_key, entry_values in log_values.items():
+                        file.write(f"{entry_key}: {entry_values},\n")
+                    file.write("}\n")
+            if isinstance(log_values, list):
+                with open(filepath, "w") as file:
+                    file.writelines(log_values)
+            if isinstance(log_values, set):
+                with open(filepath, "w") as file:
+                    for entry in log_values:
+                        file.write(entry + "\n")
             output_manager.output_line({
                 "line": f"{log_name} written to: {filepath}",
                 "is_info": True
@@ -324,15 +360,13 @@ class LogManager:
 
         self.matching_cases_dict = matching_cases_dict
 
-        self.generate_output_for_closest_canonicals(parser_args)
+        # TODO: remove. related issue: https://github.com/heidi-holappa/comparison-analyzer/issues/195
+        # self.generate_output_for_closest_canonicals(parser_args)
         self.generate_output_for_indels(parser_args)
 
         if parser_args.extended_debug:
             self.debug_logs["matching_cases_dict"] = self.matching_cases_dict
             self.write_debug_files()
-
-        output_manager.output_footer()
-        output_manager.write_log_file()
 
         pass
 

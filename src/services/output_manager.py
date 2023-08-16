@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from config import LOG_FILE_DIR
+from config import LOG_DIR
 
 
 class OutputManager:
@@ -64,13 +65,17 @@ class OutputManager:
             }
         )
 
-    def output_footer(self):
+    def output_footer(self, run_time_str: str):
         self.output_line({
             "line": "",
             "is_title": True
         })
         self.output_line({
             "line": "Pipeline finished.",
+            "is_info": True
+        })
+        self.output_line({
+            "line": "Total run time: " + run_time_str,
             "is_info": True
         })
         self.output_line({
@@ -88,6 +93,9 @@ class OutputManager:
             "line": "stdout appended to " + file_path,
             "is_info": True
         })
+        history_file_path = os.path.join(LOG_DIR, 'history.log')
+        with open(history_file_path, 'a', encoding='utf-8') as file:
+            file.writelines(self.log_output)
 
 
 default_output_manager = OutputManager()
