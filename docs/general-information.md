@@ -151,6 +151,7 @@ Assume that we have a list of exons $E = [e_1, \ldots, e_n]$ and a list of refer
 3. Let us remind ourselves that $t_{e_i, x_j}$ is the total total offset between $e_i$ and arbitrary $x_j$. If $t_{e_{i}, x_{j}} > t_{e_{i+1}, x_{j}}$, $e_i$ must be $(\inf, \inf)$. Append list and break the inner loop.
 4. If instead $t_{e_{i}, x_{j+1}}  < t_{e_{i}, x_{j}}$, then if $t_{e_{i+1}, x_{j+1}} > t_{e_{i}, x_{j+1}}$, then $x_{j}$ must be $(-\inf, -\inf)$. In that case append $(-\inf, -\inf)$ to the list and continue iterating through the inner loop. If the latter condition does not apply, append the offset $t_{e_{i}, x_{j}}$ to the list and break the inner loop. 
 5. Once aligned exons are iterated through if there are reference exons left, append $(-\inf, -\inf)$ for each remaining reference exon to the list of results
+   - **Save point:** After computation is done the intron\_site\_dict is exported using pickle library. In future runs the first sections of second pipeline can be skipped, if a save file exists. 
 6. Once all reference exons are iterated over or the inner loop breaks, append result to the list of results and return the results. 
 
 
@@ -550,7 +551,8 @@ With the information collected in the analysis-phase it is now possible to try t
 2. **Compute reads and locations:** After interesting cases and related transcripts are extracted, reads and locations are created. 
 3. **Compute indels:** Next for each given location insertions and deletions are computed. 
 4. **Closest canonicals:** For cases with interesting amounts of insertions or deletions closest canonicals are extracted from reference.fa. 
-5. **Make prediction:** TBA
+5. **Make prediction:** Predictions can be made using three different strategies. See subsection 'make prediction' for more detailed summary.
+   - **Save point:** After computation is done the intron\_site\_dict is exported using pickle library. In future runs the first sections of second pipeline can be skipped, if a save file exists. 
 6. **Verify results:** In some way at this point it should be verified whether the results are desired or not. As a first step it would perhaps be beneficial to compare the results to the offset computations to see, how the predictions worked out. 
 
 
@@ -559,7 +561,8 @@ With the information collected in the analysis-phase it is now possible to try t
 ## Extracting intron sites and information
 [Back to top](#general-information)  
 
-The intron site dictionary is similar to the matching\_cases\_dictionary. In this case insertions, deletions and closest canonicals are extracted for both 'directions', to the left and right from the interesting location (intron site). Additionally the distribution of insertions and deletions is stored. During prediction mean and standard deviation is computed for insertions and deletions.  
+The intron site dictionary is similar to the matching\_cases\_dictionary. In this case insertions, deletions and closest canonicals are extracted for both 'directions', to the left and right from the interesting location (intron site). Additionally the distribution of insertions and deletions is stored. During prediction mean and standard deviation is computed for insertions and deletions. Based on analysis of the early results an additional data field for "most commmon del nucleotides" was included. This field contains a pair of nucleotides that resides at the distance of the most common offset case from the splice site. 
+
 
 ```python
 {
@@ -578,7 +581,8 @@ The intron site dictionary is similar to the matching\_cases\_dictionary. In thi
         "deletion_distribution": <list>,
         "deletion_mean": <float>,
         "deletion_sd": <float>,
-        "closest_canonical": <str>
+        "closest_canonical": <str>,
+        "most_common_case_nucleotides": <str>
       },
       "right": {
         "insertions": <dict>,
@@ -589,7 +593,8 @@ The intron site dictionary is similar to the matching\_cases\_dictionary. In thi
         "deletion_distribution": <list>,
         "deletion_mean": <float>,
         "deletion_sd": <float>,
-        "closest_canonical": <str>
+        "closest_canonical": <str>,
+        "most_common_case_nucleotides": <str>
       }
     }
   }
@@ -612,13 +617,35 @@ For each intron site closest canonicals are computed into each direction. Canoni
 ## Making predictions
 [Back to top](#general-information)  
 
-At the moment the prediction is still crude. For each dictionary stored in `extracted information` the following conditions are verified:
+## Prediction strategies
 
-1. threshold for minimum number of reads is exceeded
-2. there is a distinct most common case of deletions
-3. There are a distinct amount of nucleotides for which number of deletions exceeds a preset threshold and it is equal to the most common case of deletions
 
-**Note:** For now only error are considered only based on deletions. Insertions are so for now ignored. 
+**Aggressive**
+1. There has to be a distinct most common case of deletions
+2. A constant threshold has to be exceeded (currently 0.7)
+3. There has to be $n$ adjacent nucleotides that have larger or equal values to nucleotides in other positions. 
+
+> [!NOTE]
+> Elaboration on 3rd condition.   
+
+Let $S$ be the list of elements in window and $A = \{k_1, \ldots, k_n \}$ be $n$ adjacent indices that is a sublist of $S$. Let $B={h_1,\ldots,h_m}$ be the sublist of the remaining (possibly non-adjacent) indices in $S$, so that $\forall h_i\in B\\;h_i\notin A$, $\forall k_j\in A\\;k_j\notin B$ and $|A| + |B| = |S|$.  
+
+Now for condition 3 to apply it holds that  
+
+$$\forall S[k_j]\\;\not\exists S[h_i]\\;\text{s.t.}\\;S[k_j] < S[h_i].$$
+
+Note: as this is a list of elements, it may have multiple elements with equal value. 
+
+**Conservative:**
+1. There has to be a distinct most common case of deletions
+2. There has to be a canonical pair at the distance of the most common case of deletions from the splice site
+
+
+**Very conservative:**
+1. There has to be a distinct most common case of deletions
+2. There has to be a canonical pair at the distance of the most common case of deletions from the splice site
+3. A constant threshold has to be exceeded (currently 0.7)
+4. There has to be $n$ adjacent nucleotides that have larger or equal values to nucleotides in other positions (see explanation above)
 
 ## Verifying predictions
 [Back to top](#general-information)  
@@ -627,9 +654,38 @@ Once predicted errors have been flagged, prediction is then compared to the 'cor
 
 - **True positive (TP):** an error was correctly predicted
 - **False positive (FP):** an error was incorrectly predicted
+- **Unverified:** The case was not in the gffcompare results and can not be verified.
 
 
-### Future steps
+## More efficient analysis
+
+To chain runs with different JSON-configurations and all available strategies the following script can be used to
+
+- run selected datasets with different startegies 
+- pipeline runs on multiple json-configurations
+- scrape useful information from all runs to log files
+
+```bash
+#!/bin/bash
+rm '<stdout-history-log>' # ensure there is no stdout log-history
+
+while read F  ; do
+        python3 '<realpath for compana.py>' -j $F -v # strategy: very conservative
+        python3 '<realpath for compana.py>' -j $F    # strategy: conservative
+        python3 '<realpath for compana.py>' -j $F -n # strategy: aggressive
+done < '<realpath for json-files in txt>' # file containing a json realpath on each line
+
+# search all created log directories for false positives and store results to single log file
+find '<string identifies for log directories>' -name '<log-file for false positives>' -exec sh -c 'echo "$1"; grep "" "$1"' sh {} \; > '<output-file for false-positives>'
+
+# filter relevant lines from stdout-history. Characters \| signify inclusive or. 
+grep "==================================================\| positives\|Unverified \|Verified \|Predicted \|JSON" '<stdout-history-log>' > '<output for stdout extraction>'
+
+rm '<stdout-history-log>' # remove log-history
+```
+
+# Implementing code to IsoQuant
+
 [Back to top](#general-information)  
 
 Once the initial steps have been taken, the new feature can be input into IsoQuant. When this is relevant look into the file `graph\_based\_model\_construction.py`. On line \#143 is method `process`. In this method:
