@@ -1,10 +1,16 @@
 import os
+import sys
+
 import pytest
 from unittest import TestCase
 
+from services.argument_parser import init_argparser
 from services.log_manager import LogManager
 from services.log_manager import default_log_manager as log_manager
 from config import OFFSET_LOG
+from config import PRED_MIN_CASES_THRESHOLD
+from config import PRED_PREC_OF_ALL_CASES_TRESHOLD
+from config import PRED_ACCEPTED_OFFSET_CASES
 
 
 class TestLogManager(TestCase):
@@ -14,7 +20,21 @@ class TestLogManager(TestCase):
         self.capsys = capsys
 
     def setUp(self):
-        pass
+        sys.argv = [
+            'compAna.py',
+            '-g=gffcompare.gtf',
+            '-r=reference.gtf',
+            '-b=file.bam',
+            '-a=file.fasta',
+            '-t=file.tsv',
+            '-o=0 10',
+            '-f',
+            '-s',
+            '-c=j k',
+            '-n=true',
+            '-v=true',
+        ]
+        self.parser = init_argparser()
 
     def test_indel_results_are_correctly_computated(self):
         log_manager.matching_cases_dict = {
@@ -118,6 +138,30 @@ class TestLogManager(TestCase):
         log_manager.write_alignment_errors_to_file()
         self.assertTrue(os.path.exists(
             log_manager.alignment_error_log_filepath))
+
+    def test_validation_for_indel_graphs_returns_true_if_enough_cases_and_closest_canonical_matches(self):
+        key = ("+", "start", 1, "left")
+        nucleotides = ("AG", "AC")
+        cases = {2: 10}
+        result = log_manager.validate_img_should_be_created_for_closest_canonical_dict_entry(
+            key, nucleotides, cases)
+        self.assertTrue(result)
+
+    def test_validation_for_indel_graphs_returns_false_if_too_few_cases(self):
+        key = ("+", "start", 1, "left")
+        nucleotides = ("AT", "GT")
+        cases = {2: 1}
+        result = log_manager.validate_img_should_be_created_for_closest_canonical_dict_entry(
+            key, nucleotides, cases)
+        self.assertFalse(result)
+
+    def test_validation_for_indel_graphs_returns_false_if_no_canonical_match(self):
+        key = ("+", "start", 1, "left")
+        nucleotides = ("AA", "GT")
+        cases = {2: 10}
+        result = log_manager.validate_img_should_be_created_for_closest_canonical_dict_entry(
+            key, nucleotides, cases)
+        self.assertFalse(result)
 
     def tearDown(self):
         if os.path.exists(log_manager.alignment_error_log_filepath):
