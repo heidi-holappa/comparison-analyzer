@@ -163,6 +163,55 @@ class TestLogManager(TestCase):
             key, nucleotides, cases)
         self.assertFalse(result)
 
+    def test_closest_canonical_generation_runs_correctly(self):
+        log_manager.matching_cases_dict = {
+            "case1": {
+                "strand": "+",
+                "offset": 1,
+                "location_type": "start",
+                "indel_errors": {
+                    "insertions": 2,
+                    "deletions": 1
+                },
+                "closest_canonical": {
+                    "left": ("AT", "GT", 2),
+                    "right": ("GC", "GT", 4)
+                }
+            },
+            "case2": {
+                "strand": "+",
+                "offset": 1,
+                "location_type": "start",
+                "indel_errors": {
+                    "insertions": 3,
+                    "deletions": 1
+                },
+                "closest_canonical": {
+                    "left": ("AT", "GT", 2),
+                    "right": ("GT", "GT", 0)
+                }
+            },
+        }
+
+        log_manager.generate_output_for_closest_canonicals(self.parser)
+
+        captured = self.capsys.readouterr()
+        assert "2" in captured.out
+
+    def test_indel_graph_validator_returns_true_if_enough_cases(self):
+        cases = {2: 11}
+        self.parser.min_reads_for_graph = 10
+        result = log_manager.validate_indel_grahp_should_be_created(
+            self.parser, cases)
+        self.assertTrue(result)
+
+    def test_indel_graph_validator_returns_true_if_not_enough_cases(self):
+        cases = {2: 9}
+        self.parser.min_reads_for_graph = 10
+        result = log_manager.validate_indel_grahp_should_be_created(
+            self.parser, cases)
+        self.assertFalse(result)
+
     def tearDown(self):
         if os.path.exists(log_manager.alignment_error_log_filepath):
             os.remove(log_manager.alignment_error_log_filepath)
