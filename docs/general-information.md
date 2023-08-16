@@ -25,7 +25,7 @@
   - [Closest canonicals](#closest-canonicals)
   - [Making predictions](#making-predictions)
   - [Verifying predictions](#verifying-predictions)
-  - [Future steps](#future-steps)
+- [Implementing code to IsoQuant](#implementing-code-to-isoquant)
 
 The purpose of this application is to 
 
