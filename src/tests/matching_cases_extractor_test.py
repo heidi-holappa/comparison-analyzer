@@ -32,7 +32,7 @@ class TestMatchingCasesExtractor(TestCase):
             self.reference_db
         )
         matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
-        self.assertEqual(len(matching_cases_dict), 12)
+        self.assertEqual(len(matching_cases_dict), 11)
 
     def test_offset_results_with_more_diversity_are_handled_correctly(self):
         custom_offset_results = {

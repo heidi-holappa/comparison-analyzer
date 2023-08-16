@@ -6,6 +6,6 @@
     "reads_bam": "src/tests/files/Mouse.ONT.R9.4.sim.RE.no_gtf.transcript925.ch1.nnic.bam",
     "reference_fasta": "src/tests/files/gencode.vM26.transcripts.extract.fa",
     "offset": [4, 4],
-    "force": false,
+    "force": true,
     "stats": true
 }

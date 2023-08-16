@@ -4,6 +4,7 @@ import json
 from services.output_manager import default_output_manager as output_manager
 from services.graph_manager import default_graph_manager as graph_manager
 from config import LOG_FILE_DIR, FASTA_OVERVIEW_FILE, OFFSET_LOG
+from config import PRED_MIN_CASES_THRESHOLD
 
 
 class LogManager:
@@ -64,18 +65,28 @@ class LogManager:
             })
         return indel_results
 
+    def get_canonicals(self, strand, location_type):
+        possible_canonicals = {
+            '+': {
+                'start': ['AG', 'AC'],
+                'end': ['GT', 'GC', 'AT']
+            },
+            '-': {
+                'start': ['AC', 'GC', 'AC'],
+                'end': ['CT', 'GT']
+            }
+        }
+        return possible_canonicals[strand][location_type]
+
     def validate_img_should_be_created_for_closest_canonical_dict_entry(self,
-                                                                        parser_args,
                                                                         key: tuple,
                                                                         nucleotide_pair: tuple,
                                                                         cases: dict):
-        if sum(cases.values()) < int(parser_args.min_reads_for_graph):
+        if sum(cases.values()) < PRED_MIN_CASES_THRESHOLD:
             return False
-        acceptor_site_canonicals = ["AG", "AC"]
-        donor_site_canonicals = ["GT", "GC", "AT"]
-        if key[1] == 'start' and str(nucleotide_pair[1]).upper() not in acceptor_site_canonicals:
-            return False
-        if key[1] == 'end' and str(nucleotide_pair[1]).upper() not in donor_site_canonicals:
+        # Key[0] is strand, key[1] is location_type
+        canonicals = self.get_canonicals(key[0], key[1])
+        if nucleotide_pair[1].upper() not in canonicals:
             return False
         return True
 
@@ -89,7 +100,7 @@ class LogManager:
         for key, nucleotides in dict_of_canonicals.items():
             for nucleotide_pair, cases in nucleotides.items():
                 if not self.validate_img_should_be_created_for_closest_canonical_dict_entry(
-                    parser_args, key, nucleotide_pair, cases
+                    key, nucleotide_pair, cases
                 ):
                     continue
                 case_count = sum(cases.values())
