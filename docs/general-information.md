@@ -199,7 +199,49 @@ The stored value is the location of the start or end of an exon in the IsoQuant 
 ### Extracting closest canonicals
 [Back to top](#general-information)  
 
-`pyfaidx` library provides efficient tools for extracting subsequences from a FASTA file. With these tools a window of size two times the size of the provided (or default) window is extracted from the reference FASTA file at each location stored into the matching_cases_dictionary. If the given location is marks the 'start of the exon' we look for acceptor site canonicals. If the given location marks the 'end of the exon', we look for 'donor site canonicals':
+`pyfaidx` library provides efficient tools for extracting subsequences from a FASTA file. With these tools a window of size two times the size of the provided (or default) window is extracted from the reference FASTA file at each location stored into the matching_cases_dictionary. If the given location is marks the 'start of the exon' we look for acceptor site canonicals. 
+
+The following correction has to be made to correctly extract the window:
+
+```python
+{
+    'start': -2,
+    'end': +1
+}
+```
+
+```bash
+idx_correction = -1
+```
+
+**Justification:** pyfaidx-[documentation](https://pypi.org/project/pyfaidx/) states:
+
+> If the FASTA file is not indexed, when Faidx is initialized the build_index method will automatically run, and the index will be written to “filename.fa.fai” with write_fai(). where “filename.fa” is the original FASTA file.
+> Start and end coordinates are 1-based.
+
+Start position example:
+```
+        first nucleotide of exon
+                |
+                v
+A T C T C T A C T T G C C T G C
+            ^   ^ ^
+            |   | ∟ Fasta(file)['id'][n:n+2] = TG
+            |   ∟ start position = n
+            ∟  Fasta(file)['id'][n-3:n-3+2] = AC
+```
+
+End position example:
+```
+        last nucleotide of exon
+                |
+                v
+T C T C C A A G G T G A G T G A
+                ^ ^
+                | ∟ Fasta(file)['id'][m:m+2] = GT
+end position = m
+```
+
 
 ```python
 def iterate_matching_cases(self):
@@ -656,6 +698,76 @@ Note: as this is a list of elements, it may have multiple elements with equal va
 2. There has to be a canonical pair at the distance of the most common case of deletions from the splice site
 3. A constant threshold has to be exceeded (currently 0.7)
 4. There has to be $n$ adjacent nucleotides that have larger or equal values to nucleotides in other positions (see explanation above)
+
+Error prediction as code:
+```python
+def make_prediction(parser_args, findings: dict, location_type: str, strand: str):
+
+    # Constants
+    total_cases_threshold = PRED_MIN_CASES_THRESHOLD
+    count_proportion_threshold = PRED_PREC_OF_ALL_CASES_TRESHOLD
+    accepted_offset_cases = PRED_ACCEPTED_OFFSET_CASES
+
+    total_cases = sum(findings['deletions'].values())
+    suported_strands = ['+', '-']
+
+    if total_cases < total_cases_threshold or strand not in suported_strands:
+        return
+
+    compute_average_and_sd(findings)
+
+    del_most_common_case = [k for k, v in findings['deletions'].items(
+    ) if v == max(findings['deletions'].values())]
+
+    possible_canonicals = {
+        '+': {
+            'start': ['AG', 'AC'],
+            'end': ['GT', 'GC', 'AT']
+        },
+        '-': {
+            'start': ['AC', 'GC', 'AC'],
+            'end': ['CT', 'GT']
+        }
+    }
+    canonicals = possible_canonicals[strand][location_type]
+
+    # If aggressive search is not enabled and the most common deletion pair is not a canonical, do nothing
+    if not parser_args.no_canonicals and findings['most_common_del_pair'] not in canonicals:
+        return
+
+    # If a distinct most common deletion count does not exists or
+    # most common case is not among accepted offset cases, do nothing
+    if len(del_most_common_case) > 1 or del_most_common_case[0] not in accepted_offset_cases:
+        return
+
+    # Compute count for nucleotides exceeding distribution threshold
+    nucleotides_exceeding_treshold = 0
+    for value in findings['del_pos_distr']:
+        if value / total_cases > count_proportion_threshold:
+            nucleotides_exceeding_treshold += 1
+
+    # Aggressive stratery
+    if parser_args.no_canonicals:
+        consentration_exists = verify_sublist_largest_values_exists(
+            findings['del_pos_distr'], del_most_common_case[0])
+        threshold_exceeds = bool(
+            nucleotides_exceeding_treshold >= del_most_common_case[0])
+        if consentration_exists and threshold_exceeds:
+            findings['error_detected'] = True
+    # Very conservative strategy
+    elif parser_args.very_conservative:
+        consentration_exists = verify_sublist_largest_values_exists(
+            findings['del_pos_distr'], del_most_common_case[0])
+        threshold_exceeds = bool(
+            nucleotides_exceeding_treshold >= del_most_common_case[0])
+        canonical_matches = bool(
+            findings['most_common_del_pair'] in canonicals)
+        if consentration_exists and threshold_exceeds and canonical_matches:
+            findings['error_detected'] = True
+    # Conservative strategy: conditions have already been checked
+    else:
+        findings['error_detected'] = True
+```
 
 ## Verifying predictions
 [Back to top](#general-information)  
