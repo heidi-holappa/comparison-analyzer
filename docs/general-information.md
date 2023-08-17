@@ -204,7 +204,9 @@ The stored value is the location of the start or end of an exon in the IsoQuant 
 ```python
 def iterate_matching_cases(self):
   for key, value in self.matching_cases_dict.items():
-    if value["location_type"] == "start":
+    location_type = value["location_type"]
+    strand = value["strand"]
+    if location_type == "start":
       splice_cite_location = value["location"] - 2
     else:
       splice_cite_location = value["location"] + 1
@@ -214,10 +216,18 @@ def iterate_matching_cases(self):
       splice_cite_location + self.window_size
     )
     nucleotides = self.extract_characters_at_given_coordinates(coordinates)
-    if value["location_type"] == "start":
-        canonicals = ["AG", "AC"]
-    else:
-        canonicals = ["GT", "GC", "AT"]
+    
+    possible_canonicals = {
+      '+': {
+          'start': ['AG', 'AC'],
+          'end': ['GT', 'GC', 'AT']
+      },
+      '-': {
+          'start': ['AC', 'GC', 'AC'],
+          'end': ['CT', 'GT']
+      }
+    }  
+    canonicals = possible_canonicals[strand][location_type]
     self.find_closest_canonicals(str(nucleotides), key, canonicals)
 ```
 
