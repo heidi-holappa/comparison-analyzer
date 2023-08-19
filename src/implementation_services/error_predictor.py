@@ -47,14 +47,6 @@ def make_prediction(parser_args, findings: dict, location_type: str, strand: str
 
     compute_average_and_sd(findings)
 
-    # if location_type == "start":
-    #     canonicals = ["AG", "AC"]
-    # else:
-    #     canonicals = ["GT", "GC", "AT"]
-
-    # if findings['closest_canonical'][1] not in canonicals:
-    #     return
-
     del_most_common_case = [k for k, v in findings['deletions'].items(
     ) if v == max(findings['deletions'].values())]
 
@@ -85,9 +77,7 @@ def make_prediction(parser_args, findings: dict, location_type: str, strand: str
         if value / total_cases > count_proportion_threshold:
             nucleotides_exceeding_treshold += 1
 
-    # if del_max_value[0] == findings['closest_canonical'][2] and findings['closest_canonical'][2] != 0 and nucleotides_exceeding_treshold == del_max_value[0]:
-    #     findings['error_detected'] = True
-
+    # Aggressive stratery
     if parser_args.no_canonicals:
         consentration_exists = verify_sublist_largest_values_exists(
             findings['del_pos_distr'], del_most_common_case[0])
@@ -95,6 +85,7 @@ def make_prediction(parser_args, findings: dict, location_type: str, strand: str
             nucleotides_exceeding_treshold >= del_most_common_case[0])
         if consentration_exists and threshold_exceeds:
             findings['error_detected'] = True
+    # Very conservative strategy
     elif parser_args.very_conservative:
         consentration_exists = verify_sublist_largest_values_exists(
             findings['del_pos_distr'], del_most_common_case[0])
@@ -104,6 +95,7 @@ def make_prediction(parser_args, findings: dict, location_type: str, strand: str
             findings['most_common_del_pair'] in canonicals)
         if consentration_exists and threshold_exceeds and canonical_matches:
             findings['error_detected'] = True
+    # Conservative strategy: conditions have already been checked
     else:
         findings['error_detected'] = True
 

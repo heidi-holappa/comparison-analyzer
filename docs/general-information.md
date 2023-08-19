@@ -199,12 +199,56 @@ The stored value is the location of the start or end of an exon in the IsoQuant 
 ### Extracting closest canonicals
 [Back to top](#general-information)  
 
-`pyfaidx` library provides efficient tools for extracting subsequences from a FASTA file. With these tools a window of size two times the size of the provided (or default) window is extracted from the reference FASTA file at each location stored into the matching_cases_dictionary. If the given location is marks the 'start of the exon' we look for acceptor site canonicals. If the given location marks the 'end of the exon', we look for 'donor site canonicals':
+`pyfaidx` library provides efficient tools for extracting subsequences from a FASTA file. With these tools a window of size two times the size of the provided (or default) window is extracted from the reference FASTA file at each location stored into the matching_cases_dictionary. If the given location is marks the 'start of the exon' we look for acceptor site canonicals. 
+
+The following correction has to be made to correctly extract the window:
+
+```python
+{
+    'start': -2,
+    'end': +1
+}
+```
+
+```bash
+idx_correction = -1
+```
+
+**Justification:** pyfaidx-[documentation](https://pypi.org/project/pyfaidx/) states:
+
+> If the FASTA file is not indexed, when Faidx is initialized the build_index method will automatically run, and the index will be written to “filename.fa.fai” with write_fai(). where “filename.fa” is the original FASTA file.
+> Start and end coordinates are 1-based.
+
+Start position example:
+```
+        first nucleotide of exon
+                |
+                v
+A T C T C T A C T T G C C T G C
+            ^   ^ ^
+            |   | ∟ Fasta(file)['id'][n:n+2] = TG
+            |   ∟ start position = n
+            ∟  Fasta(file)['id'][n-3:n-3+2] = AC
+```
+
+End position example:
+```
+        last nucleotide of exon
+                |
+                v
+T C T C C A A G G T G A G T G A
+                ^ ^
+                | ∟ Fasta(file)['id'][m:m+2] = GT
+end position = m
+```
+
 
 ```python
 def iterate_matching_cases(self):
   for key, value in self.matching_cases_dict.items():
-    if value["location_type"] == "start":
+    location_type = value["location_type"]
+    strand = value["strand"]
+    if location_type == "start":
       splice_cite_location = value["location"] - 2
     else:
       splice_cite_location = value["location"] + 1
@@ -214,10 +258,18 @@ def iterate_matching_cases(self):
       splice_cite_location + self.window_size
     )
     nucleotides = self.extract_characters_at_given_coordinates(coordinates)
-    if value["location_type"] == "start":
-        canonicals = ["AG", "AC"]
-    else:
-        canonicals = ["GT", "GC", "AT"]
+    
+    possible_canonicals = {
+      '+': {
+          'start': ['AG', 'AC'],
+          'end': ['GT', 'GC', 'AT']
+      },
+      '-': {
+          'start': ['AC', 'GC', 'AC'],
+          'end': ['CT', 'GT']
+      }
+    }  
+    canonicals = possible_canonicals[strand][location_type]
     self.find_closest_canonicals(str(nucleotides), key, canonicals)
 ```
 
@@ -647,6 +699,76 @@ Note: as this is a list of elements, it may have multiple elements with equal va
 3. A constant threshold has to be exceeded (currently 0.7)
 4. There has to be $n$ adjacent nucleotides that have larger or equal values to nucleotides in other positions (see explanation above)
 
+Error prediction as code:
+```python
+def make_prediction(parser_args, findings: dict, location_type: str, strand: str):
+
+    # Constants
+    total_cases_threshold = PRED_MIN_CASES_THRESHOLD
+    count_proportion_threshold = PRED_PREC_OF_ALL_CASES_TRESHOLD
+    accepted_offset_cases = PRED_ACCEPTED_OFFSET_CASES
+
+    total_cases = sum(findings['deletions'].values())
+    suported_strands = ['+', '-']
+
+    if total_cases < total_cases_threshold or strand not in suported_strands:
+        return
+
+    compute_average_and_sd(findings)
+
+    del_most_common_case = [k for k, v in findings['deletions'].items(
+    ) if v == max(findings['deletions'].values())]
+
+    possible_canonicals = {
+        '+': {
+            'start': ['AG', 'AC'],
+            'end': ['GT', 'GC', 'AT']
+        },
+        '-': {
+            'start': ['AC', 'GC', 'AC'],
+            'end': ['CT', 'GT']
+        }
+    }
+    canonicals = possible_canonicals[strand][location_type]
+
+    # If aggressive search is not enabled and the most common deletion pair is not a canonical, do nothing
+    if not parser_args.no_canonicals and findings['most_common_del_pair'] not in canonicals:
+        return
+
+    # If a distinct most common deletion count does not exists or
+    # most common case is not among accepted offset cases, do nothing
+    if len(del_most_common_case) > 1 or del_most_common_case[0] not in accepted_offset_cases:
+        return
+
+    # Compute count for nucleotides exceeding distribution threshold
+    nucleotides_exceeding_treshold = 0
+    for value in findings['del_pos_distr']:
+        if value / total_cases > count_proportion_threshold:
+            nucleotides_exceeding_treshold += 1
+
+    # Aggressive stratery
+    if parser_args.no_canonicals:
+        consentration_exists = verify_sublist_largest_values_exists(
+            findings['del_pos_distr'], del_most_common_case[0])
+        threshold_exceeds = bool(
+            nucleotides_exceeding_treshold >= del_most_common_case[0])
+        if consentration_exists and threshold_exceeds:
+            findings['error_detected'] = True
+    # Very conservative strategy
+    elif parser_args.very_conservative:
+        consentration_exists = verify_sublist_largest_values_exists(
+            findings['del_pos_distr'], del_most_common_case[0])
+        threshold_exceeds = bool(
+            nucleotides_exceeding_treshold >= del_most_common_case[0])
+        canonical_matches = bool(
+            findings['most_common_del_pair'] in canonicals)
+        if consentration_exists and threshold_exceeds and canonical_matches:
+            findings['error_detected'] = True
+    # Conservative strategy: conditions have already been checked
+    else:
+        findings['error_detected'] = True
+```
+
 ## Verifying predictions
 [Back to top](#general-information)  
 
@@ -687,6 +809,87 @@ rm '<stdout-history-log>' # remove log-history
 # Implementing code to IsoQuant
 
 [Back to top](#general-information)  
+
+A method was created in IsoQuant into which the code is to be implemented:
+
+```python
+def correct_transcript_splice_sites(self, exons: list, assigned_reads: list):
+    # exons: list of coordinate pairs
+    # assigned_reads: list of ReadAssignment, contains read_id and cigartuples
+    # self.chr_record - FASTA recored, i.e. a single chromosome from a reference
+    # returns: a list of corrected exons if correction takes place, None - otherwise
+```
+
+## Given arguments 
+
+
+**exons**
+The `exons` is a list that contains tuples. Each tuple has two elements, start and end location for an exon in a transcript. The `assigned_reads` is a list containing `read_assignment` objects ([ref](https://github.com/ablab/IsoQuant/blob/c98725d83f4fe2070a4fa01754b5f46f642966cc/src/isoform_assignment.py#L474)). Each `read_assignment` object contains information for one read. The most important fields are:
+
+```python
+class ReadAssignment:
+    def __init__(self, read_id, assignment_type, match=None):
+        self.cigartuples = None
+        self.corrected_exons = None
+        self.strand = "."
+```
+
+For `cigartuples` see sections [extracting cigar codes](#extracting-cigar-codes-from-the-window-next-to-aligned-location) and [processing a CIGAR-string](#processing-a-cigar-string) for more information. `corrected_exons` contain a list of tuples with two elements. First element is the start position of an exon in that read. The second element is the end position in that read. The following conditions apply:
+
+- tuples in indeces $[1, ...., n-1]$ contain exon start and exon end location 
+- for the exon in index $0$ it holds that `exon[0] == read.start_location`
+- for the exon in index $n$ it holds that `exon[1] == read.end_location`
+
+
+## Work flow
+
+The initial plan for a work flow is the following:
+
+**First iteration**
+
+1. Iterate through `assigned_reads` list. 
+
+2. For each `read_assignment` object find locations from `exons` list for which is applies that 
+
+```python
+read.assignment.corrected_exons[0][0] <= exon[location] and exon[location] <= read.assignment.corrected_exons[-1][1]
+```
+3. If necessary, store these locations in a data structure 
+
+```python
+data_structure = {
+    'left': {
+        'deletions': {},
+        'most_common_deletion': -1,
+        'nucleotides_at_del_pos': 'XX',
+    },
+    'right': {
+        'deletions': {},
+        'most_common_deletion': -1,
+        'nucleotides_at_del_pos': 'XX',
+    }
+}
+```
+
+4. For each location, count deletions
+
+After all elements in `assigend_reads` list have been processed, continue.  
+
+**Second iteration**
+
+1. For each location in `exons`, count value for `most_common_deletion`
+2. if `most_common_deletion` is one of the cases of interest defined in constants, find nucleotides at the position of the deletion. 
+3. Perform error prediction:
+  - Validate whether nucleotides are canonicals (strand, nucleotides, and FASTA-reference needed)
+  - Implement code for checking threshold and consentration of events (it may not be used right away)
+
+  
+
+
+
+
+
+## Temporary notes from previous weekly meeting
 
 Once the initial steps have been taken, the new feature can be input into IsoQuant. When this is relevant look into the file `graph\_based\_model\_construction.py`. On line \#143 is method `process`. In this method:
 

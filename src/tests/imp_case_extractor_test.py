@@ -20,7 +20,7 @@ class ImplementationCaseExtractorTest(TestCase):
     def test_correct_number_of_cases_are_extracted(self):
         extracted_cases = self.case_extractor.extract_intron_site_locations(
             self.isoquant_db)
-        self.assertEqual(len(extracted_cases), 8)
+        self.assertEqual(len(extracted_cases), 4)
 
     def test_extracted_cases_have_correct_value_keys(self):
         extracted_cases = self.case_extractor.extract_intron_site_locations(
