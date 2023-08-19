@@ -810,6 +810,87 @@ rm '<stdout-history-log>' # remove log-history
 
 [Back to top](#general-information)  
 
+A method was created in IsoQuant into which the code is to be implemented:
+
+```python
+def correct_transcript_splice_sites(self, exons: list, assigned_reads: list):
+    # exons: list of coordinate pairs
+    # assigned_reads: list of ReadAssignment, contains read_id and cigartuples
+    # self.chr_record - FASTA recored, i.e. a single chromosome from a reference
+    # returns: a list of corrected exons if correction takes place, None - otherwise
+```
+
+## Given arguments 
+
+
+**exons**
+The `exons` is a list that contains tuples. Each tuple has two elements, start and end location for an exon in a transcript. The `assigned_reads` is a list containing `read_assignment` objects ([ref](https://github.com/ablab/IsoQuant/blob/c98725d83f4fe2070a4fa01754b5f46f642966cc/src/isoform_assignment.py#L474)). Each `read_assignment` object contains information for one read. The most important fields are:
+
+```python
+class ReadAssignment:
+    def __init__(self, read_id, assignment_type, match=None):
+        self.cigartuples = None
+        self.corrected_exons = None
+        self.strand = "."
+```
+
+For `cigartuples` see sections [extracting cigar codes](#extracting-cigar-codes-from-the-window-next-to-aligned-location) and [processing a CIGAR-string](#processing-a-cigar-string) for more information. `corrected_exons` contain a list of tuples with two elements. First element is the start position of an exon in that read. The second element is the end position in that read. The following conditions apply:
+
+- tuples in indeces $[1, ...., n-1]$ contain exon start and exon end location 
+- for the exon in index $0$ it holds that `exon[0] == read.start_location`
+- for the exon in index $n$ it holds that `exon[1] == read.end_location`
+
+
+## Work flow
+
+The initial plan for a work flow is the following:
+
+**First iteration**
+
+1. Iterate through `assigned_reads` list. 
+
+2. For each `read_assignment` object find locations from `exons` list for which is applies that 
+
+```python
+read.assignment.corrected_exons[0][0] <= exon[location] and exon[location] <= read.assignment.corrected_exons[-1][1]
+```
+3. If necessary, store these locations in a data structure 
+
+```python
+data_structure = {
+    'left': {
+        'deletions': {},
+        'most_common_deletion': -1,
+        'nucleotides_at_del_pos': 'XX',
+    },
+    'right': {
+        'deletions': {},
+        'most_common_deletion': -1,
+        'nucleotides_at_del_pos': 'XX',
+    }
+}
+```
+
+4. For each location, count deletions
+
+After all elements in `assigend_reads` list have been processed, continue.  
+
+**Second iteration**
+
+1. For each location in `exons`, count value for `most_common_deletion`
+2. if `most_common_deletion` is one of the cases of interest defined in constants, find nucleotides at the position of the deletion. 
+3. Perform error prediction:
+  - Validate whether nucleotides are canonicals (strand, nucleotides, and FASTA-reference needed)
+  - Implement code for checking threshold and consentration of events (it may not be used right away)
+
+  
+
+
+
+
+
+## Temporary notes from previous weekly meeting
+
 Once the initial steps have been taken, the new feature can be input into IsoQuant. When this is relevant look into the file `graph\_based\_model\_construction.py`. On line \#143 is method `process`. In this method:
 
 ```
