@@ -855,26 +855,20 @@ The initial plan for a work flow is the following:
 ```python
 read.assignment.corrected_exons[0][0] <= exon[location] and exon[location] <= read.assignment.corrected_exons[-1][1]
 ```
-3. If necessary, store these locations in a data structure 
+3. If not already in data structure, store new locations into a data structure 
 
 ```python
 data_structure = {
-  'location': {
-    'left': {
-        'deletions': {},
-        'most_common_deletion': -1,
-        'nucleotides_at_del_pos': 'XX',
-    },
-    'right': {
-        'deletions': {},
-        'most_common_deletion': -1,
-        'nucleotides_at_del_pos': 'XX',
-    }
+  'location: int': {
+    'location_is_start': 'boolean'  
+    'deletions': {'key: deletions, value: count'},
+    'most_common_deletion': -1,
+    'nucleotides_at_del_pos': 'XX'
   }
 }
 ```
 
-4. For each location, count deletions
+4. For each location, count deletions. If location is at the start of an exon, count deletions to "to the right", and at the end, "to the left."
 
 After all elements in `assigend_reads` list have been processed, continue.  
 
