@@ -859,6 +859,7 @@ read.assignment.corrected_exons[0][0] <= exon[location] and exon[location] <= re
 
 ```python
 data_structure = {
+  'location': {
     'left': {
         'deletions': {},
         'most_common_deletion': -1,
@@ -869,6 +870,7 @@ data_structure = {
         'most_common_deletion': -1,
         'nucleotides_at_del_pos': 'XX',
     }
+  }
 }
 ```
 
