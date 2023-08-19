@@ -829,8 +829,9 @@ The `exons` is a list that contains tuples. Each tuple has two elements, start a
 ```python
 class ReadAssignment:
     def __init__(self, read_id, assignment_type, match=None):
-        self.cigartuples = None
-        self.corrected_exons = None
+        self.cigartuples = ['list of tuples']
+        self.corrected_exons = ['list of tuples']
+        self.chr_record = Fasta(args.reference)[chr_id]
         self.strand = "."
 ```
 
