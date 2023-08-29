@@ -33,6 +33,14 @@ class TestFastaExtractor(TestCase):
                 'location': 45,
                 'seq_id': 'chr1'
             },
+            ('transcript2.chr1.nnic', 150): {
+                'transcript_id': 'transcript1.chr1.nnic',
+                'strand': '-',
+                'location_type': 'end',
+                'exon_number': 3,
+                'location': 45,
+                'seq_id': 'chr1'
+            },
         }
         self.fasta_config = {
             "fasta_path": file_manager.reference_fasta,

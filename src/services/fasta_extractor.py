@@ -91,6 +91,9 @@ class FastaExtractor:
 
     def iterate_matching_cases(self):
         for key, value in self.matching_cases_dict.items():
+            accepted_strands = ['+', '-']
+            if value["strand"] not in accepted_strands:
+                continue
             if value["location_type"] == "start":
                 splice_cite_location = value["location"] - 2
             else:
@@ -100,10 +103,20 @@ class FastaExtractor:
                            splice_cite_location + self.window_size)
             nucleotides = self.extract_characters_at_given_coordinates(
                 coordinates)
-            if value["location_type"] == "start":
-                canonicals = ["AG", "AC"]
-            else:
-                canonicals = ["GT", "GC", "AT"]
+
+            possible_canonicals = {
+                '+': {
+                    'start': ['AG', 'AC'],
+                    'end': ['GT', 'GC', 'AT']
+                },
+                '-': {
+                    'start': ['AC', 'GC', 'AC'],
+                    'end': ['CT', 'GT']
+                }
+            }
+            strand = value["strand"]
+            location_type = value["location_type"]
+            canonicals = possible_canonicals[strand][location_type]
             self.find_closest_canonicals(str(nucleotides), key, canonicals)
 
     def execute_fasta_extraction(self):
