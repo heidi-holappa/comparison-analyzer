@@ -149,23 +149,23 @@ def run_first_pipeline(parser_args):
     matching_cases_dict = extractor.extract_candidates_matching_selected_offset()
 
     # # 4. Extract closest canonicals
-    # if parser_args.reference_fasta:
-    #     fasta_config = {
-    #         "fasta_path": parser_args.reference_fasta,
-    #         "offset": parser_args.offset,
-    #         "matching_cases_dict": matching_cases_dict,
-    #         "window_size": parser_args.window_size
-    #     }
-    #     reference_fasta_extractor = FastaExtractor(fasta_config)
-    #     reference_fasta_extractor.execute_fasta_extraction()
+    if parser_args.reference_fasta:
+        fasta_config = {
+            "fasta_path": parser_args.reference_fasta,
+            "offset": parser_args.offset,
+            "matching_cases_dict": matching_cases_dict,
+            "window_size": parser_args.window_size
+        }
+        reference_fasta_extractor = FastaExtractor(fasta_config)
+        reference_fasta_extractor.execute_fasta_extraction()
 
     # # 5. Count indels
-    # if parser_args.reads_tsv and parser_args.reads_bam:
-    #     bam_manager = BamManager(
-    #         parser_args.reads_bam,
-    #         parser_args.reads_tsv,
-    #         matching_cases_dict)
-    #     bam_manager.execute(int(parser_args.window_size))
+    if parser_args.reads_tsv and parser_args.reads_bam:
+        bam_manager = BamManager(
+            parser_args.reads_bam,
+            parser_args.reads_tsv,
+            matching_cases_dict)
+        bam_manager.execute(int(parser_args.window_size))
 
     save_matching_cases(parser_args.save_file, matching_cases_dict)
 

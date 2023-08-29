@@ -91,6 +91,9 @@ class FastaExtractor:
 
     def iterate_matching_cases(self):
         for key, value in self.matching_cases_dict.items():
+            accepted_strands = ['+', '-']
+            if value["strand"] not in accepted_strands:
+                continue
             if value["location_type"] == "start":
                 splice_cite_location = value["location"] - 2
             else:

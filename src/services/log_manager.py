@@ -192,6 +192,8 @@ class LogManager:
             location_type = value['location_type']
             offset = value['offset']
 
+            if 'closest_canonical' not in value:
+                continue
             for canonicals_key, canonicals_value in value['closest_canonical'].items():
                 dict_key = (strand, location_type, offset, canonicals_key)
                 if dict_key not in closest_canonicals_dict:
@@ -205,94 +207,6 @@ class LogManager:
                 closest_canonicals_dict[dict_key][nucleotides][distance] += 1
 
         return closest_canonicals_dict
-
-    def generate_json_overview_dict_for_closest_canonicals(self, closest_canonicals_dict: dict):
-
-        json_overview = {}
-        for key, canonical_values in closest_canonicals_dict.items():
-            json_overview[str(key)] = {}
-            for item in canonical_values:
-                json_overview[str(key)][str(item)] = str(
-                    canonical_values[item])
-        return json_overview
-
-    def write_closest_canonicals_log_to_file(self, parser_args, json_overview: dict):
-
-        with open(FASTA_OVERVIEW_FILE, "w", encoding="utf-8") as file:
-            file.write("# Overview\n")
-            file.write("## Offset characters\n")
-            file.write(
-                "This section contains the characters in the reference ")
-            file.write(
-                "FASTA-file at the offset specified by the user.  \n\n")
-            file.write("**Arguments provided by the user:**\n")
-            file.write("```\n")
-            file.write("gffcompare GTF-file:\n" +
-                       str(parser_args.gffcompare_gtf) + "\n\n")
-            file.write("Reference GTF-file:\n" +
-                       str(parser_args.reference_gtf) + "\n\n")
-            file.write("Reference FASTA-file:\n" +
-                       str(parser_args.reference_fasta) + "\n\n")
-            file.write("Specified offset: " +
-                       str(parser_args.offset) + "\n")
-            file.write("Class codes: " +
-                       str(parser_args.class_code) + "\n")
-            file.write("```\n")
-            file.write("## Results in JSON-format: \n")
-            file.write("This section contains the results in JSON-format.  \n")
-            file.write(
-                "The first element in tuple is the closest canonical match. ")
-            file.write("The second element are the current nucleotides at the ")
-            file.write("start or end of the intron at splice site. ")
-            file.write(
-                "If the first and second items are equal, either there is no canonical pair ")
-            file.write(
-                "or the closest canonical pair is the same as the current nucleotides.  \n")
-            file.write("```json\n")
-
-            file.write(json.dumps(json_overview, indent=4))
-            file.write("\n```\n")
-
-            if parser_args.extended_debug:
-                file.write(
-                    "\n\n## Extended debug: All results in table-format\n")
-                file.write(
-                    "This section contains the results in table-format. ")
-                file.write(
-                    "To disable this section, set extended debug 'false' " +
-                    "in provided arguments.  \n")
-                current_chromosome = "chr1"
-                file.write(f'\n### {current_chromosome}\n')
-                file.write(
-                    "| transcript | read_id | strand | exon | nucleotides |\n")
-                file.write("| --- | --- | --- | --- | --- |\n")
-                for key, value in self.matching_cases_dict.items():
-                    chromosome = value['transcript_id'].split('.')[1]
-                    if current_chromosome != chromosome:
-                        file.write(f'\n### {chromosome}\n')
-                        file.write(
-                            "| transcript | strand | exon | nucleotides |\n")
-                        file.write("| --- | --- | --- | --- | --- |\n")
-                        current_chromosome = chromosome
-                    file.write("| " + str(value['transcript_id']) + " | " +
-                               " | " + str(value['strand']) + " | " + str(value['exon_number']) +
-                               " | " + str(value['closest_canonical']) + " |\n")
-            file.close()
-
-        output_manager.output_line({
-            "line": "Closest canonicals: results written to file: " + FASTA_OVERVIEW_FILE,
-            "is_info": True
-        })
-
-    def pretty_print(self, element, indent=0, output=""):
-        for item in element:
-            if isinstance(element[item], dict):
-                output += (" " * indent + str(item) + ":\n")
-                output = self.pretty_print(element[item], indent + 4, output)
-            else:
-                output += (" " * indent + str(item) +
-                           ": " + str(element[item]) + "\n")
-        return output
 
     def write_debug_files(self):
         output_manager.output_line({
@@ -318,9 +232,7 @@ class LogManager:
             filepath = os.path.join(LOG_FILE_DIR, 'debug_' + log_name + '.log')
 
             if isinstance(log_values, dict):
-                # content = self.pretty_print(log_values)
                 with open(filepath, "w") as file:
-                    # file.write(content + "\n")
                     file.write("{\n")
                     for entry_key, entry_values in log_values.items():
                         file.write(f"{entry_key}: {entry_values},\n")
@@ -339,12 +251,8 @@ class LogManager:
 
     def generate_output_for_closest_canonicals(self, parser_args):
         closest_canonicals_dict = self.compute_closest_canonicals_dict()
-        closest_canonicals_json_dict = self.generate_json_overview_dict_for_closest_canonicals(
-            closest_canonicals_dict)
         self.generate_closest_canonicals_graphs(
             parser_args, closest_canonicals_dict)
-        self.write_closest_canonicals_log_to_file(
-            parser_args, closest_canonicals_json_dict)
 
     def generate_output_for_indels(self, parser_args):
         indel_results = self.compute_indel_results()
@@ -360,8 +268,7 @@ class LogManager:
 
         self.matching_cases_dict = matching_cases_dict
 
-        # TODO: remove. related issue: https://github.com/heidi-holappa/comparison-analyzer/issues/195
-        # self.generate_output_for_closest_canonicals(parser_args)
+        self.generate_output_for_closest_canonicals(parser_args)
         self.generate_output_for_indels(parser_args)
 
         if parser_args.extended_debug:
